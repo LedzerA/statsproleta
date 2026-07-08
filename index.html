@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Proleta Esporte · Controle de Jogos</title>
+<title>Proleta · Estatísticas</title>
+<meta name="description" content="Estatísticas dos elencos do Proletariado Alviverde — jogos, atletas, ao vivo.">
+<meta name="theme-color" content="#0b4529">
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAA6CAMAAADBRyrTAAAAV1BMVEVHcEwEWy0TaDuOq5f78uvR18sVVjfy7OMJZDXo5tsmc0pKd14rY0a6yLdShWj++fQbbEGmuahfi3EHSCp1n4U4e1cHZS1klXg7bFOctaGrwq4Vb1YAPCZ2sIVDAAAAAXRSTlMAQObYZgAABGhJREFUSMeVlol26ygMQGOEzA6GsNhO/v87R2AncTt9bzpqT+KALmgD63b7WbS+/Q95LExKtjz0b5XrJHWRU+3Qf69Myg1QCNyaph8E/WGjhXXtxQMqHrgQnHOB4Jdp+mEj3ZemxbwTgfRO4V2Uy4UN6/TVkGnSZZruNpqNq0M9KERiBA/Dus9GDzK0ZKfMvcvTqm4O/WUtpc7Y9yMT+0akSIFbpCYXeYjPOnViniNNc0UbalqWudPCvhEUudx0zcNFtPVpzVyJ8Vn6Mi27EE5PEj8+BZh0B/jhIdJOqBDucysUzhjID2RTegOCQ9U3Szu8FuimB3e3bqdkDN95ktK9iQD1MElchOMzh40AMdz1coLwd8A9DV6AaWqXHQ4fvgNw3WGS/gNk8kHLzwpjMD6NiFeT2lfgdlnhBYT9Zx94kx1I3wGPrQNHlCZ2SYSXVBqyiC8API1LPaxnHi4W8zIAq74BlTsqrwgj01pdDNAdYJc9D2DGkbjE6CyU6yQurAOXVJ4mnVGClh3n15zKDiwSvpiUT4DOXQhf4iEiFevtZmVWHy9UyPc7uldYr6IUDIAyp1CpFxTSfY7xO9DnUY009Liqg+iMCo2A/ZWHoSyOSRQjDQToc2jM8XS/b+5V3n1InIBS+gAoTK+Rkc3TJNXxtz1jC8aOC0kCosOT4P55mDQSpvrnUCbZ5AFY6XfwKQI4gM0laxNYrRU6Oq+AzqGL/WP3I0jDiZSsaclYb17ifTYrpHXNiX4Yk1LyVp53mVx8toYm7Lr6utJXf7I0lFaTvLeE0C97WtS9pl+kble6Z+a+PAF2HnpdtSvX1a9XYLZztZWYuWuusx8D9Nj/jS2zLXZ5Awsbd16912nuMk2THQ+sP8+n1Iktr+uYsalP0ZX8N2HsfdnLocps8SkD7BTDHkxwjkLdvNdsAJKdb4mHZKXliEogBocccsyJdEOku9NxuvSJB4rqdOZBFhrg0WRlazQQ5hyNdfbOi7GxinXmzTh6Wwg8a2ny3M7JZIq5MwlC8SEmbgx6WKNRpirKq1srzZzV6rnZKG+UXDQphhUCJLTWpUpfSGRylFW04g0EU7dcMxgqKR8tlRWtQDnOxq2R7GyuGS8spjewxmCgb4sEQeoRQrUBwkbRACoOGy3OyrxNshQbxH7wkPdS30QPaX8KNEzViiHN6eIDvZoVuOB3x1Dvi1sw7brtWRfYWXEqAy10XnwDoFfPXlvwwB8xqYdq0ERpImfwzjuNC4wL6gP0+6v50LbQSuZabUvmBTgsC+4+aKfzOKxXgLeyiJTdVqOQiBU4y9Ca37ZCJmoU3wHUrmy5gMqKg+I72Ui1tCPspURkDfhXIChK/nHWXaSS2wAiSS9DCohAChM5cYkSRvKhaMb+VdS9K6GC2XqT88rDUqiXqaOd6TJfhFqi3hXJStOkxs7ypkrX79NHZ+P+kr7+tUNafuoOe5v1UpfsN23fciCje/tlV8mO/oz9vhXV3fnH/+lc/9zo/gOPCVi46qC28wAAAABJRU5ErkJggg==">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -47,13 +50,9 @@
       linear-gradient(90deg, transparent calc(50% - .5px), var(--linha) calc(50% - .5px), var(--linha) calc(50% + .5px), transparent calc(50% + .5px));
   }
   .hd{position:relative; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px 0 20px; flex-wrap:wrap}
-  .crest{display:flex; align-items:center; gap:12px}
-  .crest .mark{
-    width:44px;height:44px;border-radius:50%;
-    background:var(--creme); color:var(--verde-800);
-    display:grid;place-items:center; font-family:'Zilla Slab',serif; font-weight:700; font-size:20px;
-    box-shadow:inset 0 0 0 3px var(--verde-800), 0 0 0 2px var(--creme);
-  }
+  .crest{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+  .crest .mark{ height:48px; width:auto; display:block; flex:none;
+    filter:drop-shadow(0 2px 5px rgba(0,0,0,.32)); }
   .crest .txt h1{font-size:22px; line-height:1; color:var(--creme-3)}
   .crest .txt .sub{font-size:11px; letter-spacing:2.5px; text-transform:uppercase; color:var(--verde-300); margin-top:5px; font-weight:600}
   .scoreboard{display:flex; align-items:center; gap:22px; flex-wrap:wrap}
@@ -231,6 +230,18 @@
   .subhead .sh-hint{font-family:'Inter',sans-serif; font-size:11px; font-weight:500; color:var(--carvao-2)}
   .tag.arq{background:rgba(15,32,25,.12); color:var(--carvao-2)}
   .ro-badge{background:rgba(242,235,214,.16); border:1px solid var(--linha-forte); padding:1px 8px; border-radius:20px; font-size:11px; white-space:nowrap}
+  .empty-crest{height:74px; width:auto; opacity:.9; margin-bottom:10px; filter:drop-shadow(0 3px 8px rgba(0,0,0,.25))}
+  .splash{display:flex; flex-direction:column; align-items:center; gap:16px; color:var(--creme)}
+  .splash-crest{height:96px; width:auto; filter:drop-shadow(0 6px 16px rgba(0,0,0,.4))}
+  /* escudo como marca d'água da Visão Geral (identidade verde/creme, sem roubar leitura) */
+  .geral-mark{position:relative; overflow:hidden}
+  .geral-mark::after{content:""; position:absolute; right:-28px; top:50%; transform:translateY(-50%);
+    width:190px; height:190px; background:var(--crest) center/contain no-repeat;
+    opacity:.05; pointer-events:none; filter:grayscale(1)}
+  @media(max-width:560px){ .geral-mark::after{width:130px; right:-34px; opacity:.04} }
+  .splash-spin{width:26px; height:26px; border-radius:50%; border:3px solid var(--linha-forte); border-top-color:var(--verde-400); animation:spin .8s linear infinite}
+  .splash-txt{font-size:13px; letter-spacing:.06em; color:var(--verde-300)}
+  @keyframes spin{to{transform:rotate(360deg)}}
   .filter-bar{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:0 0 14px; padding:10px 12px; background:var(--creme-2); border-radius:var(--r-sm); box-shadow:var(--sombra); color:var(--carvao)}
   .filter-bar .fb-lab{font-size:13px; font-weight:600; color:var(--carvao-2)}
   .filter-bar .fb-sel{padding:6px 10px; border-radius:8px; border:1px solid rgba(15,32,25,.18); background:var(--creme-3); color:var(--carvao); font-size:13px; font-weight:600}
@@ -303,9 +314,7 @@
   .login-card{width:100%; max-width:380px; background:var(--creme-3); border-radius:var(--r); box-shadow:var(--sombra);
     padding:28px 24px 24px; border:1px solid rgba(0,0,0,.05); }
   .login-crest{display:flex; align-items:center; gap:12px; margin-bottom:22px}
-  .login-crest .ball{width:38px; height:38px; border-radius:50%; flex:none;
-    background:var(--verde-700); position:relative; box-shadow:inset 0 0 0 3px var(--creme), 0 2px 6px rgba(0,0,0,.2);}
-  .login-crest .ball::after{content:""; position:absolute; inset:9px; border-radius:50%; border:2px solid var(--creme);}
+  .login-crest .crest-img{height:54px; width:auto; flex:none; filter:drop-shadow(0 2px 5px rgba(0,0,0,.18));}
   .login-crest h1{margin:0; font-family:"Zilla Slab",Georgia,serif; font-size:22px; color:var(--verde-800); line-height:1;}
   .login-crest span{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--carvao-2);}
   .login-card h2{margin:0 0 2px; font-family:"Zilla Slab",Georgia,serif; color:var(--carvao); font-size:24px;}
@@ -330,7 +339,7 @@
 </head>
 <body>
 <div id="app"></div>
-<div id="toast" class="toast"></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
 <input type="file" id="fileInput" accept="application/json,.json" style="display:none">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -348,9 +357,8 @@
      SUPABASE_URL      = "Project URL"
      SUPABASE_ANON_KEY = a chave "anon public"
    ===================================================================== */
-const SUPABASE_URL      = "https://jycbewmizgwugoapbbzz.supabase.co";  // ex.: https://abcdefgh.supabase.co
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5Y2Jld21pemd3dWdvYXBiYnp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MDY2MzcsImV4cCI6MjA5OTA4MjYzN30.R9jKcenGlt1crYABuHel4Cjz7l_3h8D4cgPc50Hq4Js";  // ex.: eyJhbGciOiJIUzI1NiIsIn...
-
+const SUPABASE_URL      = "";  // ex.: https://abcdefgh.supabase.co
+const SUPABASE_ANON_KEY = "";  // ex.: eyJhbGciOiJIUzI1NiIsIn...
 /* ELENCOS: cada elenco tem tela e registros totalmente separados.
    Troque pelo seletor no topo do app ou direto na URL: ?elenco=feminino
    (combina com o modo público: ?elenco=feminino&publico) */
@@ -365,6 +373,7 @@ const CLOUD = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
    Entra sem login e esconde tudo que edita. A escrita continua bloqueada
    no banco (RLS) para quem não está logado — a segurança é de verdade. */
 const READONLY = (typeof location!=="undefined") && new URLSearchParams(location.search).has("publico");
+const CREST = "data:image/png;base64,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";  // escudo do Proleta (usado no cabeçalho, login, telas vazias e ícone)
 
 const DATA_SEED = {"version":1,"team":{"name":"Proletariado Alviverde","short":"Proleta","squad":"Esporte"},"roster":[{"id":"a1","name":"Bibico"},{"id":"a2","name":"Dudu"},{"id":"a3","name":"Rosalvo"},{"id":"a4","name":"Vini França"},{"id":"a5","name":"Hashi"},{"id":"a6","name":"Caio"},{"id":"a7","name":"André"},{"id":"a8","name":"Fabiano"},{"id":"a9","name":"Digão"},{"id":"a10","name":"Wellington"},{"id":"a11","name":"Rennan"},{"id":"a12","name":"Meloni"},{"id":"a13","name":"Renan"},{"id":"a14","name":"Eloy"},{"id":"a15","name":"Macapá"},{"id":"a16","name":"Belaz"},{"id":"a17","name":"Rafael"},{"id":"a18","name":"Siqueira"},{"id":"a19","name":"Luis E."},{"id":"a20","name":"Albano"},{"id":"a21","name":"Wez"},{"id":"a22","name":"Gzus"},{"id":"a23","name":"Lima"},{"id":"a24","name":"Brendon"},{"id":"a25","name":"Detona"},{"id":"a26","name":"Euller"},{"id":"a27","name":"Edu"},{"id":"a28","name":"Rufus"},{"id":"a29","name":"Leone"},{"id":"a30","name":"Pelota"},{"id":"a31","name":"Romario"},{"id":"a32","name":"W. Felipe"},{"id":"a33","name":"Gui Dantas"},{"id":"a34","name":"Barone"},{"id":"a35","name":"Igor"},{"id":"a36","name":"Amaral"},{"id":"a37","name":"Diego"},{"id":"a38","name":"Leodan"},{"id":"a39","name":"Lingo"},{"id":"a40","name":"Lucas Vini"},{"id":"a41","name":"Xande"},{"id":"a42","name":"PH"},{"id":"a43","name":"Salvador"}],"matches":[{"id":"m1","date":"2026-01-07","opponent":"Pç Kant","goalsFor":1,"goalsAgainst":3,"lineup":["a20"],"scorers":[{"a":"a20","g":1}],"assists":[],"lineupComplete":false,"notes":""},{"id":"m2","date":"2026-01-17","opponent":"Botafogo Vl Bela","goalsFor":5,"goalsAgainst":3,"lineup":["a11","a2","a10","a7","a3"],"scorers":[{"a":"a11","g":3},{"a":"a2","g":2}],"assists":[{"a":"a10","n":1},{"a":"a7","n":1},{"a":"a3","n":1}],"lineupComplete":false,"notes":""},{"id":"m3","date":"2026-01-20","opponent":"Inker","goalsFor":1,"goalsAgainst":4,"lineup":["a7"],"scorers":[{"a":"a7","g":1}],"assists":[],"lineupComplete":false,"notes":""},{"id":"m4","date":"2026-01-23","opponent":"EC Nacional Mooca","goalsFor":2,"goalsAgainst":1,"lineup":["a8"],"scorers":[{"a":"a8","g":2}],"assists":[],"lineupComplete":false,"notes":""},{"id":"m5","date":"2026-01-31","opponent":"Maque FC","goalsFor":1,"goalsAgainst":2,"lineup":["a3","a1"],"scorers":[{"a":"a3","g":1}],"assists":[{"a":"a1","n":1}],"lineupComplete":false,"notes":""},{"id":"m6","date":"2026-02-03","opponent":"Juventude","goalsFor":1,"goalsAgainst":4,"lineup":["a16","a12"],"scorers":[{"a":"a16","g":1}],"assists":[{"a":"a12","n":1}],"lineupComplete":false,"notes":""},{"id":"m7","date":"2026-02-07","opponent":"Maque FC","goalsFor":2,"goalsAgainst":3,"lineup":["a3","a8","a1"],"scorers":[{"a":"a3","g":1},{"a":"a8","g":1}],"assists":[{"a":"a8","n":1},{"a":"a1","n":1}],"lineupComplete":false,"notes":""},{"id":"m8","date":"2026-02-14","opponent":"Atletico Mangalot","goalsFor":3,"goalsAgainst":2,"lineup":["a12","a11","a2","a8"],"scorers":[{"a":"a12","g":1},{"a":"a11","g":1},{"a":"a2","g":1}],"assists":[{"a":"a8","n":1},{"a":"a11","n":1}],"lineupComplete":false,"notes":""},{"id":"m9","date":"2026-02-21","opponent":"Sufoco FC","goalsFor":1,"goalsAgainst":4,"lineup":["a19","a12"],"scorers":[{"a":"a19","g":1}],"assists":[{"a":"a12","n":1}],"lineupComplete":false,"notes":""},{"id":"m10","date":"2026-02-24","opponent":"Catadão","goalsFor":1,"goalsAgainst":1,"lineup":["a14"],"scorers":[{"a":"a14","g":1}],"assists":[],"lineupComplete":false,"notes":""},{"id":"m11","date":"2026-02-28","opponent":"Das Antigas","goalsFor":1,"goalsAgainst":2,"lineup":["a2"],"scorers":[{"a":"a2","g":1}],"assists":[],"lineupComplete":false,"notes":""},{"id":"m12","date":"2026-03-07","opponent":"Explosão FC","goalsFor":3,"goalsAgainst":3,"lineup":["a8","a27","a11","a10","a4"],"scorers":[{"a":"a8","g":1},{"a":"a27","g":1},{"a":"a11","g":1}],"assists":[{"a":"a10","n":1},{"a":"a4","n":1}],"lineupComplete":false,"notes":""},{"id":"m13","date":"2026-03-14","opponent":"De Primeira","goalsFor":3,"goalsAgainst":3,"lineup":["a10","a8","a23","a2"],"scorers":[{"a":"a10","g":1},{"a":"a8","g":1},{"a":"a23","g":1}],"assists":[{"a":"a8","n":1},{"a":"a2","n":1}],"lineupComplete":false,"notes":""},{"id":"m14","date":"2026-03-21","opponent":"AD Ponte Grande","goalsFor":5,"goalsAgainst":4,"lineup":["a1","a8","a2","a4","a7","a33","a17"],"scorers":[{"a":"a1","g":1},{"a":"a8","g":2},{"a":"a2","g":2}],"assists":[{"a":"a4","n":1},{"a":"a7","n":1},{"a":"a33","n":2},{"a":"a17","n":1}],"lineupComplete":false,"notes":""},{"id":"m15","date":"2026-03-29","opponent":"Futnoia","goalsFor":7,"goalsAgainst":0,"lineup":["a11","a8","a16","a4","a26","a3","a12","a24"],"scorers":[{"a":"a11","g":3},{"a":"a8","g":1},{"a":"a16","g":1},{"a":"a4","g":1},{"a":"a26","g":1}],"assists":[{"a":"a3","n":1},{"a":"a8","n":1},{"a":"a11","n":2},{"a":"a12","n":1},{"a":"a24","n":1}],"lineupComplete":false,"notes":""},{"id":"m16","date":"2026-04-09","opponent":"Al Phumaça","goalsFor":0,"goalsAgainst":1,"lineup":[],"scorers":[],"assists":[],"lineupComplete":false,"notes":""},{"id":"m17","date":"2026-04-11","opponent":"Pinguim FC","goalsFor":0,"goalsAgainst":2,"lineup":[],"scorers":[],"assists":[],"lineupComplete":false,"notes":""},{"id":"m18","date":"2026-04-15","opponent":"Formigueiro","goalsFor":3,"goalsAgainst":6,"lineup":["a11","a8","a10"],"scorers":[{"a":"a11","g":1},{"a":"a8","g":2}],"assists":[{"a":"a10","n":1},{"a":"a11","n":1}],"lineupComplete":false,"notes":""},{"id":"m19","date":"2026-04-18","opponent":"Proleta Vetera/Diverso","goalsFor":0,"goalsAgainst":1,"lineup":[],"scorers":[],"assists":[],"lineupComplete":false,"notes":""},{"id":"m20","date":"2026-04-26","opponent":"LIbertarios","goalsFor":3,"goalsAgainst":1,"lineup":["a8","a11","a2","a3","a25"],"scorers":[{"a":"a8","g":1},{"a":"a11","g":1},{"a":"a2","g":1}],"assists":[{"a":"a3","n":1},{"a":"a25","n":1}],"lineupComplete":false,"notes":""},{"id":"m21","date":"2026-05-05","opponent":"Código Verde","goalsFor":0,"goalsAgainst":0,"lineup":[],"scorers":[],"assists":[],"lineupComplete":false,"notes":""},{"id":"m22","date":"2026-05-09","opponent":"Time do Gueto","goalsFor":2,"goalsAgainst":4,"lineup":["a10","a7","a2","a3"],"scorers":[{"a":"a10","g":1},{"a":"a7","g":1}],"assists":[{"a":"a2","n":1},{"a":"a3","n":1}],"lineupComplete":false,"notes":""},{"id":"m23","date":"2026-05-16","opponent":"Samba São Jorge","goalsFor":1,"goalsAgainst":3,"lineup":[],"scorers":[],"assists":[],"lineupComplete":false,"notes":""},{"id":"m24","date":"2026-05-24","opponent":"XI De Setembro","goalsFor":0,"goalsAgainst":1,"lineup":[],"scorers":[],"assists":[],"lineupComplete":false,"notes":""},{"id":"m25","date":"2026-05-30","opponent":"Corote Molotov","goalsFor":1,"goalsAgainst":1,"lineup":["a8"],"scorers":[{"a":"a8","g":1}],"assists":[],"lineupComplete":false,"notes":""},{"id":"m26","date":"2026-06-07","opponent":"Catadão","goalsFor":1,"goalsAgainst":1,"lineup":["a2","a11"],"scorers":[{"a":"a2","g":1}],"assists":[{"a":"a11","n":1}],"lineupComplete":false,"notes":""},{"id":"m27","date":"2026-06-20","opponent":"Só de Virada","goalsFor":3,"goalsAgainst":0,"lineup":["a2","a11"],"scorers":[{"a":"a2","g":2},{"a":"a11","g":1}],"assists":[{"a":"a2","n":1}],"lineupComplete":false,"notes":""},{"id":"m28","date":"2026-06-27","opponent":"TAP","goalsFor":1,"goalsAgainst":0,"lineup":["a12","a2"],"scorers":[{"a":"a12","g":1}],"assists":[{"a":"a2","n":1}],"lineupComplete":false,"notes":""}],"seededFrom":"Estatísticas_Proleta_Esporte.xlsx"};
 const KEY = "proleta_"+SQUAD+"_v1";   // dados locais separados por elenco (esporte mantém a chave antiga)
@@ -447,8 +456,8 @@ const Store = {
     if(state.matches && state.matches.length){ const {error}=await sb.from("matches").insert(state.matches.map(matchToRow)); if(error) throw error; }
   },
   subscribe(onChange){
-    if(!CLOUD) return;
-    sb.channel("proleta-rt-"+SQUAD)
+    if(!CLOUD || this._sub) return;   // um canal por sessão, nunca duplica
+    this._sub = sb.channel("proleta-rt-"+SQUAD)
       .on("postgres_changes",{event:"*",schema:"public",table:"matches",  filter:"squad=eq."+SQUAD}, onChange)
       .on("postgres_changes",{event:"*",schema:"public",table:"athletes", filter:"squad=eq."+SQUAD}, onChange)
       .subscribe();
@@ -484,7 +493,14 @@ const el = (id)=>document.getElementById(id);
 const app = ()=>el("app");
 function uid(p){ return p + Date.now().toString(36) + Math.floor(Math.random()*1e4).toString(36); }
 function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
-function nameOf(id){ const a=DATA.roster.find(x=>x.id===id); return a?a.name:"?"; }
+let _nIdx=null, _nIdxSrc=null;
+function nameOf(id){
+  if(_nIdxSrc!==DATA.roster){ _nIdxSrc=DATA.roster; _nIdx=new Map(DATA.roster.map(a=>[a.id,a.name])); }
+  return _nIdx.get(id)||"?";
+}
+/* data de HOJE no fuso do usuário. new Date().toISOString() devolve UTC:
+   às 21h em São Paulo (UTC-3) já é o dia seguinte — e os jogos são à noite. */
+function todayISO(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
 function fmtDate(iso){ if(!iso) return ""; const [y,m,d]=iso.split("-"); return `${d}/${m}/${y}`; }
 function fmtDateShort(iso){ if(!iso) return ""; const [y,m,d]=iso.split("-"); return `${d}/${m}`; }
 function result(m){ return m.goalsFor>m.goalsAgainst?"V":m.goalsFor===m.goalsAgainst?"E":"D"; }
@@ -569,7 +585,7 @@ function headerHTML(s){
   return `
   <header class="app-header"><div class="wrap"><div class="hd">
     <div class="crest">
-      <div class="mark">PA</div>
+      <img class="mark" src="${CREST}" alt="Escudo do Proletariado Alviverde">
       <div class="txt"><h1>${esc(DATA.team.name)}</h1><div class="sub">${esc(DATA.team.short)} · ${esc(DATA.team.squad)} · Sequência: ${streak}${READONLY?` · <span class="ro-badge">👁 somente leitura</span>`:""}</div></div>
       <select id="squad-sel" class="squad-sel" title="Trocar de elenco">${Object.entries(SQUADS).map(([k,l])=>`<option value="${k}" ${k===SQUAD?"selected":""}>${l}</option>`).join("")}</select>
     </div>
@@ -607,7 +623,7 @@ function viewGeral(s){
   const mg=t.maiorGoleada, pd=t.piorDerrota;
   const cards = `
     <div class="grid">
-      <div class="card dark"><div class="stat-num num">${pct(t.aprov)}</div><div class="stat-label">Aproveitamento</div><div class="stat-sub">${t.pts} de ${t.J*3} pts possíveis</div></div>
+      <div class="card dark geral-mark"><div class="stat-num num">${pct(t.aprov)}</div><div class="stat-label">Aproveitamento</div><div class="stat-sub">${t.pts} de ${t.J*3} pts possíveis</div></div>
       <div class="card"><div class="stat-num num">${t.GP}<span style="font-size:20px; color:var(--carvao-2)"> : </span>${t.GC}</div><div class="stat-label">Gols pró : contra</div><div class="stat-sub">${dec(t.mgp,2)} feitos · ${dec(t.mgc,2)} sofridos / jogo</div></div>
       <div class="card"><div class="stat-num num ${t.SG>0?"pos":t.SG<0?"neg":""}">${t.SG>0?"+":""}${t.SG}</div><div class="stat-label">Saldo de gols</div><div class="stat-sub">${t.V}V · ${t.E}E · ${t.D}D em ${t.J} jogos</div></div>
       <div class="card"><div class="stat-num num">${dec(t.J? (t.GP+t.GC)/t.J :0,1)}</div><div class="stat-label">Gols por jogo</div><div class="stat-sub">soma das duas equipes</div></div>
@@ -675,7 +691,8 @@ function viewAtletas(s){
   const head = COLS.map(c=>{
     const active=UI.sortKey===c.k;
     const arw = active? (UI.sortDir<0?" ▼":" ▲") : "";
-    return `<th data-act="sort" data-key="${c.k}" title="${c.tip||c.l}">${c.l}<span class="arw">${arw}</span></th>`;
+    const sort = active? (UI.sortDir<0?"descending":"ascending") : "none";
+    return `<th data-act="sort" data-key="${c.k}" tabindex="0" role="columnheader" aria-sort="${sort}" title="${c.tip||c.l}">${c.l}<span class="arw">${arw}</span></th>`;
   }).join("");
   const filterBar = `<div class="filter-bar">
     <span class="fb-lab">Filtrar por</span>
@@ -754,7 +771,7 @@ function matchCard(m){
   </div>`;
 }
 function viewPartidas(s){
-  if(activeMatches().length===0) return `<div class="section-title"><h2>Partidas</h2>${READONLY?"":`<button class="btn primary sm" data-act="new">+ Nova partida</button>`}</div>${emptyState("Nenhuma partida","Cadastre o primeiro jogo do "+DATA.team.squad+".","partidas")}`;
+  if(activeMatches().length===0) return `<div class="section-title"><h2>Partidas</h2>${READONLY?"":`<button class="btn primary sm" data-act="new">+ Nova partida</button>`}</div>${emptyState("Nenhuma partida","Cadastre o primeiro jogo deste elenco.","partidas")}`;
   const upcoming = sortMatches(liveOrScheduled());
   const finals = sortMatches(activeMatches().filter(isFinal)).reverse();
   const list = sortMatches(countableMatches()).reverse();
@@ -765,7 +782,7 @@ function viewPartidas(s){
     ${upHtml}
     <div class="match-list">${cards}</div>`;
 }
-function dateFilterBar(refYear){
+function dateFilterBar(ano){
   const m=UI.dfMode||"all";
   const opt=(v,l)=>`<option value="${v}" ${m===v?"selected":""}>${l}</option>`;
   let extra="";
@@ -775,7 +792,7 @@ function dateFilterBar(refYear){
     <span class="fb-lab">Período</span>
     <select id="df-mode" class="fb-sel">
       ${opt("all","Todos")}${opt("last30","Últimos 30 dias")}${opt("last90","Últimos 90 dias")}
-      ${opt("sem1","1º semestre "+refYear)}${opt("sem2","2º semestre "+refYear)}
+      ${opt("sem1","1º semestre "+ano)}${opt("sem2","2º semestre "+ano)}
       ${opt("month","Mês específico")}${opt("range","Entre datas")}
     </select>
     ${extra}
@@ -787,11 +804,15 @@ function matchDateFilter(list){
   if(m==="all") return list;
   if(m==="month") return UI.dfMonth? list.filter(x=>x.date.slice(0,7)===UI.dfMonth) : list;
   if(m==="range"){ const f=UI.dfFrom, t=UI.dfTo; if(!f&&!t) return list; return list.filter(x=>(!f||x.date>=f)&&(!t||x.date<=t)); }
-  const iso=d=>d.toISOString().slice(0,10), today=new Date();
-  if(m==="last30"||m==="last90"){ const c=new Date(today); c.setDate(today.getDate()-(m==="last30"?30:90)); return list.filter(x=>x.date>=iso(c) && x.date<=iso(today)); }
-  const refYear = list.length? Math.max(...list.map(x=>+x.date.slice(0,4))) : today.getFullYear();
-  if(m==="sem1") return list.filter(x=>x.date>=`${refYear}-01-01` && x.date<=`${refYear}-06-30`);
-  if(m==="sem2") return list.filter(x=>x.date>=`${refYear}-07-01` && x.date<=`${refYear}-12-31`);
+  const hoje=todayISO();
+  if(m==="last30"||m==="last90"){
+    const c=new Date(); c.setDate(c.getDate()-(m==="last30"?30:90));
+    const ini=`${c.getFullYear()}-${String(c.getMonth()+1).padStart(2,"0")}-${String(c.getDate()).padStart(2,"0")}`;
+    return list.filter(x=>x.date>=ini && x.date<=hoje);
+  }
+  const ano = refYear();   // mesmo ano exibido no rótulo do filtro (nunca divergem)
+  if(m==="sem1") return list.filter(x=>x.date>=`${ano}-01-01` && x.date<=`${ano}-06-30`);
+  if(m==="sem2") return list.filter(x=>x.date>=`${ano}-07-01` && x.date<=`${ano}-12-31`);
   return list;
 }
 
@@ -910,7 +931,7 @@ function viewLive(s){
       <div class="lv-head">
         <div class="lv-team">Proleta<br><span class="lv-squad">${esc(DATA.team.squad)}</span></div>
         <div class="lv-mid"><div class="lv-score num">${m.goalsFor} – ${m.goalsAgainst}</div>
-          <div class="lv-clock num" id="live-clock">${fmtClock(clockElapsed(m.clock))}</div>
+          <div class="lv-clock num" id="live-clock" role="timer" aria-label="Tempo de jogo">${fmtClock(clockElapsed(m.clock))}</div>
           <div class="lv-date">${fmtDate(m.date)}</div></div>
         <div class="lv-team">${esc(m.opponent)}</div>
       </div>
@@ -1004,7 +1025,8 @@ function viewDados(s){
     ${banner}
     <div class="data-cards">
       ${syncCard}
-      <div class="data-card"><h3>Resumo</h3><p>Elenco: <b>${esc(DATA.team.squad)}</b><br>${DATA.matches.length} partidas · ${DATA.roster.length} atletas no elenco<br>Período: ${per}<br>${t.V}V · ${t.E}E · ${t.D}D · ${pct(t.aprov)} aprov.</p></div>
+      ${(()=>{ const nFin=DATA.matches.filter(isFinal).length, nOut=DATA.matches.length-nFin;
+      return `<div class="data-card"><h3>Resumo</h3><p>Elenco: <b>${esc(DATA.team.squad)}</b><br>${nFin} partida${nFin!==1?"s":""} encerrada${nFin!==1?"s":""}${nOut?` · ${nOut} agendada/ao vivo (fora das estatísticas)`:""}<br>${DATA.roster.length} atletas no elenco<br>Período: ${per}<br>${t.V}V · ${t.E}E · ${t.D}D · ${pct(t.aprov)} aprov.</p></div>`; })()}
       <div class="data-card"><h3>Backup completo</h3><p>Baixa tudo (elenco + partidas) num arquivo .json para guardar ou levar para outro PC.</p><button class="btn primary block" data-act="export-json">↓ Baixar backup (JSON)</button></div>
       <div class="data-card"><h3>Restaurar / importar</h3><p>Carrega um backup .json. Substitui os dados atuais deste navegador.</p><button class="btn block" data-act="import-json">↑ Importar backup (JSON)</button></div>
       <div class="data-card"><h3>Exportar planilhas</h3><p>Tabelas em CSV (abrem no Excel / Google Sheets).</p><button class="btn ghost block" data-act="export-players" style="margin-bottom:8px">Atletas (CSV)</button><button class="btn ghost block" data-act="export-matches">Partidas (CSV)</button></div>
@@ -1013,7 +1035,7 @@ function viewDados(s){
 }
 
 function emptyState(title,sub,tab){
-  return `<div class="empty"><div class="big">⚽</div><h3>${esc(title)}</h3><p>${esc(sub)}</p>${READONLY?"":`<div style="margin-top:16px"><button class="btn primary" data-act="new">+ Nova partida</button></div>`}</div>`;
+  return `<div class="empty"><img class="empty-crest" src="${CREST}" alt=""><h3>${esc(title)}</h3><p>${esc(sub)}</p>${READONLY?"":`<div style="margin-top:16px"><button class="btn primary" data-act="new">+ Nova partida</button></div>`}</div>`;
 }
 
 /* ============ formulário de partida ============ */
@@ -1115,6 +1137,12 @@ function updateTotals(){
 /* ============ binding de eventos ============ */
 function bind(s){
   // navegação e ações gerais via delegação
+  app().onkeydown = (e)=>{
+    if(e.key!=="Enter" && e.key!==" ") return;
+    const th = e.target.closest && e.target.closest('th[data-act="sort"]');
+    if(!th) return;
+    e.preventDefault(); th.click();
+  };
   app().onclick = (e)=>{
     const node = e.target.closest("[data-act]"); if(!node) return;
     const act=node.dataset.act;
@@ -1170,6 +1198,7 @@ function bind(s){
   if(window.__lt){ clearInterval(window.__lt); window.__lt=null; }
   if(UI.live){ const lm=DATA.matches.find(x=>x.id===UI.live);
     if(lm && lm.clock && lm.clock.running){ window.__lt=setInterval(()=>{ const n=el("live-clock"); const m2=DATA.matches.find(x=>x.id===UI.live); if(n&&m2&&m2.clock) n.textContent=fmtClock(clockElapsed(m2.clock)); },1000); } }
+  if(UI.livePick){ const pk=document.querySelector(".lv-picker"); if(pk && pk.scrollIntoView) pk.scrollIntoView({block:"nearest", behavior:"smooth"}); }
   const fk=el("flt-key"); if(fk) fk.onchange=e=>{ UI.filterKey=e.target.value; if(!UI.filterKey) UI.filterMin=0; else if(UI.filterMin<1) UI.filterMin=1; render(); };
   const fm=el("flt-min"); if(fm) fm.onchange=e=>{ UI.filterMin=Math.max(0,parseInt(e.target.value)||0); render(); };
   // filtro de período da aba Partidas
@@ -1209,7 +1238,7 @@ function openForm(id){
       scorers:Object.fromEntries((m.scorers||[]).map(x=>[x.a,x.g])),
       assists:Object.fromEntries((m.assists||[]).map(x=>[x.a,x.n])), lineupComplete:m.lineupComplete!==false, status:m.status||"final" };
   } else {
-    const today=new Date().toISOString().slice(0,10);
+    const today=todayISO();
     UI.form={ id:null, date:today, opponent:"", goalsFor:0, goalsAgainst:0, lineup:new Set(), starters:new Set(), scorers:{}, assists:{}, lineupComplete:true, status:"final" };
   }
   render();
@@ -1290,7 +1319,7 @@ function download(filename, text, type="application/json"){
   const a=document.createElement("a"); a.href=url; a.download=filename; document.body.appendChild(a); a.click();
   setTimeout(()=>{URL.revokeObjectURL(url); a.remove();},100);
 }
-function stamp(){ return new Date().toISOString().slice(0,10); }
+function stamp(){ return todayISO(); }
 function exportJSON(){ download(`proleta-esporte-${stamp()}.json`, JSON.stringify(DATA,null,2)); toast("Backup baixado ✓"); }
 function exportPlayersCSV(s){
   const head=["Atleta","Jogos","Gols","Assistencias","Participacoes","Part_por_jogo","Gols_por_jogo","V","E","D","Aproveitamento","Perc_gols_time"];
@@ -1350,7 +1379,7 @@ function traduzErro(e){
 function renderFatal(msg){
   UI.form=null;
   app().innerHTML = `<div class="login-screen"><div class="login-card">
-    <div class="login-crest"><div class="ball"></div><div><h1>Proleta</h1><span>Estatísticas · Esporte</span></div></div>
+    <div class="login-crest"><img class="crest-img" src="${CREST}" alt="Escudo do Proleta"><div><h1>Proleta</h1><span>Estatísticas · ${esc(TEAM.squad)}</span></div></div>
     <h2>Ops…</h2><p class="login-sub">${esc(msg)}</p>
     <p class="login-sub">Recarregue a página quando tiver internet — ou apague as credenciais do Supabase no topo do arquivo para usar em modo local.</p>
   </div></div>`;
@@ -1358,7 +1387,7 @@ function renderFatal(msg){
 function renderLogin(){
   UI.form=null;
   app().innerHTML = `<div class="login-screen"><div class="login-card">
-    <div class="login-crest"><div class="ball"></div><div><h1>Proleta</h1><span>Estatísticas · Esporte</span></div></div>
+    <div class="login-crest"><img class="crest-img" src="${CREST}" alt="Escudo do Proleta"><div><h1>Proleta</h1><span>Estatísticas · ${esc(TEAM.squad)}</span></div></div>
     <h2>Entrar</h2>
     <p class="login-sub">Acesso da comissão técnica · Elenco ${TEAM.squad}</p>
     <label class="lg-lab">E-mail</label>
@@ -1381,7 +1410,9 @@ function renderLogin(){
 }
 
 /* ============ init ============ */
-let pendingReload=false;
+let pendingReload=false, _reloadT=null;
+/* rajadas de eventos (um gol dispara vários postgres_changes) viram 1 leitura */
+function scheduleReload(){ clearTimeout(_reloadT); _reloadT=setTimeout(()=>reloadFromStore(),250); }
 async function reloadFromStore(){
   if(UI.form || UI.livePick){ pendingReload=true; return; }   // não interrompe formulário/anotação aberta
   try{ DATA=await Store.loadState(); DATA.team=TEAM; render(); }
@@ -1393,18 +1424,30 @@ async function boot(){
   DATA=await Store.loadState();
   if(!DATA.team) DATA.team=TEAM;
   UI.view="geral"; render();
-  Store.subscribe(()=>reloadFromStore());
+  Store.subscribe(()=>scheduleReload());
+}
+
+function renderSplash(){
+  app().innerHTML = `<div class="login-screen"><div class="splash">
+    <img class="splash-crest" src="${CREST}" alt="Escudo do Proleta">
+    <div class="splash-spin"></div>
+    <div class="splash-txt">Carregando estatísticas…</div>
+  </div></div>`;
 }
 
 (async ()=>{
+  document.title = "Proleta " + TEAM.squad + " · Estatísticas";
+  document.documentElement.style.setProperty("--crest", `url("${CREST}")`);
+  try{ const lk=document.createElement("link"); lk.rel="apple-touch-icon"; lk.href=CREST; document.head.appendChild(lk); }catch(e){}
   el("fileInput").addEventListener("change", e=>{ if(e.target.files[0]) importJSON(e.target.files[0]); e.target.value=""; });
+  renderSplash();
   if(!CLOUD){ await boot(); return; }
   try{ Store.initClient(); }catch(e){ renderFatal(e.message); return; }
   if(READONLY){ await boot(); return; }   // modo público: sem login, lê como anônimo
   let booted=false;
   Store.onAuth(async s=>{ if(s){ if(!booted){ booted=true; await boot(); } } else { booted=false; renderLogin(); } });
   await Store.getSession();
-  if(SESSION){ booted=true; await boot(); } else { renderLogin(); }
+  if(SESSION && !booted){ booted=true; await boot(); } else if(!SESSION){ renderLogin(); }
 })();
 </script>
 </body>
