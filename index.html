@@ -600,7 +600,7 @@ const COLS = [
 const FILTERS=[["jogos","Jogos"],["gols","Gols"],["assist","Assistências"],["part","Participações"],["cs","Clean sheets"],["v","Vitórias"]];
 function viewAtletas(s){
   const banner = s.partialLineups>0? `<div class="banner"><span class="ic">ⓘ</span><div><b>${s.partialLineups} jogo${s.partialLineups>1?"s":""} sem escalação completa.</b> Edite a partida e marque os relacionados + "escalação completa" para deixar as presenças 100% exatas. Gols e assistências já estão corretos.</div></div>`:"";
-  let list=[...s.players];
+  let list=[...s.players].filter(p=>p.jogos>0||p.gols>0||p.assist>0); // só quem tem registro no período
   const fltActive = UI.filterKey && UI.filterMin>0;
   if(fltActive) list=list.filter(p=>(p[UI.filterKey]||0)>=UI.filterMin);
   const dir=UI.sortDir;
@@ -619,7 +619,8 @@ function viewAtletas(s){
     }).join("");
     return `<tr class="clickable" data-act="perfil" data-id="${p.id}">${cells}</tr>`;
   }).join("");
-  const body = rows || `<tr><td colspan="${COLS.length}" style="text-align:center;padding:22px;color:var(--carvao-2)">Nenhum atleta com esse critério.</td></tr>`;
+  const emptyMsg = fltActive ? "Nenhum atleta com esse critério." : (periodActive()? "Nenhum atleta com registro no período selecionado." : "Nenhum atleta com registro ainda.");
+  const body = rows || `<tr><td colspan="${COLS.length}" style="text-align:center;padding:22px;color:var(--carvao-2)">${emptyMsg}</td></tr>`;
   const head = COLS.map(c=>{
     const active=UI.sortKey===c.k;
     const arw = active? (UI.sortDir<0?" ▼":" ▲") : "";
@@ -635,9 +636,10 @@ function viewAtletas(s){
     <input id="flt-min" class="fb-num" type="number" min="0" step="1" value="${UI.filterMin||0}" ${UI.filterKey?"":"disabled"}>
     ${fltActive?`<button class="btn sm ghost" data-act="flt-clear">Limpar</button>`:""}
   </div>`;
+  const noPer = periodActive()?" no período":"";
   const hint = fltActive
-    ? `${list.length} atleta${list.length!==1?"s":""} com ${FILTERS.find(f=>f[0]===UI.filterKey)[1]} ≥ ${UI.filterMin}`
-    : `clique numa coluna para ordenar · ${s.totalJogadores} atletas com registro`;
+    ? `${list.length} atleta${list.length!==1?"s":""} com ${FILTERS.find(f=>f[0]===UI.filterKey)[1]} ≥ ${UI.filterMin}${noPer}`
+    : `clique numa coluna para ordenar · ${list.length} atleta${list.length!==1?"s":""} com registro${noPer}`;
   return `<div class="section-title"><h2>Classificação de atletas</h2><span class="hint">${hint}</span></div>
     ${banner}
     ${filterBar}
