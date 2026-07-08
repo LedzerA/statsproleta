@@ -212,6 +212,24 @@
   .chip{background:var(--creme-3); border:1.5px solid rgba(15,32,25,.16); color:var(--carvao-2); padding:6px 12px; border-radius:20px; font-size:13px; font-weight:600; transition:all .12s}
   .chip:hover{border-color:var(--verde-500)}
   .chip.on{background:var(--verde-700); border-color:var(--verde-700); color:var(--creme-3)}
+  .chip.more{background:transparent; border-style:dashed; color:var(--verde-700)}
+  .chip.more:hover{background:rgba(15,32,25,.05)}
+  /* clicáveis (linhas de tabela e cards que abrem perfil/jogo) */
+  .clickable{cursor:pointer}
+  tr.clickable:hover td{background:rgba(26,160,74,.12)!important}
+  .card.clickable, .hl.clickable{cursor:pointer; transition:transform .12s, box-shadow .12s}
+  .card.clickable:hover, .hl.clickable:hover{transform:translateY(-2px); box-shadow:0 4px 14px rgba(0,0,0,.16)}
+  .hl .role{color:var(--verde-500)}
+  /* botão de titular (estrela) na lista de gols/assist */
+  .tit-btn{background:none; border:none; font-size:17px; line-height:1; color:rgba(15,32,25,.28); cursor:pointer; padding:0 2px; vertical-align:middle}
+  .tit-btn.on{color:var(--gold)}
+  .tit-btn:hover{color:var(--gold)}
+  .tit-count{margin-top:8px; font-size:11.5px; color:var(--carvao-2); font-weight:600}
+  /* busca de atletas no formulário */
+  .lineup-search{width:100%; box-sizing:border-box; padding:9px 12px; margin-bottom:10px; border-radius:var(--r-sm); font-size:14px; border:1px solid rgba(15,32,25,.18); background:var(--creme-3); color:var(--carvao); outline:none}
+  .lineup-search:focus{border-color:var(--verde-500); box-shadow:0 0 0 3px rgba(47,191,107,.16)}
+  .subhead .sh-hint{font-family:'Inter',sans-serif; font-size:11px; font-weight:500; color:var(--carvao-2)}
+  .tag.arq{background:rgba(15,32,25,.12); color:var(--carvao-2)}
   .add-athlete{display:flex; gap:8px; margin-top:10px}
   .add-athlete input{flex:1; padding:9px 12px; border:1.5px dashed rgba(15,32,25,.28); border-radius:10px; background:transparent; font-size:14px; color:var(--carvao)}
   .ga-list{display:flex; flex-direction:column; gap:2px; margin-top:4px}
@@ -288,8 +306,8 @@
      SUPABASE_URL      = "Project URL"
      SUPABASE_ANON_KEY = a chave "anon public"
    ===================================================================== */
-const SUPABASE_URL      = "https://jycbewmizgwugoapbbzz.supabase.co";  // ex.: https://abcdefgh.supabase.co
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5Y2Jld21pemd3dWdvYXBiYnp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MDY2MzcsImV4cCI6MjA5OTA4MjYzN30.R9jKcenGlt1crYABuHel4Cjz7l_3h8D4cgPc50Hq4Js";  // ex.: eyJhbGciOiJIUzI1NiIsIn...
+const SUPABASE_URL      = "";  // ex.: https://abcdefgh.supabase.co
+const SUPABASE_ANON_KEY = "";  // ex.: eyJhbGciOiJIUzI1NiIsIn...
 const TEAM  = {name:"Proletariado Alviverde", short:"Proleta", squad:"Esporte"};
 const CLOUD = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
 
@@ -311,12 +329,15 @@ const rowToMatch = r => ({
   lineup:Array.isArray(r.lineup)?r.lineup:[],
   scorers:Array.isArray(r.scorers)?r.scorers:[],
   assists:Array.isArray(r.assists)?r.assists:[],
+  starters:Array.isArray(r.starters)?r.starters:[],
+  archived:r.archived===true,
   lineupComplete:r.lineup_complete!==false, notes:r.notes||""
 });
 const matchToRow = m => ({
   id:m.id, date:m.date, opponent:m.opponent,
   goals_for:m.goalsFor||0, goals_against:m.goalsAgainst||0,
   lineup:m.lineup||[], scorers:m.scorers||[], assists:m.assists||[],
+  starters:m.starters||[], archived:!!m.archived,
   lineup_complete:!!m.lineupComplete, notes:m.notes||"", updated_at:new Date().toISOString()
 });
 
@@ -379,7 +400,17 @@ function saveErr(e){ console.error(e); toast("Erro ao salvar. Verifique a conex�
 
 /* ============ estado ============ */
 let DATA = null;
-let UI = { view:"geral", sortKey:"part", sortDir:-1, form:null };
+let UI = { view:"geral", sortKey:"part", sortDir:-1, form:null, perfil:null, backTo:"geral", lineupSearch:"", lineupShowAll:false };
+
+/* jogos que contam (não arquivados) e arquivados */
+function activeMatches(){ return DATA.matches.filter(m=>!m.archived); }
+function archivedMatches(){ return DATA.matches.filter(m=>m.archived); }
+/* frequência de relacionados (só jogos que contam) → id:contagem */
+function freqMap(){
+  const f={};
+  for(const m of activeMatches()) for(const id of (m.lineup||[])) f[id]=(f[id]||0)+1;
+  return f;
+}
 
 /* ============ utils ============ */
 const $ = (sel,root=document)=>root.querySelector(sel);
@@ -408,7 +439,7 @@ function compute(){
   const pIdx = Object.fromEntries(players.map(p=>[p.id,p]));
   const opps = {};
   let J=0,V=0,E=0,D=0,GP=0,GC=0;
-  const sorted = sortMatches(DATA.matches);
+  const sorted = sortMatches(activeMatches());
   for(const m of sorted){
     J++; GP+=m.goalsFor; GC+=m.goalsAgainst;
     const r=result(m), p=pts(m);
@@ -443,18 +474,20 @@ function compute(){
   const withAss = players.filter(p=>p.assist>0);
   const artilheiro = withGols.length? [...withGols].sort((a,b)=>b.gols-a.gols||b.part-a.part)[0]:null;
   const garcom = withAss.length? [...withAss].sort((a,b)=>b.assist-a.assist||b.part-a.part)[0]:null;
-  const partialLineups = DATA.matches.filter(m=>m.lineupComplete===false).length;
-  return {team,players,opponents,artilheiro,garcom,partialLineups,totalJogadores:players.filter(p=>p.jogos>0||p.gols>0||p.assist>0).length};
+  const partialLineups = activeMatches().filter(m=>m.lineupComplete===false).length;
+  return {team,players,opponents,artilheiro,garcom,partialLineups,pIdx,totalJogadores:players.filter(p=>p.jogos>0||p.gols>0||p.assist>0).length};
 }
 
 /* ============ render raiz ============ */
 function render(){
   const s = compute();
   let content="";
-  if(UI.view==="geral") content=viewGeral(s);
+  if(UI.perfil) content=viewPerfil(s, UI.perfil);
+  else if(UI.view==="geral") content=viewGeral(s);
   else if(UI.view==="atletas") content=viewAtletas(s);
   else if(UI.view==="partidas") content=viewPartidas(s);
   else if(UI.view==="adversarios") content=viewAdversarios(s);
+  else if(UI.view==="arquivados") content=viewArquivados(s);
   else if(UI.view==="dados") content=viewDados(s);
   app().innerHTML = headerHTML(s) + tabsHTML() + `<div class="content"><div class="wrap">${content}</div></div>` + (UI.form?formHTML():"");
   bind(s);
@@ -485,9 +518,13 @@ function headerHTML(s){
 }
 
 function tabsHTML(){
-  const tabs=[["geral","Visão Geral"],["atletas","Atletas"],["partidas","Partidas"],["adversarios","Adversários"],["dados","Dados"]];
+  const nArq = archivedMatches().length;
+  const tabs=[["geral","Visão Geral"],["atletas","Atletas"],["partidas","Partidas"],["adversarios","Adversários"]];
+  if(nArq>0) tabs.push(["arquivados",`Arquivados · ${nArq}`]);
+  tabs.push(["dados","Dados"]);
+  const activeTab = UI.perfil ? "" : UI.view;
   return `<div class="tabs-outer"><div class="wrap"><div class="tabs">${
-    tabs.map(([k,l])=>`<button class="tab ${UI.view===k?"active":""}" data-act="tab" data-tab="${k}">${l}</button>`).join("")
+    tabs.map(([k,l])=>`<button class="tab ${activeTab===k?"active":""}" data-act="tab" data-tab="${k}">${l}</button>`).join("")
   }</div></div></div>`;
 }
 
@@ -505,13 +542,13 @@ function viewGeral(s){
     </div>`;
   const hl = `
     <div class="highlight-row">
-      ${s.artilheiro?`<div class="hl"><div class="medal">⚽</div><div><div class="who">${esc(s.artilheiro.name)}</div><div class="role">Artilheiro</div></div><div class="val"><div class="n num">${s.artilheiro.gols}</div><div class="u">gols</div></div></div>`:""}
-      ${s.garcom?`<div class="hl"><div class="medal">🅰️</div><div><div class="who">${esc(s.garcom.name)}</div><div class="role">Garçom</div></div><div class="val"><div class="n num">${s.garcom.assist}</div><div class="u">assist.</div></div></div>`:""}
+      ${s.artilheiro?`<div class="hl clickable" data-act="perfil" data-id="${s.artilheiro.id}"><div class="medal">⚽</div><div><div class="who">${esc(s.artilheiro.name)}</div><div class="role">Artilheiro ›</div></div><div class="val"><div class="n num">${s.artilheiro.gols}</div><div class="u">gols</div></div></div>`:""}
+      ${s.garcom?`<div class="hl clickable" data-act="perfil" data-id="${s.garcom.id}"><div class="medal">🅰️</div><div><div class="who">${esc(s.garcom.name)}</div><div class="role">Garçom ›</div></div><div class="val"><div class="n num">${s.garcom.assist}</div><div class="u">assist.</div></div></div>`:""}
     </div>`;
   const extremes = (mg||pd)?`
     <div class="grid">
-      ${mg?`<div class="card"><div class="stat-label">Maior goleada</div><div class="stat-num num pos" style="font-size:26px; margin-top:6px">${mg.m.goalsFor}–${mg.m.goalsAgainst}</div><div class="stat-sub">vs ${esc(mg.m.opponent)} · ${fmtDate(mg.m.date)}</div></div>`:""}
-      ${pd?`<div class="card"><div class="stat-label">Pior derrota</div><div class="stat-num num neg" style="font-size:26px; margin-top:6px">${pd.m.goalsFor}–${pd.m.goalsAgainst}</div><div class="stat-sub">vs ${esc(pd.m.opponent)} · ${fmtDate(pd.m.date)}</div></div>`:""}
+      ${mg?`<div class="card clickable" data-act="match" data-id="${mg.m.id}"><div class="stat-label">Maior goleada ›</div><div class="stat-num num pos" style="font-size:26px; margin-top:6px">${mg.m.goalsFor}–${mg.m.goalsAgainst}</div><div class="stat-sub">vs ${esc(mg.m.opponent)} · ${fmtDate(mg.m.date)}</div></div>`:""}
+      ${pd?`<div class="card clickable" data-act="match" data-id="${pd.m.id}"><div class="stat-label">Pior derrota ›</div><div class="stat-num num neg" style="font-size:26px; margin-top:6px">${pd.m.goalsFor}–${pd.m.goalsAgainst}</div><div class="stat-sub">vs ${esc(pd.m.opponent)} · ${fmtDate(pd.m.date)}</div></div>`:""}
     </div>`:"";
   // top 5 participações mini table
   const top = [...s.players].filter(p=>p.part>0).sort((a,b)=>b.part-a.part||b.gols-a.gols).slice(0,5);
@@ -521,7 +558,7 @@ function viewGeral(s){
         <button class="btn sm ghost" data-act="tab" data-tab="atletas">Ver todos →</button></div>
       <div class="table-wrap"><table class="stats">
         <thead><tr><th>Atleta</th><th>J</th><th>G</th><th>A</th><th>Part.</th><th>Part./J</th></tr></thead>
-        <tbody>${top.map((p,i)=>`<tr><td class="name"><span class="rk">${i+1}</span>${esc(p.name)}</td>
+        <tbody>${top.map((p,i)=>`<tr class="clickable" data-act="perfil" data-id="${p.id}"><td class="name"><span class="rk">${i+1}</span>${esc(p.name)}</td>
           <td class="cell-num">${p.jogos}</td><td class="cell-num">${p.gols}</td><td class="cell-num">${p.assist}</td>
           <td class="cell-num">${p.part}</td><td class="cell-num muted">${dec(p.ppj,2)}</td></tr>`).join("")}</tbody>
       </table></div>
@@ -554,7 +591,7 @@ function viewAtletas(s){
       const cls = (v===0)?"cell-num muted":"cell-num";
       return `<td class="${cls}">${disp}</td>`;
     }).join("");
-    return `<tr>${cells}</tr>`;
+    return `<tr class="clickable" data-act="perfil" data-id="${p.id}">${cells}</tr>`;
   }).join("");
   const head = COLS.map(c=>{
     const active=UI.sortKey===c.k;
@@ -573,37 +610,108 @@ function viewAtletas(s){
 }
 
 /* ---------- Partidas ---------- */
+function lineupSummary(m){
+  const st=(m.starters||[]);
+  const bench=(m.lineup||[]).filter(id=>!st.includes(id));
+  let html="";
+  if(st.length) html+=`<div><span class="k">👥 Titulares:</span> ${st.map(id=>esc(nameOf(id))).join(", ")}</div>`;
+  if(bench.length) html+=`<div><span class="k">🔁 Banco:</span> ${bench.map(id=>esc(nameOf(id))).join(", ")}</div>`;
+  if(!st.length && !bench.length) html=`<div class="muted">Sem relacionados</div>`;
+  return html;
+}
+function matchCard(m){
+  const r=result(m), rl=r.toLowerCase();
+  const sc = (m.scorers||[]).slice().sort((a,b)=>b.g-a.g).map(x=>`${esc(nameOf(x.a))}${x.g>1?` (${x.g})`:""}`).join(", ");
+  const as = (m.assists||[]).slice().sort((a,b)=>b.n-a.n).map(x=>`${esc(nameOf(x.a))}${x.n>1?` (${x.n})`:""}`).join(", ");
+  const nRel=(m.lineup||[]).length, nTit=(m.starters||[]).length;
+  const tags = `<div class="mc-tags">
+    <span class="tag n">${nRel} relacionado${nRel!==1?"s":""}</span>
+    ${nTit?`<span class="tag n">${nTit} titular${nTit!==1?"es":""}</span>`:""}
+    ${m.lineupComplete===false?`<span class="tag">escalação parcial</span>`:""}
+    ${m.archived?`<span class="tag arq">arquivado</span>`:""}
+  </div>`;
+  const arcBtn = m.archived
+    ? `<button class="btn sm ghost" data-act="unarchive" data-id="${m.id}">Desarquivar</button>`
+    : `<button class="btn sm ghost" data-act="archive" data-id="${m.id}">Arquivar</button>`;
+  return `<div class="match-card ${rl}">
+    <div class="mc-top">
+      <div class="mc-date">${fmtDate(m.date)}</div>
+      <div class="mc-main"><div class="mc-score"><span class="sc">${m.goalsFor} – ${m.goalsAgainst}</span> <span class="opp">${esc(m.opponent||"Adversário")}</span></div></div>
+      <div class="mc-badge ${rl}">${r}</div>
+    </div>
+    <div class="mc-detail">
+      ${sc?`<div><span class="k">⚽ Gols:</span> ${sc}</div>`:`<div class="muted">Sem gols registrados</div>`}
+      ${as?`<div><span class="k">🅰️ Assist.:</span> ${as}</div>`:""}
+      ${lineupSummary(m)}
+      ${tags}
+    </div>
+    <div class="mc-actions">
+      <button class="btn sm ghost" data-act="edit" data-id="${m.id}">Editar</button>
+      ${arcBtn}
+      <button class="btn sm danger" data-act="del" data-id="${m.id}">Excluir</button>
+    </div>
+  </div>`;
+}
 function viewPartidas(s){
-  const list = sortMatches(DATA.matches).reverse();
+  const list = sortMatches(activeMatches()).reverse();
   if(list.length===0) return `<div class="section-title"><h2>Partidas</h2><button class="btn primary sm" data-act="new">+ Nova partida</button></div>${emptyState("Nenhuma partida","Cadastre o primeiro jogo do Proleta.","partidas")}`;
-  const cards = list.map(m=>{
-    const r=result(m), rl=r.toLowerCase();
-    const sc = (m.scorers||[]).slice().sort((a,b)=>b.g-a.g).map(x=>`${esc(nameOf(x.a))}${x.g>1?` (${x.g})`:""}`).join(", ");
-    const as = (m.assists||[]).slice().sort((a,b)=>b.n-a.n).map(x=>`${esc(nameOf(x.a))}${x.n>1?` (${x.n})`:""}`).join(", ");
-    const nRel = (m.lineup||[]).length;
-    const tags = `<div class="mc-tags">
-      <span class="tag n">${nRel} relacionado${nRel!==1?"s":""}</span>
-      ${m.lineupComplete===false?`<span class="tag">escalação parcial</span>`:""}
-    </div>`;
-    return `<div class="match-card ${rl}">
-      <div class="mc-top">
-        <div class="mc-date">${fmtDate(m.date)}</div>
-        <div class="mc-main"><div class="mc-score"><span class="sc">${m.goalsFor} – ${m.goalsAgainst}</span> <span class="opp">${esc(m.opponent||"Adversário")}</span></div></div>
-        <div class="mc-badge ${rl}">${r}</div>
-      </div>
-      <div class="mc-detail">
-        ${sc?`<div><span class="k">⚽ Gols:</span> ${sc}</div>`:`<div class="muted">Sem gols registrados</div>`}
-        ${as?`<div><span class="k">🅰️ Assist.:</span> ${as}</div>`:""}
-        ${tags}
-      </div>
-      <div class="mc-actions">
-        <button class="btn sm ghost" data-act="edit" data-id="${m.id}">Editar</button>
-        <button class="btn sm danger" data-act="del" data-id="${m.id}">Excluir</button>
-      </div>
-    </div>`;
-  }).join("");
+  const cards = list.map(matchCard).join("");
   return `<div class="section-title"><h2>Partidas <span class="hint" style="font-weight:400">· ${list.length} jogos</span></h2><button class="btn primary sm" data-act="new">+ Nova partida</button></div>
     <div class="match-list">${cards}</div>`;
+}
+
+/* ---------- Arquivados ---------- */
+function viewArquivados(s){
+  const list = sortMatches(archivedMatches()).reverse();
+  if(list.length===0) return emptyState("Nada arquivado","Jogos arquivados ficam aqui, fora das estatísticas.","partidas");
+  const cards = list.map(matchCard).join("");
+  return `<div class="section-title"><h2>Arquivados <span class="hint" style="font-weight:400">· ${list.length} jogos</span></h2></div>
+    <div class="banner"><span class="ic">📦</span><div>Estes jogos <b>não entram nas estatísticas</b> (nem em médias, artilharia ou frequência). Use "Desarquivar" para trazer de volta.</div></div>
+    <div class="match-list">${cards}</div>`;
+}
+
+/* ---------- Perfil do jogador ---------- */
+function viewPerfil(s, pid){
+  const p = s.pIdx[pid];
+  if(!p) return `<div class="section-title"><button class="btn sm ghost" data-act="voltar">← Voltar</button></div>${emptyState("Atleta não encontrado","Talvez tenha sido removido.","atletas")}`;
+  // histórico jogo a jogo (só jogos que contam)
+  const log = sortMatches(activeMatches()).reverse().map(m=>{
+    const inL=(m.lineup||[]).includes(pid);
+    const isTit=(m.starters||[]).includes(pid);
+    const g=(m.scorers||[]).filter(x=>x.a===pid).reduce((n,x)=>n+x.g,0);
+    const a=(m.assists||[]).filter(x=>x.a===pid).reduce((n,x)=>n+x.n,0);
+    if(!inL && !g && !a) return null;
+    const r=result(m), rl=r.toLowerCase();
+    const papel = inL ? (isTit?`<span class="pill v" style="padding:2px 8px">Titular</span>`:`<span class="pill e" style="padding:2px 8px">Banco</span>`) : `<span class="muted">—</span>`;
+    return `<tr class="clickable" data-act="match" data-id="${m.id}">
+      <td class="cell-num muted" style="white-space:nowrap">${fmtDateShort(m.date)}</td>
+      <td class="name">${esc(m.opponent)}</td>
+      <td><span class="mc-badge ${rl}" style="width:22px;height:22px;font-size:12px;display:inline-flex">${r}</span> <span class="muted">${m.goalsFor}–${m.goalsAgainst}</span></td>
+      <td>${papel}</td>
+      <td class="cell-num ${g?"":"muted"}">${g||"–"}</td>
+      <td class="cell-num ${a?"":"muted"}">${a||"–"}</td>
+    </tr>`;
+  }).filter(Boolean).join("");
+  const nTit = activeMatches().filter(m=>(m.starters||[]).includes(pid)).length;
+  const stat=(n,l,sub)=>`<div class="card"><div class="stat-num num">${n}</div><div class="stat-label">${l}</div>${sub?`<div class="stat-sub">${sub}</div>`:""}</div>`;
+  return `<div class="section-title"><h2 style="display:flex;align-items:center;gap:12px"><button class="btn sm ghost" data-act="voltar">← Voltar</button> ${esc(p.name)}</h2></div>
+    <div class="grid">
+      ${stat(p.jogos,"Jogos", `${nTit} como titular`)}
+      ${stat(p.gols,"Gols", p.jogos?`${dec(p.gpj,2)} por jogo`:"")}
+      ${stat(p.assist,"Assistências","")}
+      ${stat(p.part,"Participações", p.jogos?`${dec(p.ppj,2)} por jogo`:"")}
+    </div>
+    <div class="grid" style="margin-top:12px">
+      <div class="card"><div class="stat-num num">${p.v}·${p.e}·${p.d}</div><div class="stat-label">V · E · D com ele em campo</div></div>
+      <div class="card"><div class="stat-num num">${pct(p.aprov)}</div><div class="stat-label">Aproveitamento do time</div><div class="stat-sub">quando ele joga</div></div>
+      <div class="card"><div class="stat-num num">${pct(p.share)}</div><div class="stat-label">Fatia dos gols do time</div></div>
+    </div>
+    <div class="panel" style="margin-top:16px">
+      <div class="panel-head"><div><h3>Jogo a jogo</h3><div class="sub">só partidas que contam · mais recentes primeiro</div></div></div>
+      ${log?`<div class="table-wrap"><table class="stats">
+        <thead><tr><th>Data</th><th>Adversário</th><th>Placar</th><th>Papel</th><th>G</th><th>A</th></tr></thead>
+        <tbody>${log}</tbody></table></div>`:`<div class="empty" style="padding:24px"><p>Sem jogos registrados para ${esc(p.name)}.</p></div>`}
+    </div>`;
 }
 
 /* ---------- Adversários ---------- */
@@ -672,10 +780,11 @@ function formHTML(){
             <div class="side"><div class="cap">Adversário</div><input type="number" min="0" id="f-ga" value="${f.goalsAgainst}"></div>
           </div>
         </div>
-        <div class="subhead"><div class="t">Relacionados</div><div class="mini"><button class="btn sm ghost" data-act="lineup-all">Todos</button><button class="btn sm ghost" data-act="lineup-none">Limpar</button></div></div>
+        <div class="subhead"><div class="t">Relacionados <span class="sh-hint">· mais frequentes primeiro</span></div><div class="mini"><button class="btn sm ghost" data-act="lineup-none">Limpar</button></div></div>
+        <input type="text" id="f-search" class="lineup-search" placeholder="🔍 Buscar atleta pelo nome…" autocomplete="off" value="${esc(UI.lineupSearch||"")}">
         <div class="chips" id="f-chips"></div>
         <div class="add-athlete"><input type="text" id="f-newname" placeholder="+ Adicionar atleta ao elenco" autocomplete="off"><button class="btn sm" data-act="add-athlete">Adicionar</button></div>
-        <div class="subhead"><div class="t">Gols e assistências</div></div>
+        <div class="subhead"><div class="t">Titular (★), gols e assistências</div></div>
         <div id="f-ga-container"></div>
         <div class="tot-line" id="f-totals"></div>
         <div class="warn" id="f-warn"></div>
@@ -691,25 +800,44 @@ function formHTML(){
 
 function renderLineupSection(){
   const f=UI.form;
-  // chips
-  const chips = DATA.roster.map(a=>`<button class="chip ${f.lineup.has(a.id)?"on":""}" data-act="chip" data-id="${a.id}">${esc(a.name)}</button>`).join("");
-  el("f-chips").innerHTML = chips;
-  // ga list: atletas na escalação (ou que já tenham gol/assist)
+  // chips ordenados por frequência (só jogos que contam), com top-25 + busca + mostrar mais
+  const freq=freqMap();
+  const term=(UI.lineupSearch||"").trim().toLowerCase();
+  const sorted=[...DATA.roster].sort((a,b)=>(freq[b.id]||0)-(freq[a.id]||0) || a.name.localeCompare(b.name,"pt"));
+  let visible;
+  if(term){
+    visible=sorted.filter(a=>a.name.toLowerCase().includes(term));
+  } else if(UI.lineupShowAll){
+    visible=sorted;
+  } else {
+    const top=sorted.slice(0,25);
+    const topIds=new Set(top.map(a=>a.id));
+    const extras=sorted.filter(a=>f.lineup.has(a.id) && !topIds.has(a.id)); // não esconde quem já foi marcado
+    visible=[...top,...extras];
+  }
+  const chips=visible.map(a=>`<button class="chip ${f.lineup.has(a.id)?"on":""}" data-act="chip" data-id="${a.id}">${esc(a.name)}</button>`).join("");
+  const hidden=sorted.length-visible.length;
+  let moreBtn="";
+  if(!term && !UI.lineupShowAll && hidden>0) moreBtn=`<button class="chip more" data-act="lineup-more">+ mostrar mais (${hidden})</button>`;
+  else if(!term && UI.lineupShowAll) moreBtn=`<button class="chip more" data-act="lineup-less">− mostrar menos</button>`;
+  el("f-chips").innerHTML = (chips+moreBtn) || `<div class="ga-empty">Nenhum atleta encontrado.</div>`;
+  // lista de gols/assist/titular: atletas na escalação (ou que já tenham gol/assist)
   const ids = new Set([...f.lineup, ...Object.keys(f.scorers), ...Object.keys(f.assists)]);
   const ordered = DATA.roster.filter(a=>ids.has(a.id));
   const cont = el("f-ga-container");
   if(ordered.length===0){
-    cont.innerHTML = `<div class="ga-empty">Marque os relacionados acima para lançar gols e assistências.</div>`;
+    cont.innerHTML = `<div class="ga-empty">Marque os relacionados acima para definir titulares, gols e assistências.</div>`;
   } else {
     const head = `<div class="ga-head"><span>Atleta</span><span>Gols</span><span>Assist.</span></div>`;
     const rows = ordered.map(a=>{
-      const g=f.scorers[a.id]||0, n=f.assists[a.id]||0;
-      return `<div class="ga-row"><div class="nm">${esc(a.name)}</div>
+      const g=f.scorers[a.id]||0, n=f.assists[a.id]||0, tit=f.starters.has(a.id);
+      return `<div class="ga-row"><div class="nm"><button class="tit-btn ${tit?"on":""}" data-act="titular" data-id="${a.id}" title="${tit?"Titular":"Marcar titular"}">${tit?"★":"☆"}</button> ${esc(a.name)}</div>
         <div class="stepper"><button data-act="g-" data-id="${a.id}">−</button><span class="val ${g?"":"zero"}" id="g-${a.id}">${g}</span><button data-act="g+" data-id="${a.id}">+</button></div>
         <div class="stepper"><button data-act="a-" data-id="${a.id}">−</button><span class="val ${n?"":"zero"}" id="a-${a.id}">${n}</span><button data-act="a+" data-id="${a.id}">+</button></div>
       </div>`;
     }).join("");
-    cont.innerHTML = `<div class="ga-list">${head}${rows}</div>`;
+    const nTit=[...f.starters].filter(id=>f.lineup.has(id)).length;
+    cont.innerHTML = `<div class="ga-list">${head}${rows}</div><div class="tit-count">★ ${nTit} titular${nTit!==1?"es":""} marcado${nTit!==1?"s":""}</div>`;
   }
   updateTotals();
 }
@@ -733,11 +861,19 @@ function bind(s){
   app().onclick = (e)=>{
     const node = e.target.closest("[data-act]"); if(!node) return;
     const act=node.dataset.act;
-    if(act==="tab"){ UI.view=node.dataset.tab; render(); }
+    if(act==="tab"){ UI.perfil=null; UI.view=node.dataset.tab; render(); }
     else if(act==="sort"){ const k=node.dataset.key; if(UI.sortKey===k) UI.sortDir*=-1; else {UI.sortKey=k; UI.sortDir = k==="name"?1:-1;} render(); }
     else if(act==="new"){ openForm(null); }
     else if(act==="edit"){ openForm(node.dataset.id); }
     else if(act==="del"){ delMatch(node.dataset.id); }
+    else if(act==="perfil"){ UI.backTo=UI.view; UI.perfil=node.dataset.id; render(); }
+    else if(act==="voltar"){ UI.perfil=null; render(); }
+    else if(act==="match"){ openForm(node.dataset.id); }
+    else if(act==="archive"){ if(confirm("Arquivar este jogo? Ele sai das estatísticas (dá pra desarquivar depois).")) archiveMatch(node.dataset.id,true); }
+    else if(act==="unarchive"){ archiveMatch(node.dataset.id,false); }
+    else if(act==="titular"){ toggleTitular(node.dataset.id); }
+    else if(act==="lineup-more"){ UI.lineupShowAll=true; renderLineupSection(); }
+    else if(act==="lineup-less"){ UI.lineupShowAll=false; renderLineupSection(); }
     else if(act==="overlay"){ /* fecha ao clicar fora */ if(e.target.classList.contains("overlay")) closeForm(); }
     else if(act==="close"){ closeForm(); }
     else if(act==="save"){ saveForm(); }
@@ -765,6 +901,7 @@ function bind(s){
     el("f-ga").oninput=e=>{UI.form.goalsAgainst=parseInt(e.target.value)||0;};
     el("f-complete").onchange=e=>UI.form.lineupComplete=e.target.checked;
     el("f-newname").onkeydown=e=>{ if(e.key==="Enter"){ e.preventDefault(); addAthlete(); } };
+    const srch=el("f-search"); if(srch) srch.oninput=e=>{ UI.lineupSearch=e.target.value; renderLineupSection(); };
     renderLineupSection();
     setTimeout(()=>{ if(UI.form && !UI.form.id){ const o=el("f-opp"); if(o) o.focus(); } },50);
   }
@@ -772,22 +909,36 @@ function bind(s){
 
 /* ============ ações de formulário ============ */
 function openForm(id){
+  UI.lineupSearch=""; UI.lineupShowAll=false;
   if(id){
     const m=DATA.matches.find(x=>x.id===id);
     UI.form={ id:m.id, date:m.date, opponent:m.opponent, goalsFor:m.goalsFor, goalsAgainst:m.goalsAgainst,
-      lineup:new Set(m.lineup||[]), scorers:Object.fromEntries((m.scorers||[]).map(x=>[x.a,x.g])),
-      assists:Object.fromEntries((m.assists||[]).map(x=>[x.n!==undefined?x.a:x.a,x.n])), lineupComplete:m.lineupComplete!==false };
+      lineup:new Set(m.lineup||[]), starters:new Set(m.starters||[]),
+      scorers:Object.fromEntries((m.scorers||[]).map(x=>[x.a,x.g])),
+      assists:Object.fromEntries((m.assists||[]).map(x=>[x.a,x.n])), lineupComplete:m.lineupComplete!==false };
   } else {
     const today=new Date().toISOString().slice(0,10);
-    UI.form={ id:null, date:today, opponent:"", goalsFor:0, goalsAgainst:0, lineup:new Set(), scorers:{}, assists:{}, lineupComplete:true };
+    UI.form={ id:null, date:today, opponent:"", goalsFor:0, goalsAgainst:0, lineup:new Set(), starters:new Set(), scorers:{}, assists:{}, lineupComplete:true };
   }
   render();
 }
 function closeForm(){ UI.form=null; render(); afterFormClose(); }
 function toggleChip(id){
   const f=UI.form;
-  if(f.lineup.has(id)) f.lineup.delete(id); else f.lineup.add(id);
+  if(f.lineup.has(id)){ f.lineup.delete(id); f.starters.delete(id); } // sair da escalação tira o titular
+  else f.lineup.add(id);
   renderLineupSection();
+}
+function toggleTitular(id){
+  const f=UI.form;
+  if(f.starters.has(id)) f.starters.delete(id);
+  else { f.starters.add(id); f.lineup.add(id); } // titular tem que ser relacionado
+  renderLineupSection();
+}
+function archiveMatch(id, val){
+  const m=DATA.matches.find(x=>x.id===id); if(!m) return;
+  m.archived=val; render();
+  Store.upsertMatch(m).then(()=>toast(val?"Jogo arquivado":"Jogo desarquivado")).catch(saveErr);
 }
 function step(kind,id,delta){
   const f=UI.form, map=f[kind];
@@ -813,15 +964,17 @@ function addAthlete(){
 function saveForm(){
   const f=UI.form;
   if(!f.opponent.trim()){ toast("Informe o adversário"); el("f-opp").focus(); return; }
+  const isEdit=!!f.id;
+  const prev = isEdit? DATA.matches.find(m=>m.id===f.id) : null;
   const rec={
     id: f.id||uid("m"), date:f.date, opponent:f.opponent.trim(),
     goalsFor:f.goalsFor||0, goalsAgainst:f.goalsAgainst||0,
     lineup:[...f.lineup],
+    starters:[...f.starters].filter(id=>f.lineup.has(id)),
     scorers:Object.entries(f.scorers).map(([a,g])=>({a,g})),
     assists:Object.entries(f.assists).map(([a,n])=>({a,n})),
-    lineupComplete: !!f.lineupComplete, notes:""
+    lineupComplete: !!f.lineupComplete, notes:"", archived: prev? !!prev.archived : false
   };
-  const isEdit=!!f.id;
   if(isEdit){ const i=DATA.matches.findIndex(m=>m.id===f.id); DATA.matches[i]=rec; }
   else DATA.matches.push(rec);
   UI.form=null; render(); afterFormClose();
