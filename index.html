@@ -413,11 +413,15 @@ function saveErr(e){ console.error(e); toast("Erro ao salvar. Verifique a conex�
 
 /* ============ estado ============ */
 let DATA = null;
-let UI = { view:"geral", sortKey:"part", sortDir:-1, form:null, perfil:null, backTo:"geral", lineupSearch:"", lineupShowAll:false, filterKey:"", filterMin:0 };
+let UI = { view:"geral", sortKey:"part", sortDir:-1, form:null, perfil:null, backTo:"geral", lineupSearch:"", lineupShowAll:false, filterKey:"", filterMin:0, dfMode:"all", dfMonth:"", dfFrom:"", dfTo:"" };
 
 /* jogos que contam (não arquivados) e arquivados */
 function activeMatches(){ return DATA.matches.filter(m=>!m.archived); }
 function archivedMatches(){ return DATA.matches.filter(m=>m.archived); }
+/* jogos que contam E dentro do período selecionado (filtro global) */
+function filteredMatches(){ return matchDateFilter(activeMatches()); }
+function periodActive(){ return UI.dfMode && UI.dfMode!=="all"; }
+function refYear(){ const am=activeMatches(); return am.length? Math.max(...am.map(m=>+m.date.slice(0,4))) : new Date().getFullYear(); }
 /* frequência de relacionados (só jogos que contam) → id:contagem */
 function freqMap(){
   const f={};
@@ -452,7 +456,7 @@ function compute(){
   const pIdx = Object.fromEntries(players.map(p=>[p.id,p]));
   const opps = {};
   let J=0,V=0,E=0,D=0,GP=0,GC=0;
-  const sorted = sortMatches(activeMatches());
+  const sorted = sortMatches(filteredMatches());
   for(const m of sorted){
     J++; GP+=m.goalsFor; GC+=m.goalsAgainst;
     const r=result(m), p=pts(m), clean=(m.goalsAgainst===0);
@@ -503,9 +507,10 @@ function render(){
   else if(UI.view==="adversarios") content=viewAdversarios(s);
   else if(UI.view==="arquivados") content=viewArquivados(s);
   else if(UI.view==="dados") content=viewDados(s);
-  app().innerHTML = headerHTML(s) + tabsHTML() + `<div class="content"><div class="wrap">${content}</div></div>` + (UI.form?formHTML():"");
+  app().innerHTML = headerHTML(s) + tabsHTML() + `<div class="content"><div class="wrap">${periodViews()?dateFilterBar(refYear()):""}${content}</div></div>` + (UI.form?formHTML():"");
   bind(s);
 }
+function periodViews(){ return !!UI.perfil || ["geral","atletas","partidas","adversarios"].includes(UI.view); }
 
 function headerHTML(s){
   const t=s.team;
@@ -545,7 +550,9 @@ function tabsHTML(){
 /* ---------- Visão Geral ---------- */
 function viewGeral(s){
   const t=s.team;
-  if(t.J===0) return emptyState("Nenhuma partida ainda","Cadastre seu primeiro jogo para ver as estatísticas.","partidas");
+  if(t.J===0) return activeMatches().length
+    ? `<div class="empty" style="padding:30px"><div class="big" style="font-size:42px">📅</div><h3>Nenhum jogo no período</h3><p>Ajuste o seletor de período acima para ver as estatísticas.</p></div>`
+    : emptyState("Nenhuma partida ainda","Cadastre seu primeiro jogo para ver as estatísticas.","partidas");
   const mg=t.maiorGoleada, pd=t.piorDerrota;
   const cards = `
     <div class="grid">
@@ -688,11 +695,42 @@ function matchCard(m){
   </div>`;
 }
 function viewPartidas(s){
-  const list = sortMatches(activeMatches()).reverse();
-  if(list.length===0) return `<div class="section-title"><h2>Partidas</h2>${READONLY?"":`<button class="btn primary sm" data-act="new">+ Nova partida</button>`}</div>${emptyState("Nenhuma partida","Cadastre o primeiro jogo do Proleta.","partidas")}`;
-  const cards = list.map(matchCard).join("");
-  return `<div class="section-title"><h2>Partidas <span class="hint" style="font-weight:400">· ${list.length} jogos</span></h2>${READONLY?"":`<button class="btn primary sm" data-act="new">+ Nova partida</button>`}</div>
+  const all = sortMatches(activeMatches()).reverse();
+  if(all.length===0) return `<div class="section-title"><h2>Partidas</h2>${READONLY?"":`<button class="btn primary sm" data-act="new">+ Nova partida</button>`}</div>${emptyState("Nenhuma partida","Cadastre o primeiro jogo do Proleta.","partidas")}`;
+  const list = sortMatches(filteredMatches()).reverse();
+  const cards = list.length? list.map(matchCard).join("") : `<div class="empty" style="padding:26px"><div class="big" style="font-size:40px">📅</div><p>Nenhuma partida no período selecionado.</p></div>`;
+  const hint = periodActive()? `${list.length} de ${all.length} jogos no período` : `· ${all.length} jogos`;
+  return `<div class="section-title"><h2>Partidas <span class="hint" style="font-weight:400">${hint}</span></h2>${READONLY?"":`<button class="btn primary sm" data-act="new">+ Nova partida</button>`}</div>
     <div class="match-list">${cards}</div>`;
+}
+function dateFilterBar(refYear){
+  const m=UI.dfMode||"all";
+  const opt=(v,l)=>`<option value="${v}" ${m===v?"selected":""}>${l}</option>`;
+  let extra="";
+  if(m==="month") extra=`<input type="month" id="df-month" class="fb-num" style="width:auto" value="${UI.dfMonth||""}">`;
+  else if(m==="range") extra=`<span class="fb-lab">de</span><input type="date" id="df-from" class="fb-num" style="width:auto" value="${UI.dfFrom||""}"><span class="fb-lab">até</span><input type="date" id="df-to" class="fb-num" style="width:auto" value="${UI.dfTo||""}">`;
+  return `<div class="filter-bar">
+    <span class="fb-lab">Período</span>
+    <select id="df-mode" class="fb-sel">
+      ${opt("all","Todos")}${opt("last30","Últimos 30 dias")}${opt("last90","Últimos 90 dias")}
+      ${opt("sem1","1º semestre "+refYear)}${opt("sem2","2º semestre "+refYear)}
+      ${opt("month","Mês específico")}${opt("range","Entre datas")}
+    </select>
+    ${extra}
+    ${m!=="all"?`<button class="btn sm ghost" data-act="df-clear">Limpar</button>`:""}
+  </div>`;
+}
+function matchDateFilter(list){
+  const m=UI.dfMode||"all";
+  if(m==="all") return list;
+  if(m==="month") return UI.dfMonth? list.filter(x=>x.date.slice(0,7)===UI.dfMonth) : list;
+  if(m==="range"){ const f=UI.dfFrom, t=UI.dfTo; if(!f&&!t) return list; return list.filter(x=>(!f||x.date>=f)&&(!t||x.date<=t)); }
+  const iso=d=>d.toISOString().slice(0,10), today=new Date();
+  if(m==="last30"||m==="last90"){ const c=new Date(today); c.setDate(today.getDate()-(m==="last30"?30:90)); return list.filter(x=>x.date>=iso(c) && x.date<=iso(today)); }
+  const refYear = list.length? Math.max(...list.map(x=>+x.date.slice(0,4))) : today.getFullYear();
+  if(m==="sem1") return list.filter(x=>x.date>=`${refYear}-01-01` && x.date<=`${refYear}-06-30`);
+  if(m==="sem2") return list.filter(x=>x.date>=`${refYear}-07-01` && x.date<=`${refYear}-12-31`);
+  return list;
 }
 
 /* ---------- Arquivados ---------- */
@@ -710,7 +748,7 @@ function viewPerfil(s, pid){
   const p = s.pIdx[pid];
   if(!p) return `<div class="section-title"><button class="btn sm ghost" data-act="voltar">← Voltar</button></div>${emptyState("Atleta não encontrado","Talvez tenha sido removido.","atletas")}`;
   // histórico jogo a jogo (só jogos que contam)
-  const log = sortMatches(activeMatches()).reverse().map(m=>{
+  const log = sortMatches(filteredMatches()).reverse().map(m=>{
     const inL=(m.lineup||[]).includes(pid);
     const isTit=(m.starters||[]).includes(pid);
     const g=(m.scorers||[]).filter(x=>x.a===pid).reduce((n,x)=>n+x.g,0);
@@ -727,7 +765,7 @@ function viewPerfil(s, pid){
       <td class="cell-num ${a?"":"muted"}">${a||"–"}</td>
     </tr>`;
   }).filter(Boolean).join("");
-  const nTit = activeMatches().filter(m=>(m.starters||[]).includes(pid)).length;
+  const nTit = filteredMatches().filter(m=>(m.starters||[]).includes(pid)).length;
   const stat=(n,l,sub)=>`<div class="card"><div class="stat-num num">${n}</div><div class="stat-label">${l}</div>${sub?`<div class="stat-sub">${sub}</div>`:""}</div>`;
   return `<div class="section-title"><h2 style="display:flex;align-items:center;gap:12px"><button class="btn sm ghost" data-act="voltar">← Voltar</button> ${esc(p.name)}</h2></div>
     <div class="grid">
@@ -751,7 +789,9 @@ function viewPerfil(s, pid){
 
 /* ---------- Adversários ---------- */
 function viewAdversarios(s){
-  if(s.opponents.length===0) return emptyState("Sem adversários","Cadastre partidas para ver o retrospecto.","partidas");
+  if(s.opponents.length===0) return activeMatches().length
+    ? `<div class="empty" style="padding:30px"><div class="big" style="font-size:42px">📅</div><h3>Nenhum jogo no período</h3><p>Ajuste o seletor de período acima.</p></div>`
+    : emptyState("Sem adversários","Cadastre partidas para ver o retrospecto.","partidas");
   let list=[...s.opponents].sort((a,b)=> b.J-a.J || b.aprov-a.aprov || a.opponent.localeCompare(b.opponent,"pt"));
   const rows = list.map(o=>{
     const rl = o.aprov>=0.6?"v":o.aprov>=0.34?"e":"d";
@@ -910,6 +950,7 @@ function bind(s){
     else if(act==="lineup-more"){ UI.lineupShowAll=true; renderLineupSection(); }
     else if(act==="lineup-less"){ UI.lineupShowAll=false; renderLineupSection(); }
     else if(act==="flt-clear"){ UI.filterKey=""; UI.filterMin=0; render(); }
+    else if(act==="df-clear"){ UI.dfMode="all"; render(); }
     else if(act==="overlay"){ /* fecha ao clicar fora */ if(e.target.classList.contains("overlay")) closeForm(); }
     else if(act==="close"){ closeForm(); }
     else if(act==="save"){ saveForm(); }
@@ -932,6 +973,17 @@ function bind(s){
   // filtro da aba Atletas (onchange = só ao confirmar, sem perder foco)
   const fk=el("flt-key"); if(fk) fk.onchange=e=>{ UI.filterKey=e.target.value; if(!UI.filterKey) UI.filterMin=0; else if(UI.filterMin<1) UI.filterMin=1; render(); };
   const fm=el("flt-min"); if(fm) fm.onchange=e=>{ UI.filterMin=Math.max(0,parseInt(e.target.value)||0); render(); };
+  // filtro de período da aba Partidas
+  const dfm=el("df-mode"); if(dfm) dfm.onchange=e=>{
+    UI.dfMode=e.target.value;
+    const ds=activeMatches().map(x=>x.date).sort();
+    if(UI.dfMode==="month" && !UI.dfMonth && ds.length) UI.dfMonth=ds[ds.length-1].slice(0,7);
+    if(UI.dfMode==="range" && !UI.dfFrom && !UI.dfTo && ds.length){ UI.dfFrom=ds[0]; UI.dfTo=ds[ds.length-1]; }
+    render();
+  };
+  const dmo=el("df-month"); if(dmo) dmo.onchange=e=>{ UI.dfMonth=e.target.value; render(); };
+  const dfr=el("df-from"); if(dfr) dfr.onchange=e=>{ UI.dfFrom=e.target.value; render(); };
+  const dto=el("df-to"); if(dto) dto.onchange=e=>{ UI.dfTo=e.target.value; render(); };
   // form: inputs de texto/numero (sem re-render)
   if(UI.form){
     el("f-date").oninput=e=>UI.form.date=e.target.value;
