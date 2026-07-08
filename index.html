@@ -231,6 +231,12 @@
   .subhead .sh-hint{font-family:'Inter',sans-serif; font-size:11px; font-weight:500; color:var(--carvao-2)}
   .tag.arq{background:rgba(15,32,25,.12); color:var(--carvao-2)}
   .ro-badge{background:rgba(242,235,214,.16); border:1px solid var(--linha-forte); padding:1px 8px; border-radius:20px; font-size:11px; white-space:nowrap}
+  .filter-bar{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:0 0 14px; padding:10px 12px; background:var(--creme-2); border-radius:var(--r-sm); box-shadow:var(--sombra); color:var(--carvao)}
+  .filter-bar .fb-lab{font-size:13px; font-weight:600; color:var(--carvao-2)}
+  .filter-bar .fb-sel{padding:6px 10px; border-radius:8px; border:1px solid rgba(15,32,25,.18); background:var(--creme-3); color:var(--carvao); font-size:13px; font-weight:600}
+  .filter-bar .fb-num{width:70px; padding:6px 8px; border-radius:8px; border:1px solid rgba(15,32,25,.18); background:var(--creme-3); color:var(--carvao); font-size:14px; font-weight:700; text-align:center}
+  .filter-bar .fb-num:disabled{opacity:.45}
+  .filter-bar .fb-sel:focus, .filter-bar .fb-num:focus{outline:none; border-color:var(--verde-500); box-shadow:0 0 0 3px rgba(47,191,107,.16)}
   .add-athlete{display:flex; gap:8px; margin-top:10px}
   .add-athlete input{flex:1; padding:9px 12px; border:1.5px dashed rgba(15,32,25,.28); border-radius:10px; background:transparent; font-size:14px; color:var(--carvao)}
   .ga-list{display:flex; flex-direction:column; gap:2px; margin-top:4px}
@@ -309,6 +315,7 @@
    ===================================================================== */
 const SUPABASE_URL      = "https://jycbewmizgwugoapbbzz.supabase.co";  // ex.: https://abcdefgh.supabase.co
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5Y2Jld21pemd3dWdvYXBiYnp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MDY2MzcsImV4cCI6MjA5OTA4MjYzN30.R9jKcenGlt1crYABuHel4Cjz7l_3h8D4cgPc50Hq4Js";  // ex.: eyJhbGciOiJIUzI1NiIsIn...
+
 const TEAM  = {name:"Proletariado Alviverde", short:"Proleta", squad:"Esporte"};
 const CLOUD = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
 /* MODO PÚBLICO (somente leitura): acesse o app com ?publico no fim da URL,
@@ -406,7 +413,7 @@ function saveErr(e){ console.error(e); toast("Erro ao salvar. Verifique a conex�
 
 /* ============ estado ============ */
 let DATA = null;
-let UI = { view:"geral", sortKey:"part", sortDir:-1, form:null, perfil:null, backTo:"geral", lineupSearch:"", lineupShowAll:false };
+let UI = { view:"geral", sortKey:"part", sortDir:-1, form:null, perfil:null, backTo:"geral", lineupSearch:"", lineupShowAll:false, filterKey:"", filterMin:0 };
 
 /* jogos que contam (não arquivados) e arquivados */
 function activeMatches(){ return DATA.matches.filter(m=>!m.archived); }
@@ -441,18 +448,18 @@ function toast(msg){
 
 /* ============ cálculo de estatísticas ============ */
 function compute(){
-  const players = DATA.roster.map(a=>({id:a.id,name:a.name,jogos:0,gols:0,assist:0,v:0,e:0,d:0,ptsP:0}));
+  const players = DATA.roster.map(a=>({id:a.id,name:a.name,jogos:0,gols:0,assist:0,v:0,e:0,d:0,ptsP:0,cs:0}));
   const pIdx = Object.fromEntries(players.map(p=>[p.id,p]));
   const opps = {};
   let J=0,V=0,E=0,D=0,GP=0,GC=0;
   const sorted = sortMatches(activeMatches());
   for(const m of sorted){
     J++; GP+=m.goalsFor; GC+=m.goalsAgainst;
-    const r=result(m), p=pts(m);
+    const r=result(m), p=pts(m), clean=(m.goalsAgainst===0);
     if(r==="V")V++; else if(r==="E")E++; else D++;
     const o = opps[m.opponent] || (opps[m.opponent]={opponent:m.opponent,J:0,V:0,E:0,D:0,GP:0,GC:0,last:m.date});
     o.J++; o.GP+=m.goalsFor; o.GC+=m.goalsAgainst; o[r]++; if(m.date>o.last)o.last=m.date;
-    for(const id of (m.lineup||[])){ const pl=pIdx[id]; if(!pl)continue; pl.jogos++; pl.ptsP+=p; pl[r.toLowerCase()]++; }
+    for(const id of (m.lineup||[])){ const pl=pIdx[id]; if(!pl)continue; pl.jogos++; pl.ptsP+=p; pl[r.toLowerCase()]++; if(clean)pl.cs++; }
     for(const s of (m.scorers||[])){ const pl=pIdx[s.a]; if(pl)pl.gols+=s.g; }
     for(const s of (m.assists||[])){ const pl=pIdx[s.a]; if(pl)pl.assist+=s.n; }
   }
@@ -462,6 +469,7 @@ function compute(){
     p.gpj = p.jogos? p.gols/p.jogos : 0;
     p.aprov = p.jogos? p.ptsP/(p.jogos*3) : 0;
     p.share = GP? p.gols/GP : 0;
+    p.csPct = p.jogos? p.cs/p.jogos : 0;
   });
   const team={J,V,E,D,GP,GC,SG:GP-GC,pts:V*3+E, aprov:J?(V*3+E)/(J*3):0, mgp:J?GP/J:0, mgc:J?GC/J:0};
   const results = sorted.map(result);
@@ -578,11 +586,16 @@ const COLS = [
   {k:"gols",l:"G",t:"n"},{k:"assist",l:"A",t:"n"},{k:"part",l:"Part.",t:"n"},
   {k:"ppj",l:"Part./J",t:"d"},{k:"gpj",l:"G/J",t:"d"},
   {k:"v",l:"V",t:"n"},{k:"e",l:"E",t:"n"},{k:"d",l:"D",t:"n"},
+  {k:"cs",l:"CS",t:"n",tip:"Clean sheets — jogos em que o time não sofreu gol com o atleta relacionado"},
+  {k:"csPct",l:"% CS",t:"p",tip:"Percentual de jogos do atleta sem sofrer gol"},
   {k:"aprov",l:"Aprov.",t:"p"},{k:"share",l:"% Gols",t:"p"}
 ];
+const FILTERS=[["jogos","Jogos"],["gols","Gols"],["assist","Assistências"],["part","Participações"],["cs","Clean sheets"],["v","Vitórias"]];
 function viewAtletas(s){
-  const banner = s.partialLineups>0? `<div class="banner"><span class="ic">ⓘ</span><div><b>${s.partialLineups} jogo${s.partialLineups>1?"s":""} sem escalação completa.</b> Nos jogos importados da planilha, a presença registra só quem fez gol ou assistência (a aba Presença estava vazia). Edite uma partida e marque os relacionados + "escalação completa" para deixar as presenças 100% exatas. Gols e assistências já estão corretos.</div></div>`:"";
+  const banner = s.partialLineups>0? `<div class="banner"><span class="ic">ⓘ</span><div><b>${s.partialLineups} jogo${s.partialLineups>1?"s":""} sem escalação completa.</b> Edite a partida e marque os relacionados + "escalação completa" para deixar as presenças 100% exatas. Gols e assistências já estão corretos.</div></div>`:"";
   let list=[...s.players];
+  const fltActive = UI.filterKey && UI.filterMin>0;
+  if(fltActive) list=list.filter(p=>(p[UI.filterKey]||0)>=UI.filterMin);
   const dir=UI.sortDir;
   list.sort((a,b)=>{
     if(UI.sortKey==="name") return dir*a.name.localeCompare(b.name,"pt");
@@ -599,19 +612,35 @@ function viewAtletas(s){
     }).join("");
     return `<tr class="clickable" data-act="perfil" data-id="${p.id}">${cells}</tr>`;
   }).join("");
+  const body = rows || `<tr><td colspan="${COLS.length}" style="text-align:center;padding:22px;color:var(--carvao-2)">Nenhum atleta com esse critério.</td></tr>`;
   const head = COLS.map(c=>{
     const active=UI.sortKey===c.k;
     const arw = active? (UI.sortDir<0?" ▼":" ▲") : "";
     return `<th data-act="sort" data-key="${c.k}" title="${c.tip||c.l}">${c.l}<span class="arw">${arw}</span></th>`;
   }).join("");
-  return `<div class="section-title"><h2>Classificação de atletas</h2><span class="hint">clique numa coluna para ordenar · ${s.totalJogadores} atletas com registro</span></div>
+  const filterBar = `<div class="filter-bar">
+    <span class="fb-lab">Filtrar por</span>
+    <select id="flt-key" class="fb-sel">
+      <option value="">— sem filtro —</option>
+      ${FILTERS.map(([k,l])=>`<option value="${k}" ${UI.filterKey===k?"selected":""}>${l}</option>`).join("")}
+    </select>
+    <span class="fb-lab">no mínimo</span>
+    <input id="flt-min" class="fb-num" type="number" min="0" step="1" value="${UI.filterMin||0}" ${UI.filterKey?"":"disabled"}>
+    ${fltActive?`<button class="btn sm ghost" data-act="flt-clear">Limpar</button>`:""}
+  </div>`;
+  const hint = fltActive
+    ? `${list.length} atleta${list.length!==1?"s":""} com ${FILTERS.find(f=>f[0]===UI.filterKey)[1]} ≥ ${UI.filterMin}`
+    : `clique numa coluna para ordenar · ${s.totalJogadores} atletas com registro`;
+  return `<div class="section-title"><h2>Classificação de atletas</h2><span class="hint">${hint}</span></div>
     ${banner}
+    ${filterBar}
     <div class="panel"><div class="table-wrap"><table class="stats">
-      <thead><tr>${head}</tr></thead><tbody>${rows}</tbody>
+      <thead><tr>${head}</tr></thead><tbody>${body}</tbody>
     </table></div></div>
     <div style="font-size:12px; color:var(--verde-300); line-height:1.7">
       <b>J</b> presenças · <b>G</b> gols · <b>A</b> assistências · <b>Part.</b> participações (G+A) · <b>Part./J</b> e <b>G/J</b> médias por jogo ·
-      <b>V/E/D</b> resultados com o atleta em campo · <b>Aprov.</b> aproveitamento do time quando ele joga · <b>% Gols</b> fatia dos gols do time.
+      <b>V/E/D</b> resultados com o atleta em campo · <b>CS</b> clean sheets (jogos sem sofrer gol) e <b>% CS</b> a proporção deles ·
+      <b>Aprov.</b> aproveitamento do time quando ele joga · <b>% Gols</b> fatia dos gols do time.
     </div>`;
 }
 
@@ -880,6 +909,7 @@ function bind(s){
     else if(act==="titular"){ toggleTitular(node.dataset.id); }
     else if(act==="lineup-more"){ UI.lineupShowAll=true; renderLineupSection(); }
     else if(act==="lineup-less"){ UI.lineupShowAll=false; renderLineupSection(); }
+    else if(act==="flt-clear"){ UI.filterKey=""; UI.filterMin=0; render(); }
     else if(act==="overlay"){ /* fecha ao clicar fora */ if(e.target.classList.contains("overlay")) closeForm(); }
     else if(act==="close"){ closeForm(); }
     else if(act==="save"){ saveForm(); }
@@ -899,6 +929,9 @@ function bind(s){
     else if(act==="wipe"){ wipe(); }
     else if(act==="signout"){ if(confirm("Sair da conta?")) Store.signOut(); }
   };
+  // filtro da aba Atletas (onchange = só ao confirmar, sem perder foco)
+  const fk=el("flt-key"); if(fk) fk.onchange=e=>{ UI.filterKey=e.target.value; if(!UI.filterKey) UI.filterMin=0; else if(UI.filterMin<1) UI.filterMin=1; render(); };
+  const fm=el("flt-min"); if(fm) fm.onchange=e=>{ UI.filterMin=Math.max(0,parseInt(e.target.value)||0); render(); };
   // form: inputs de texto/numero (sem re-render)
   if(UI.form){
     el("f-date").oninput=e=>UI.form.date=e.target.value;
