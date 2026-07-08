@@ -262,6 +262,41 @@
   .toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
 
   :focus-visible{outline:2px solid var(--verde-400); outline-offset:2px}
+  /* ---- elencos & ao vivo ---- */
+  .squad-sel{margin-left:14px; padding:6px 10px; border-radius:8px; font-size:13px; font-weight:700; letter-spacing:.02em;
+    background:rgba(242,235,214,.10); color:var(--creme-2); border:1px solid var(--linha-forte); cursor:pointer}
+  .squad-sel:focus{outline:none; border-color:var(--verde-400)}
+  .squad-sel option{color:var(--carvao); background:var(--creme-3)}
+  .tag.live{background:rgba(224,112,95,.18); color:#ffb4a6; font-weight:800}
+  .tag.ag{background:rgba(230,185,75,.16); color:var(--e); font-weight:700}
+  .mc-badge.live{background:rgba(224,112,95,.2); animation:lvpulse 1.4s ease-in-out infinite}
+  .mc-badge.ag{background:rgba(230,185,75,.18)}
+  .sc.sched{font-size:15px; opacity:.75; letter-spacing:.06em}
+  .up-title{font-size:12px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--verde-300); margin:2px 0 8px}
+  .lv-panel{padding-bottom:14px}
+  .lv-head{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:16px 14px 6px}
+  .lv-team{flex:1; text-align:center; font-family:"Zilla Slab",Georgia,serif; font-size:18px; font-weight:700; color:var(--carvao)}
+  .lv-squad{font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--carvao-2); font-family:'Inter',sans-serif}
+  .lv-mid{flex:1.2; text-align:center}
+  .lv-score{font-size:40px; font-weight:800; color:var(--carvao); line-height:1}
+  .lv-clock{font-size:22px; font-weight:700; color:var(--verde-700); margin-top:2px}
+  .lv-date{font-size:12px; color:var(--carvao-2)}
+  .lv-chip{padding:4px 12px; border-radius:20px; font-size:12px; font-weight:800; letter-spacing:.04em}
+  .lv-chip.live{background:rgba(224,112,95,.16); color:#c14b38; animation:lvpulse 1.4s ease-in-out infinite}
+  .lv-chip.pause{background:rgba(230,185,75,.18); color:#8a6b1f}
+  .lv-chip.ag{background:rgba(230,185,75,.14); color:#8a6b1f}
+  .lv-chip.fin{background:rgba(15,32,25,.10); color:var(--carvao-2)}
+  @keyframes lvpulse{0%,100%{opacity:1}50%{opacity:.55}}
+  .lv-actions{display:flex; flex-wrap:wrap; gap:8px; padding:10px 14px 4px}
+  .lv-actions .btn{flex:1 1 auto; min-width:130px}
+  .lv-big{width:100%; padding:14px; font-size:16px}
+  .lv-picker{margin:12px 14px 4px; padding:12px; background:var(--creme-2); border-radius:var(--r-sm); border:1px dashed rgba(15,32,25,.25)}
+  .lp-title{font-weight:800; color:var(--carvao); margin-bottom:10px}
+  .lp-div{width:100%; font-size:11px; color:var(--carvao-2); margin:6px 0 2px; letter-spacing:.06em}
+  .ev-list{padding:4px 14px 14px}
+  .ev{padding:8px 2px; border-bottom:1px dashed rgba(15,32,25,.12); font-size:14px; color:var(--carvao)}
+  .ev:last-child{border-bottom:none}
+  .ev-min{display:inline-block; min-width:34px; font-weight:800; color:var(--verde-700)}
   /* ---- login (modo nuvem) ---- */
   .login-screen{min-height:100vh; min-height:100dvh; display:flex; align-items:center; justify-content:center; padding:24px;
     background:radial-gradient(1200px 600px at 50% -10%, var(--verde-800), var(--verde-900)); }
@@ -316,7 +351,14 @@
 const SUPABASE_URL      = "https://jycbewmizgwugoapbbzz.supabase.co";  // ex.: https://abcdefgh.supabase.co
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5Y2Jld21pemd3dWdvYXBiYnp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MDY2MzcsImV4cCI6MjA5OTA4MjYzN30.R9jKcenGlt1crYABuHel4Cjz7l_3h8D4cgPc50Hq4Js";  // ex.: eyJhbGciOiJIUzI1NiIsIn...
 
-const TEAM  = {name:"Proletariado Alviverde", short:"Proleta", squad:"Esporte"};
+/* ELENCOS: cada elenco tem tela e registros totalmente separados.
+   Troque pelo seletor no topo do app ou direto na URL: ?elenco=feminino
+   (combina com o modo público: ?elenco=feminino&publico) */
+const SQUADS = { esporte:"Esporte", veterano:"Veterano", feminino:"Feminino", diverso:"Diverso" };
+const _qs = (typeof location!=="undefined")? new URLSearchParams(location.search) : null;
+const _sq = _qs? (_qs.get("elenco")||"").toLowerCase() : "";
+const SQUAD = SQUADS[_sq]? _sq : "esporte";
+const TEAM  = {name:"Proletariado Alviverde", short:"Proleta", squad:SQUADS[SQUAD]};
 const CLOUD = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
 /* MODO PÚBLICO (somente leitura): acesse o app com ?publico no fim da URL,
    ex.: https://seuusuario.github.io/statsproleta/?publico
@@ -325,7 +367,8 @@ const CLOUD = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
 const READONLY = (typeof location!=="undefined") && new URLSearchParams(location.search).has("publico");
 
 const DATA_SEED = {"version":1,"team":{"name":"Proletariado Alviverde","short":"Proleta","squad":"Esporte"},"roster":[{"id":"a1","name":"Bibico"},{"id":"a2","name":"Dudu"},{"id":"a3","name":"Rosalvo"},{"id":"a4","name":"Vini França"},{"id":"a5","name":"Hashi"},{"id":"a6","name":"Caio"},{"id":"a7","name":"André"},{"id":"a8","name":"Fabiano"},{"id":"a9","name":"Digão"},{"id":"a10","name":"Wellington"},{"id":"a11","name":"Rennan"},{"id":"a12","name":"Meloni"},{"id":"a13","name":"Renan"},{"id":"a14","name":"Eloy"},{"id":"a15","name":"Macapá"},{"id":"a16","name":"Belaz"},{"id":"a17","name":"Rafael"},{"id":"a18","name":"Siqueira"},{"id":"a19","name":"Luis E."},{"id":"a20","name":"Albano"},{"id":"a21","name":"Wez"},{"id":"a22","name":"Gzus"},{"id":"a23","name":"Lima"},{"id":"a24","name":"Brendon"},{"id":"a25","name":"Detona"},{"id":"a26","name":"Euller"},{"id":"a27","name":"Edu"},{"id":"a28","name":"Rufus"},{"id":"a29","name":"Leone"},{"id":"a30","name":"Pelota"},{"id":"a31","name":"Romario"},{"id":"a32","name":"W. Felipe"},{"id":"a33","name":"Gui Dantas"},{"id":"a34","name":"Barone"},{"id":"a35","name":"Igor"},{"id":"a36","name":"Amaral"},{"id":"a37","name":"Diego"},{"id":"a38","name":"Leodan"},{"id":"a39","name":"Lingo"},{"id":"a40","name":"Lucas Vini"},{"id":"a41","name":"Xande"},{"id":"a42","name":"PH"},{"id":"a43","name":"Salvador"}],"matches":[{"id":"m1","date":"2026-01-07","opponent":"Pç Kant","goalsFor":1,"goalsAgainst":3,"lineup":["a20"],"scorers":[{"a":"a20","g":1}],"assists":[],"lineupComplete":false,"notes":""},{"id":"m2","date":"2026-01-17","opponent":"Botafogo Vl Bela","goalsFor":5,"goalsAgainst":3,"lineup":["a11","a2","a10","a7","a3"],"scorers":[{"a":"a11","g":3},{"a":"a2","g":2}],"assists":[{"a":"a10","n":1},{"a":"a7","n":1},{"a":"a3","n":1}],"lineupComplete":false,"notes":""},{"id":"m3","date":"2026-01-20","opponent":"Inker","goalsFor":1,"goalsAgainst":4,"lineup":["a7"],"scorers":[{"a":"a7","g":1}],"assists":[],"lineupComplete":false,"notes":""},{"id":"m4","date":"2026-01-23","opponent":"EC Nacional Mooca","goalsFor":2,"goalsAgainst":1,"lineup":["a8"],"scorers":[{"a":"a8","g":2}],"assists":[],"lineupComplete":false,"notes":""},{"id":"m5","date":"2026-01-31","opponent":"Maque FC","goalsFor":1,"goalsAgainst":2,"lineup":["a3","a1"],"scorers":[{"a":"a3","g":1}],"assists":[{"a":"a1","n":1}],"lineupComplete":false,"notes":""},{"id":"m6","date":"2026-02-03","opponent":"Juventude","goalsFor":1,"goalsAgainst":4,"lineup":["a16","a12"],"scorers":[{"a":"a16","g":1}],"assists":[{"a":"a12","n":1}],"lineupComplete":false,"notes":""},{"id":"m7","date":"2026-02-07","opponent":"Maque FC","goalsFor":2,"goalsAgainst":3,"lineup":["a3","a8","a1"],"scorers":[{"a":"a3","g":1},{"a":"a8","g":1}],"assists":[{"a":"a8","n":1},{"a":"a1","n":1}],"lineupComplete":false,"notes":""},{"id":"m8","date":"2026-02-14","opponent":"Atletico Mangalot","goalsFor":3,"goalsAgainst":2,"lineup":["a12","a11","a2","a8"],"scorers":[{"a":"a12","g":1},{"a":"a11","g":1},{"a":"a2","g":1}],"assists":[{"a":"a8","n":1},{"a":"a11","n":1}],"lineupComplete":false,"notes":""},{"id":"m9","date":"2026-02-21","opponent":"Sufoco FC","goalsFor":1,"goalsAgainst":4,"lineup":["a19","a12"],"scorers":[{"a":"a19","g":1}],"assists":[{"a":"a12","n":1}],"lineupComplete":false,"notes":""},{"id":"m10","date":"2026-02-24","opponent":"Catadão","goalsFor":1,"goalsAgainst":1,"lineup":["a14"],"scorers":[{"a":"a14","g":1}],"assists":[],"lineupComplete":false,"notes":""},{"id":"m11","date":"2026-02-28","opponent":"Das Antigas","goalsFor":1,"goalsAgainst":2,"lineup":["a2"],"scorers":[{"a":"a2","g":1}],"assists":[],"lineupComplete":false,"notes":""},{"id":"m12","date":"2026-03-07","opponent":"Explosão FC","goalsFor":3,"goalsAgainst":3,"lineup":["a8","a27","a11","a10","a4"],"scorers":[{"a":"a8","g":1},{"a":"a27","g":1},{"a":"a11","g":1}],"assists":[{"a":"a10","n":1},{"a":"a4","n":1}],"lineupComplete":false,"notes":""},{"id":"m13","date":"2026-03-14","opponent":"De Primeira","goalsFor":3,"goalsAgainst":3,"lineup":["a10","a8","a23","a2"],"scorers":[{"a":"a10","g":1},{"a":"a8","g":1},{"a":"a23","g":1}],"assists":[{"a":"a8","n":1},{"a":"a2","n":1}],"lineupComplete":false,"notes":""},{"id":"m14","date":"2026-03-21","opponent":"AD Ponte Grande","goalsFor":5,"goalsAgainst":4,"lineup":["a1","a8","a2","a4","a7","a33","a17"],"scorers":[{"a":"a1","g":1},{"a":"a8","g":2},{"a":"a2","g":2}],"assists":[{"a":"a4","n":1},{"a":"a7","n":1},{"a":"a33","n":2},{"a":"a17","n":1}],"lineupComplete":false,"notes":""},{"id":"m15","date":"2026-03-29","opponent":"Futnoia","goalsFor":7,"goalsAgainst":0,"lineup":["a11","a8","a16","a4","a26","a3","a12","a24"],"scorers":[{"a":"a11","g":3},{"a":"a8","g":1},{"a":"a16","g":1},{"a":"a4","g":1},{"a":"a26","g":1}],"assists":[{"a":"a3","n":1},{"a":"a8","n":1},{"a":"a11","n":2},{"a":"a12","n":1},{"a":"a24","n":1}],"lineupComplete":false,"notes":""},{"id":"m16","date":"2026-04-09","opponent":"Al Phumaça","goalsFor":0,"goalsAgainst":1,"lineup":[],"scorers":[],"assists":[],"lineupComplete":false,"notes":""},{"id":"m17","date":"2026-04-11","opponent":"Pinguim FC","goalsFor":0,"goalsAgainst":2,"lineup":[],"scorers":[],"assists":[],"lineupComplete":false,"notes":""},{"id":"m18","date":"2026-04-15","opponent":"Formigueiro","goalsFor":3,"goalsAgainst":6,"lineup":["a11","a8","a10"],"scorers":[{"a":"a11","g":1},{"a":"a8","g":2}],"assists":[{"a":"a10","n":1},{"a":"a11","n":1}],"lineupComplete":false,"notes":""},{"id":"m19","date":"2026-04-18","opponent":"Proleta Vetera/Diverso","goalsFor":0,"goalsAgainst":1,"lineup":[],"scorers":[],"assists":[],"lineupComplete":false,"notes":""},{"id":"m20","date":"2026-04-26","opponent":"LIbertarios","goalsFor":3,"goalsAgainst":1,"lineup":["a8","a11","a2","a3","a25"],"scorers":[{"a":"a8","g":1},{"a":"a11","g":1},{"a":"a2","g":1}],"assists":[{"a":"a3","n":1},{"a":"a25","n":1}],"lineupComplete":false,"notes":""},{"id":"m21","date":"2026-05-05","opponent":"Código Verde","goalsFor":0,"goalsAgainst":0,"lineup":[],"scorers":[],"assists":[],"lineupComplete":false,"notes":""},{"id":"m22","date":"2026-05-09","opponent":"Time do Gueto","goalsFor":2,"goalsAgainst":4,"lineup":["a10","a7","a2","a3"],"scorers":[{"a":"a10","g":1},{"a":"a7","g":1}],"assists":[{"a":"a2","n":1},{"a":"a3","n":1}],"lineupComplete":false,"notes":""},{"id":"m23","date":"2026-05-16","opponent":"Samba São Jorge","goalsFor":1,"goalsAgainst":3,"lineup":[],"scorers":[],"assists":[],"lineupComplete":false,"notes":""},{"id":"m24","date":"2026-05-24","opponent":"XI De Setembro","goalsFor":0,"goalsAgainst":1,"lineup":[],"scorers":[],"assists":[],"lineupComplete":false,"notes":""},{"id":"m25","date":"2026-05-30","opponent":"Corote Molotov","goalsFor":1,"goalsAgainst":1,"lineup":["a8"],"scorers":[{"a":"a8","g":1}],"assists":[],"lineupComplete":false,"notes":""},{"id":"m26","date":"2026-06-07","opponent":"Catadão","goalsFor":1,"goalsAgainst":1,"lineup":["a2","a11"],"scorers":[{"a":"a2","g":1}],"assists":[{"a":"a11","n":1}],"lineupComplete":false,"notes":""},{"id":"m27","date":"2026-06-20","opponent":"Só de Virada","goalsFor":3,"goalsAgainst":0,"lineup":["a2","a11"],"scorers":[{"a":"a2","g":2},{"a":"a11","g":1}],"assists":[{"a":"a2","n":1}],"lineupComplete":false,"notes":""},{"id":"m28","date":"2026-06-27","opponent":"TAP","goalsFor":1,"goalsAgainst":0,"lineup":["a12","a2"],"scorers":[{"a":"a12","g":1}],"assists":[{"a":"a2","n":1}],"lineupComplete":false,"notes":""}],"seededFrom":"Estatísticas_Proleta_Esporte.xlsx"};
-const KEY = "proleta_esporte_v1";
+const KEY = "proleta_"+SQUAD+"_v1";   // dados locais separados por elenco (esporte mantém a chave antiga)
+function seedData(){ return SQUAD==="esporte" ? JSON.parse(JSON.stringify(DATA_SEED)) : {version:1, team:TEAM, roster:[], matches:[]}; }
 
 /* ============ camada de dados (local <-> Supabase) ============
    MODO LOCAL  : tudo num blob no localStorage deste navegador.
@@ -344,6 +387,7 @@ const rowToMatch = r => ({
   assists:Array.isArray(r.assists)?r.assists:[],
   starters:Array.isArray(r.starters)?r.starters:[],
   archived:r.archived===true,
+  status:r.status||"final", events:Array.isArray(r.events)?r.events:[], clock:r.clock||null,
   lineupComplete:r.lineup_complete!==false, notes:r.notes||""
 });
 const matchToRow = m => ({
@@ -351,6 +395,7 @@ const matchToRow = m => ({
   goals_for:m.goalsFor||0, goals_against:m.goalsAgainst||0,
   lineup:m.lineup||[], scorers:m.scorers||[], assists:m.assists||[],
   starters:m.starters||[], archived:!!m.archived,
+  status:m.status||"final", events:m.events||[], clock:m.clock||null, squad:SQUAD,
   lineup_complete:!!m.lineupComplete, notes:m.notes||"", updated_at:new Date().toISOString()
 });
 
@@ -375,12 +420,12 @@ const Store = {
     if(!CLOUD){
       let d=null;
       try{ const s=localStorage.getItem(KEY); if(s) d=JSON.parse(s); }catch(e){}
-      if(!d){ d=JSON.parse(JSON.stringify(DATA_SEED)); try{ localStorage.setItem(KEY, JSON.stringify(d)); }catch(e){} }
+      if(!d){ d=seedData(); try{ localStorage.setItem(KEY, JSON.stringify(d)); }catch(e){} }
       d.team=TEAM; return d;
     }
     const [a,m] = await Promise.all([
-      sb.from("athletes").select("*").order("created_at",{ascending:true}),
-      sb.from("matches").select("*").order("date",{ascending:true})
+      sb.from("athletes").select("*").eq("squad",SQUAD).order("created_at",{ascending:true}),
+      sb.from("matches").select("*").eq("squad",SQUAD).order("date",{ascending:true})
     ]);
     if(a.error) throw a.error;
     if(m.error) throw m.error;
@@ -393,19 +438,19 @@ const Store = {
   _saveLocal(){ try{ localStorage.setItem(KEY, JSON.stringify(DATA)); }catch(e){} },
   async upsertMatch(m){ if(!CLOUD) return this._saveLocal(); const {error}=await sb.from("matches").upsert(matchToRow(m)); if(error) throw error; },
   async deleteMatch(id){ if(!CLOUD) return this._saveLocal(); const {error}=await sb.from("matches").delete().eq("id",id); if(error) throw error; },
-  async upsertAthlete(a){ if(!CLOUD) return this._saveLocal(); const {error}=await sb.from("athletes").upsert({id:a.id,name:a.name}); if(error) throw error; },
+  async upsertAthlete(a){ if(!CLOUD) return this._saveLocal(); const {error}=await sb.from("athletes").upsert({id:a.id,name:a.name,squad:SQUAD}); if(error) throw error; },
   async replaceAll(state){
     if(!CLOUD) return this._saveLocal();
-    const dm=await sb.from("matches").delete().neq("id","__none__");   if(dm.error) throw dm.error;
-    const da=await sb.from("athletes").delete().neq("id","__none__");  if(da.error) throw da.error;
-    if(state.roster && state.roster.length){ const {error}=await sb.from("athletes").insert(state.roster.map(a=>({id:a.id,name:a.name}))); if(error) throw error; }
+    const dm=await sb.from("matches").delete().eq("squad",SQUAD);   if(dm.error) throw dm.error;
+    const da=await sb.from("athletes").delete().eq("squad",SQUAD);  if(da.error) throw da.error;
+    if(state.roster && state.roster.length){ const {error}=await sb.from("athletes").insert(state.roster.map(a=>({id:a.id,name:a.name,squad:SQUAD}))); if(error) throw error; }
     if(state.matches && state.matches.length){ const {error}=await sb.from("matches").insert(state.matches.map(matchToRow)); if(error) throw error; }
   },
   subscribe(onChange){
     if(!CLOUD) return;
-    sb.channel("proleta-rt")
-      .on("postgres_changes",{event:"*",schema:"public",table:"matches"},  onChange)
-      .on("postgres_changes",{event:"*",schema:"public",table:"athletes"}, onChange)
+    sb.channel("proleta-rt-"+SQUAD)
+      .on("postgres_changes",{event:"*",schema:"public",table:"matches",  filter:"squad=eq."+SQUAD}, onChange)
+      .on("postgres_changes",{event:"*",schema:"public",table:"athletes", filter:"squad=eq."+SQUAD}, onChange)
       .subscribe();
   }
 };
@@ -413,19 +458,23 @@ function saveErr(e){ console.error(e); toast("Erro ao salvar. Verifique a conex�
 
 /* ============ estado ============ */
 let DATA = null;
-let UI = { view:"geral", sortKey:"part", sortDir:-1, form:null, perfil:null, backTo:"geral", lineupSearch:"", lineupShowAll:false, filterKey:"", filterMin:0, dfMode:"all", dfMonth:"", dfFrom:"", dfTo:"" };
+let UI = { view:"geral", sortKey:"part", sortDir:-1, form:null, perfil:null, backTo:"geral", lineupSearch:"", lineupShowAll:false, filterKey:"", filterMin:0, live:null, livePick:null, dfMode:"all", dfMonth:"", dfFrom:"", dfTo:"" };
 
 /* jogos que contam (não arquivados) e arquivados */
 function activeMatches(){ return DATA.matches.filter(m=>!m.archived); }
 function archivedMatches(){ return DATA.matches.filter(m=>m.archived); }
+/* status: 'final' (conta nas estatísticas), 'scheduled' (agendada) e 'live' (ao vivo) */
+function isFinal(m){ return !m.status || m.status==="final"; }
+function liveOrScheduled(){ return activeMatches().filter(m=>!isFinal(m)); }
 /* jogos que contam E dentro do período selecionado (filtro global) */
 function filteredMatches(){ return matchDateFilter(activeMatches()); }
+function countableMatches(){ return matchDateFilter(activeMatches().filter(isFinal)); }
 function periodActive(){ return UI.dfMode && UI.dfMode!=="all"; }
 function refYear(){ const am=activeMatches(); return am.length? Math.max(...am.map(m=>+m.date.slice(0,4))) : new Date().getFullYear(); }
 /* frequência de relacionados (só jogos que contam) → id:contagem */
 function freqMap(){
   const f={};
-  for(const m of activeMatches()) for(const id of (m.lineup||[])) f[id]=(f[id]||0)+1;
+  for(const m of activeMatches().filter(isFinal)) for(const id of (m.lineup||[])) f[id]=(f[id]||0)+1;
   return f;
 }
 
@@ -456,7 +505,7 @@ function compute(){
   const pIdx = Object.fromEntries(players.map(p=>[p.id,p]));
   const opps = {};
   let J=0,V=0,E=0,D=0,GP=0,GC=0;
-  const sorted = sortMatches(filteredMatches());
+  const sorted = sortMatches(countableMatches());
   for(const m of sorted){
     J++; GP+=m.goalsFor; GC+=m.goalsAgainst;
     const r=result(m), p=pts(m), clean=(m.goalsAgainst===0);
@@ -492,7 +541,7 @@ function compute(){
   const withAss = players.filter(p=>p.assist>0);
   const artilheiro = withGols.length? [...withGols].sort((a,b)=>b.gols-a.gols||b.part-a.part)[0]:null;
   const garcom = withAss.length? [...withAss].sort((a,b)=>b.assist-a.assist||b.part-a.part)[0]:null;
-  const partialLineups = activeMatches().filter(m=>m.lineupComplete===false).length;
+  const partialLineups = activeMatches().filter(m=>isFinal(m) && m.lineupComplete===false).length;
   return {team,players,opponents,artilheiro,garcom,partialLineups,pIdx,totalJogadores:players.filter(p=>p.jogos>0||p.gols>0||p.assist>0).length};
 }
 
@@ -500,7 +549,8 @@ function compute(){
 function render(){
   const s = compute();
   let content="";
-  if(UI.perfil) content=viewPerfil(s, UI.perfil);
+  if(UI.live) content=viewLive(s);
+  else if(UI.perfil) content=viewPerfil(s, UI.perfil);
   else if(UI.view==="geral") content=viewGeral(s);
   else if(UI.view==="atletas") content=viewAtletas(s);
   else if(UI.view==="partidas") content=viewPartidas(s);
@@ -510,7 +560,7 @@ function render(){
   app().innerHTML = headerHTML(s) + tabsHTML() + `<div class="content"><div class="wrap">${periodViews()?dateFilterBar(refYear()):""}${content}</div></div>` + (UI.form?formHTML():"");
   bind(s);
 }
-function periodViews(){ return !!UI.perfil || ["geral","atletas","partidas","adversarios"].includes(UI.view); }
+function periodViews(){ return !UI.live && (!!UI.perfil || ["geral","atletas","partidas","adversarios"].includes(UI.view)); }
 
 function headerHTML(s){
   const t=s.team;
@@ -521,6 +571,7 @@ function headerHTML(s){
     <div class="crest">
       <div class="mark">PA</div>
       <div class="txt"><h1>${esc(DATA.team.name)}</h1><div class="sub">${esc(DATA.team.short)} · ${esc(DATA.team.squad)} · Sequência: ${streak}${READONLY?` · <span class="ro-badge">👁 somente leitura</span>`:""}</div></div>
+      <select id="squad-sel" class="squad-sel" title="Trocar de elenco">${Object.entries(SQUADS).map(([k,l])=>`<option value="${k}" ${k===SQUAD?"selected":""}>${l}</option>`).join("")}</select>
     </div>
     <div class="scoreboard">
       <div class="kpis">
@@ -541,7 +592,7 @@ function tabsHTML(){
   const tabs=[["geral","Visão Geral"],["atletas","Atletas"],["partidas","Partidas"],["adversarios","Adversários"]];
   if(nArq>0 && !READONLY) tabs.push(["arquivados",`Arquivados · ${nArq}`]);
   if(!READONLY) tabs.push(["dados","Dados"]);
-  const activeTab = UI.perfil ? "" : UI.view;
+  const activeTab = (UI.perfil||UI.live) ? "" : UI.view;
   return `<div class="tabs-outer"><div class="wrap"><div class="tabs">${
     tabs.map(([k,l])=>`<button class="tab ${activeTab===k?"active":""}" data-act="tab" data-tab="${k}">${l}</button>`).join("")
   }</div></div></div>`;
@@ -664,11 +715,14 @@ function lineupSummary(m){
   return html;
 }
 function matchCard(m){
-  const r=result(m), rl=r.toLowerCase();
+  const fin=isFinal(m), live=m.status==="live", sched=m.status==="scheduled";
+  const r=fin?result(m):"", rl=fin?r.toLowerCase():(live?"live":"ag");
   const sc = (m.scorers||[]).slice().sort((a,b)=>b.g-a.g).map(x=>`${esc(nameOf(x.a))}${x.g>1?` (${x.g})`:""}`).join(", ");
   const as = (m.assists||[]).slice().sort((a,b)=>b.n-a.n).map(x=>`${esc(nameOf(x.a))}${x.n>1?` (${x.n})`:""}`).join(", ");
   const nRel=(m.lineup||[]).length, nTit=(m.starters||[]).length;
   const tags = `<div class="mc-tags">
+    ${live?`<span class="tag live">🔴 AO VIVO</span>`:""}
+    ${sched?`<span class="tag ag">📅 Agendada</span>`:""}
     <span class="tag n">${nRel} relacionado${nRel!==1?"s":""}</span>
     ${nTit?`<span class="tag n">${nTit} titular${nTit!==1?"es":""}</span>`:""}
     ${m.lineupComplete===false?`<span class="tag">escalação parcial</span>`:""}
@@ -680,8 +734,8 @@ function matchCard(m){
   return `<div class="match-card ${rl}">
     <div class="mc-top">
       <div class="mc-date">${fmtDate(m.date)}</div>
-      <div class="mc-main"><div class="mc-score"><span class="sc">${m.goalsFor} – ${m.goalsAgainst}</span> <span class="opp">${esc(m.opponent||"Adversário")}</span></div></div>
-      <div class="mc-badge ${rl}">${r}</div>
+      <div class="mc-main"><div class="mc-score"><span class="sc${sched?" sched":""}">${sched?"vs":`${m.goalsFor} – ${m.goalsAgainst}`}</span> <span class="opp">${esc(m.opponent||"Adversário")}</span></div></div>
+      <div class="mc-badge ${rl}">${fin?r:(live?"🔴":"📅")}</div>
     </div>
     <div class="mc-detail">
       ${sc?`<div><span class="k">⚽ Gols:</span> ${sc}</div>`:`<div class="muted">Sem gols registrados</div>`}
@@ -689,20 +743,26 @@ function matchCard(m){
       ${lineupSummary(m)}
       ${tags}
     </div>
-    ${READONLY?"":`<div class="mc-actions">
-      <button class="btn sm ghost" data-act="edit" data-id="${m.id}">Editar</button>
-      ${arcBtn}
-      <button class="btn sm danger" data-act="del" data-id="${m.id}">Excluir</button>
-    </div>`}
+    ${(()=>{
+      const liveBtn=(live||sched)&&!READONLY?`<button class="btn sm primary" data-act="live" data-id="${m.id}">${live?"Abrir ao vivo 🔴":"⚡ Ao vivo"}</button>`:(live&&READONLY?`<button class="btn sm primary" data-act="live" data-id="${m.id}">Acompanhar ao vivo 🔴</button>`:"");
+      if(READONLY) return liveBtn?`<div class="mc-actions">${liveBtn}</div>`:"";
+      return `<div class="mc-actions">${liveBtn}
+        ${live?"":`<button class="btn sm ghost" data-act="edit" data-id="${m.id}">Editar</button>`}
+        ${fin?arcBtn:""}
+        <button class="btn sm danger" data-act="del" data-id="${m.id}">Excluir</button></div>`;
+    })()}
   </div>`;
 }
 function viewPartidas(s){
-  const all = sortMatches(activeMatches()).reverse();
-  if(all.length===0) return `<div class="section-title"><h2>Partidas</h2>${READONLY?"":`<button class="btn primary sm" data-act="new">+ Nova partida</button>`}</div>${emptyState("Nenhuma partida","Cadastre o primeiro jogo do Proleta.","partidas")}`;
-  const list = sortMatches(filteredMatches()).reverse();
-  const cards = list.length? list.map(matchCard).join("") : `<div class="empty" style="padding:26px"><div class="big" style="font-size:40px">📅</div><p>Nenhuma partida no período selecionado.</p></div>`;
-  const hint = periodActive()? `${list.length} de ${all.length} jogos no período` : `· ${all.length} jogos`;
+  if(activeMatches().length===0) return `<div class="section-title"><h2>Partidas</h2>${READONLY?"":`<button class="btn primary sm" data-act="new">+ Nova partida</button>`}</div>${emptyState("Nenhuma partida","Cadastre o primeiro jogo do "+DATA.team.squad+".","partidas")}`;
+  const upcoming = sortMatches(liveOrScheduled());
+  const finals = sortMatches(activeMatches().filter(isFinal)).reverse();
+  const list = sortMatches(countableMatches()).reverse();
+  const upHtml = upcoming.length? `<div class="up-title">⚡ Ao vivo &amp; agendadas</div><div class="match-list" style="margin-bottom:18px">${upcoming.map(matchCard).join("")}</div>${finals.length?`<div class="up-title">Encerradas</div>`:""}` : "";
+  const cards = list.length? list.map(matchCard).join("") : (finals.length? `<div class="empty" style="padding:26px"><div class="big" style="font-size:40px">📅</div><p>Nenhuma partida encerrada no período selecionado.</p></div>` : "");
+  const hint = periodActive()? `${list.length} de ${finals.length} jogos no período` : `· ${finals.length} jogo${finals.length!==1?"s":""}`;
   return `<div class="section-title"><h2>Partidas <span class="hint" style="font-weight:400">${hint}</span></h2>${READONLY?"":`<button class="btn primary sm" data-act="new">+ Nova partida</button>`}</div>
+    ${upHtml}
     <div class="match-list">${cards}</div>`;
 }
 function dateFilterBar(refYear){
@@ -745,12 +805,128 @@ function viewArquivados(s){
     <div class="match-list">${cards}</div>`;
 }
 
+/* ---------- Ao vivo (cronômetro + eventos) ---------- */
+function liveMatch(){ return DATA.matches.find(x=>x.id===UI.live); }
+function clockElapsed(c){ if(!c) return 0; const b=c.base||0; return (c.running&&c.startedAt)? b+Math.max(0,(Date.now()-new Date(c.startedAt).getTime())/1000) : b; }
+function fmtClock(sec){ sec=Math.floor(sec||0); const m=Math.floor(sec/60), ss=sec%60; return String(m).padStart(2,"0")+":"+String(ss).padStart(2,"0"); }
+function evMinute(t){ return Math.max(1,Math.floor((t||0)/60)+1)+"'"; }
+function onFieldOf(m){ const onf=new Set(m.starters||[]); for(const ev of (m.events||[])){ if(ev.type==="sub"){ onf.delete(ev.out); onf.add(ev.in); } } return onf; }
+function syncFromEvents(m){
+  let gf=0,ga=0; const sc={},as={}; const lu=new Set(m.lineup||[]);
+  for(const ev of (m.events||[])){
+    if(ev.type==="goal"){ gf++; if(ev.a) sc[ev.a]=(sc[ev.a]||0)+1; if(ev.as) as[ev.as]=(as[ev.as]||0)+1; }
+    else if(ev.type==="ga") ga++;
+    else if(ev.type==="sub"){ lu.add(ev.in); }
+  }
+  m.goalsFor=gf; m.goalsAgainst=ga;
+  m.scorers=Object.entries(sc).map(([a,g])=>({a,g}));
+  m.assists=Object.entries(as).map(([a,n])=>({a,n}));
+  m.lineup=[...lu];
+}
+function saveLive(m){ render(); Store.upsertMatch(m).catch(saveErr); }
+function pushEvent(m,ev){ ev.t=Math.floor(clockElapsed(m.clock)); m.events=[...(m.events||[]),ev]; syncFromEvents(m); saveLive(m); }
+function liveStart(){ const m=liveMatch(); if(!m||READONLY) return;
+  m.status="live"; m.clock={running:true, base:0, startedAt:new Date().toISOString()};
+  m.events=[...(m.events||[]),{type:"start",t:0}]; saveLive(m); toast("Bola rolando! ▶"); }
+function livePauseResume(){ const m=liveMatch(); if(!m||READONLY||!m.clock) return;
+  if(m.clock.running){ const t=Math.floor(clockElapsed(m.clock)); m.clock={running:false, base:t}; m.events=[...(m.events||[]),{type:"pause",t}]; }
+  else { m.events=[...(m.events||[]),{type:"resume",t:m.clock.base||0}]; m.clock={running:true, base:m.clock.base||0, startedAt:new Date().toISOString()}; }
+  saveLive(m); }
+function liveGA(){ const m=liveMatch(); if(!m||READONLY) return; pushEvent(m,{type:"ga"}); toast("Gol sofrido anotado"); }
+function liveUndo(){ const m=liveMatch(); if(!m||READONLY) return;
+  const evs=m.events||[];
+  for(let i=evs.length-1;i>=0;i--){ if(["goal","ga","sub"].includes(evs[i].type)){ m.events=[...evs.slice(0,i),...evs.slice(i+1)]; syncFromEvents(m); saveLive(m); toast("Última anotação desfeita ↩"); return; } }
+  toast("Nada para desfazer"); }
+function liveEnd(){ const m=liveMatch(); if(!m||READONLY) return;
+  if(!confirm(`Encerrar a partida contra ${m.opponent}? O placar ${m.goalsFor}–${m.goalsAgainst} entra nas estatísticas.`)) return;
+  const t=Math.floor(clockElapsed(m.clock)); m.clock={running:false, base:t}; m.status="final";
+  m.events=[...(m.events||[]),{type:"end",t}]; saveLive(m); toast("Partida encerrada 🏁"); }
+function lpPick(id){
+  const m=liveMatch(); const p=UI.livePick; if(!m||!p||READONLY) return;
+  if(p.kind==="goal"){
+    if(p.step===1){ if(!id) return; UI.livePick={kind:"goal",step:2,a:id}; render(); }
+    else { const a=p.a; UI.livePick=null; pushEvent(m,{type:"goal",a,as:id||null}); toast("Gol anotado ⚽"); afterFormClose(); }
+  } else {
+    if(p.step===1){ if(!id) return; UI.livePick={kind:"sub",step:2,a:id}; render(); }
+    else { if(!id) return; const out=p.a; UI.livePick=null; pushEvent(m,{type:"sub",out,in:id}); toast("Substituição anotada 🔁"); afterFormClose(); }
+  }
+}
+function evLine(ev){
+  const min=evMinute(ev.t);
+  switch(ev.type){
+    case "goal": return `<span class="ev-min num">${min}</span> ⚽ Gol de <b>${esc(nameOf(ev.a))}</b>${ev.as?` <span class="muted">(assist. ${esc(nameOf(ev.as))})</span>`:""}`;
+    case "ga":   return `<span class="ev-min num">${min}</span> 🥅 Gol sofrido`;
+    case "sub":  return `<span class="ev-min num">${min}</span> 🔁 Sai <b>${esc(nameOf(ev.out))}</b>, entra <b>${esc(nameOf(ev.in))}</b>`;
+    case "start":return `<span class="ev-min num">${min}</span> ▶ Início da partida`;
+    case "pause":return `<span class="ev-min num">${min}</span> ⏸ Cronômetro pausado`;
+    case "resume":return `<span class="ev-min num">${min}</span> ▶ Cronômetro retomado`;
+    case "end":  return `<span class="ev-min num">${min}</span> 🏁 Fim de jogo`;
+  }
+  return "";
+}
+function livePickerHTML(m,onf){
+  const p=UI.livePick;
+  const chip=id=>`<button class="chip" data-act="lp-pick" data-id="${id}">${esc(nameOf(id))}</button>`;
+  const luOrder=[...onf, ...(m.lineup||[]).filter(id=>!onf.has(id))];
+  let title="",body="";
+  if(p.kind==="goal"){
+    if(p.step===1){ title="⚽ Quem marcou?"; body=luOrder.map(chip).join("")||`<span class="muted">Marque relacionados na partida primeiro.</span>`; }
+    else { title=`⚽ Gol de ${esc(nameOf(p.a))} — assistência de…`; body=luOrder.filter(id=>id!==p.a).map(chip).join("")+`<button class="chip more" data-act="lp-none">Sem assistência</button>`; }
+  } else {
+    if(p.step===1){ title="🔁 Quem sai?"; body=[...onf].map(chip).join("")||`<span class="muted">Ninguém em campo — marque titulares (★) na partida.</span>`; }
+    else {
+      title=`🔁 Sai ${esc(nameOf(p.a))} — quem entra?`;
+      const bench=(m.lineup||[]).filter(id=>!onf.has(id));
+      const rest=DATA.roster.map(a=>a.id).filter(id=>!onf.has(id)&&!bench.includes(id));
+      body=bench.map(chip).join("")+(rest.length?`<div class="lp-div">— demais do elenco —</div>`+rest.map(chip).join(""):"");
+    }
+  }
+  return `<div class="lv-picker"><div class="lp-title">${title}</div><div class="chips">${body}</div><button class="btn sm ghost" data-act="lp-cancel" style="margin-top:10px">Cancelar</button></div>`;
+}
+function viewLive(s){
+  const m=liveMatch();
+  if(!m){ UI.live=null; return viewPartidas(s); }
+  const live=m.status==="live", sched=m.status==="scheduled";
+  const onf=onFieldOf(m);
+  const stChip = live? (m.clock&&m.clock.running? `<span class="lv-chip live">🔴 AO VIVO</span>`:`<span class="lv-chip pause">⏸ Pausado</span>`) : sched? `<span class="lv-chip ag">📅 Agendada</span>` : `<span class="lv-chip fin">🏁 Encerrada</span>`;
+  const evs=[...(m.events||[])].reverse().map(ev=>`<div class="ev">${evLine(ev)}</div>`).join("") || `<div class="muted" style="padding:10px 14px 14px">Sem eventos ainda.</div>`;
+  const onfChips=[...onf].map(id=>`<span class="chip on" style="cursor:default">${esc(nameOf(id))}</span>`).join("")||`<span class="muted">— sem titulares definidos: edite a partida e marque as estrelas (★) —</span>`;
+  const bench=(m.lineup||[]).filter(id=>!onf.has(id)).map(id=>`<span class="chip" style="cursor:default">${esc(nameOf(id))}</span>`).join("");
+  let controls="";
+  if(!READONLY){
+    if(sched) controls=`<div class="lv-actions"><button class="btn primary lv-big" data-act="live-start">▶ Iniciar partida</button></div>`;
+    else if(live) controls=`<div class="lv-actions">
+        <button class="btn primary" data-act="live-goal">⚽ Gol Proleta</button>
+        <button class="btn danger" data-act="live-ga">🥅 Gol sofrido</button>
+        <button class="btn" data-act="live-sub">🔁 Substituição</button>
+        <button class="btn ghost" data-act="live-pr">${m.clock&&m.clock.running?"⏸ Pausar":"▶ Retomar"}</button>
+        <button class="btn ghost" data-act="live-undo">↩ Desfazer</button>
+        <button class="btn danger ghost" data-act="live-end">🏁 Encerrar</button>
+      </div>`;
+  }
+  const picker = UI.livePick? livePickerHTML(m,onf) : "";
+  return `<div class="section-title"><h2 style="display:flex;align-items:center;gap:12px"><button class="btn sm ghost" data-act="live-back">← Voltar</button> ${sched?"Pré-jogo":live?"Ao vivo":"Súmula"}</h2>${stChip}</div>
+    <div class="panel lv-panel">
+      <div class="lv-head">
+        <div class="lv-team">Proleta<br><span class="lv-squad">${esc(DATA.team.squad)}</span></div>
+        <div class="lv-mid"><div class="lv-score num">${m.goalsFor} – ${m.goalsAgainst}</div>
+          <div class="lv-clock num" id="live-clock">${fmtClock(clockElapsed(m.clock))}</div>
+          <div class="lv-date">${fmtDate(m.date)}</div></div>
+        <div class="lv-team">${esc(m.opponent)}</div>
+      </div>
+      ${controls}
+      ${picker}
+    </div>
+    <div class="panel" style="margin-top:14px"><div class="panel-head"><div><h3>Em campo</h3></div></div><div class="chips" style="padding:0 14px 12px">${onfChips}</div>${bench?`<div class="panel-head" style="padding-top:0"><div><h3 style="font-size:14px">Banco</h3></div></div><div class="chips" style="padding:0 14px 14px">${bench}</div>`:""}</div>
+    <div class="panel" style="margin-top:14px"><div class="panel-head"><div><h3>Linha do tempo</h3><div class="sub">mais recente primeiro · minuto de jogo</div></div></div><div class="ev-list">${evs}</div></div>`;
+}
+
 /* ---------- Perfil do jogador ---------- */
 function viewPerfil(s, pid){
   const p = s.pIdx[pid];
   if(!p) return `<div class="section-title"><button class="btn sm ghost" data-act="voltar">← Voltar</button></div>${emptyState("Atleta não encontrado","Talvez tenha sido removido.","atletas")}`;
   // histórico jogo a jogo (só jogos que contam)
-  const log = sortMatches(filteredMatches()).reverse().map(m=>{
+  const log = sortMatches(countableMatches()).reverse().map(m=>{
     const inL=(m.lineup||[]).includes(pid);
     const isTit=(m.starters||[]).includes(pid);
     const g=(m.scorers||[]).filter(x=>x.a===pid).reduce((n,x)=>n+x.g,0);
@@ -767,7 +943,7 @@ function viewPerfil(s, pid){
       <td class="cell-num ${a?"":"muted"}">${a||"–"}</td>
     </tr>`;
   }).filter(Boolean).join("");
-  const nTit = filteredMatches().filter(m=>(m.starters||[]).includes(pid)).length;
+  const nTit = countableMatches().filter(m=>(m.starters||[]).includes(pid)).length;
   const stat=(n,l,sub)=>`<div class="card"><div class="stat-num num">${n}</div><div class="stat-label">${l}</div>${sub?`<div class="stat-sub">${sub}</div>`:""}</div>`;
   return `<div class="section-title"><h2 style="display:flex;align-items:center;gap:12px"><button class="btn sm ghost" data-act="voltar">← Voltar</button> ${esc(p.name)}</h2></div>
     <div class="grid">
@@ -828,11 +1004,11 @@ function viewDados(s){
     ${banner}
     <div class="data-cards">
       ${syncCard}
-      <div class="data-card"><h3>Resumo</h3><p>${DATA.matches.length} partidas · ${DATA.roster.length} atletas no elenco<br>Período: ${per}<br>${t.V}V · ${t.E}E · ${t.D}D · ${pct(t.aprov)} aprov.</p></div>
+      <div class="data-card"><h3>Resumo</h3><p>Elenco: <b>${esc(DATA.team.squad)}</b><br>${DATA.matches.length} partidas · ${DATA.roster.length} atletas no elenco<br>Período: ${per}<br>${t.V}V · ${t.E}E · ${t.D}D · ${pct(t.aprov)} aprov.</p></div>
       <div class="data-card"><h3>Backup completo</h3><p>Baixa tudo (elenco + partidas) num arquivo .json para guardar ou levar para outro PC.</p><button class="btn primary block" data-act="export-json">↓ Baixar backup (JSON)</button></div>
       <div class="data-card"><h3>Restaurar / importar</h3><p>Carrega um backup .json. Substitui os dados atuais deste navegador.</p><button class="btn block" data-act="import-json">↑ Importar backup (JSON)</button></div>
       <div class="data-card"><h3>Exportar planilhas</h3><p>Tabelas em CSV (abrem no Excel / Google Sheets).</p><button class="btn ghost block" data-act="export-players" style="margin-bottom:8px">Atletas (CSV)</button><button class="btn ghost block" data-act="export-matches">Partidas (CSV)</button></div>
-      <div class="data-card"><h3>Zona de perigo</h3><p>Recarrega os 28 jogos de exemplo ou apaga tudo. Faça backup antes.</p><button class="btn danger block" data-act="reset-seed" style="margin-bottom:8px">Recarregar dados de exemplo</button><button class="btn danger block" data-act="wipe">Apagar tudo</button></div>
+      <div class="data-card"><h3>Zona de perigo</h3><p>${SQUAD==="esporte"?"Recarrega os 28 jogos de exemplo ou apaga tudo deste elenco.":"Apaga tudo deste elenco."} Faça backup antes.</p>${SQUAD==="esporte"?`<button class="btn danger block" data-act="reset-seed" style="margin-bottom:8px">Recarregar dados de exemplo</button>`:""}<button class="btn danger block" data-act="wipe">Apagar tudo</button></div>
     </div>`;
 }
 
@@ -850,6 +1026,10 @@ function formHTML(){
       <div class="modal-body">
         <div class="field"><label>Data</label><input type="date" id="f-date" value="${f.date}"></div>
         <div class="field"><label>Adversário</label><input type="text" id="f-opp" value="${esc(f.opponent)}" placeholder="Nome do adversário" autocomplete="off"></div>
+        ${f.status!=="live"?`<div class="field"><label>Situação</label><select id="f-status" class="fb-sel" style="width:100%; padding:10px">
+          <option value="final" ${f.status!=="scheduled"?"selected":""}>Encerrada — lançar resultado agora</option>
+          <option value="scheduled" ${f.status==="scheduled"?"selected":""}>📅 Agendada — jogo futuro (anotar ao vivo no dia)</option>
+        </select></div>`:""}
         <div class="field"><label>Placar</label>
           <div class="placar">
             <div class="side"><div class="cap">Proleta</div><input type="number" min="0" id="f-gf" value="${f.goalsFor}"></div>
@@ -952,6 +1132,18 @@ function bind(s){
     else if(act==="lineup-more"){ UI.lineupShowAll=true; renderLineupSection(); }
     else if(act==="lineup-less"){ UI.lineupShowAll=false; renderLineupSection(); }
     else if(act==="flt-clear"){ UI.filterKey=""; UI.filterMin=0; render(); }
+    else if(act==="live"){ UI.live=node.dataset.id; UI.livePick=null; render(); }
+    else if(act==="live-back"){ UI.live=null; UI.livePick=null; render(); afterFormClose(); }
+    else if(act==="live-start"){ liveStart(); }
+    else if(act==="live-goal"){ UI.livePick={kind:"goal",step:1}; render(); }
+    else if(act==="live-ga"){ liveGA(); }
+    else if(act==="live-sub"){ UI.livePick={kind:"sub",step:1}; render(); }
+    else if(act==="live-pr"){ livePauseResume(); }
+    else if(act==="live-undo"){ liveUndo(); }
+    else if(act==="live-end"){ liveEnd(); }
+    else if(act==="lp-pick"){ lpPick(node.dataset.id); }
+    else if(act==="lp-none"){ lpPick(null); }
+    else if(act==="lp-cancel"){ UI.livePick=null; render(); afterFormClose(); }
     else if(act==="df-clear"){ UI.dfMode="all"; render(); }
     else if(act==="overlay"){ /* fecha ao clicar fora */ if(e.target.classList.contains("overlay")) closeForm(); }
     else if(act==="close"){ closeForm(); }
@@ -973,6 +1165,11 @@ function bind(s){
     else if(act==="signout"){ if(confirm("Sair da conta?")) Store.signOut(); }
   };
   // filtro da aba Atletas (onchange = só ao confirmar, sem perder foco)
+  const ssel=el("squad-sel"); if(ssel) ssel.onchange=e=>{ const p=new URLSearchParams(location.search); if(e.target.value==="esporte") p.delete("elenco"); else p.set("elenco",e.target.value); const q=p.toString(); location.href=location.pathname+(q?"?"+q:""); };
+  // cronômetro do ao vivo (atualiza só o texto do relógio, sem re-render)
+  if(window.__lt){ clearInterval(window.__lt); window.__lt=null; }
+  if(UI.live){ const lm=DATA.matches.find(x=>x.id===UI.live);
+    if(lm && lm.clock && lm.clock.running){ window.__lt=setInterval(()=>{ const n=el("live-clock"); const m2=DATA.matches.find(x=>x.id===UI.live); if(n&&m2&&m2.clock) n.textContent=fmtClock(clockElapsed(m2.clock)); },1000); } }
   const fk=el("flt-key"); if(fk) fk.onchange=e=>{ UI.filterKey=e.target.value; if(!UI.filterKey) UI.filterMin=0; else if(UI.filterMin<1) UI.filterMin=1; render(); };
   const fm=el("flt-min"); if(fm) fm.onchange=e=>{ UI.filterMin=Math.max(0,parseInt(e.target.value)||0); render(); };
   // filtro de período da aba Partidas
@@ -993,6 +1190,7 @@ function bind(s){
     el("f-gf").oninput=e=>{UI.form.goalsFor=parseInt(e.target.value)||0; updateTotals();};
     el("f-ga").oninput=e=>{UI.form.goalsAgainst=parseInt(e.target.value)||0;};
     el("f-complete").onchange=e=>UI.form.lineupComplete=e.target.checked;
+    const fst=el("f-status"); if(fst) fst.onchange=e=>{ UI.form.status=e.target.value; };
     el("f-newname").onkeydown=e=>{ if(e.key==="Enter"){ e.preventDefault(); addAthlete(); } };
     const srch=el("f-search"); if(srch) srch.oninput=e=>{ UI.lineupSearch=e.target.value; renderLineupSection(); };
     renderLineupSection();
@@ -1009,10 +1207,10 @@ function openForm(id){
     UI.form={ id:m.id, date:m.date, opponent:m.opponent, goalsFor:m.goalsFor, goalsAgainst:m.goalsAgainst,
       lineup:new Set(m.lineup||[]), starters:new Set(m.starters||[]),
       scorers:Object.fromEntries((m.scorers||[]).map(x=>[x.a,x.g])),
-      assists:Object.fromEntries((m.assists||[]).map(x=>[x.a,x.n])), lineupComplete:m.lineupComplete!==false };
+      assists:Object.fromEntries((m.assists||[]).map(x=>[x.a,x.n])), lineupComplete:m.lineupComplete!==false, status:m.status||"final" };
   } else {
     const today=new Date().toISOString().slice(0,10);
-    UI.form={ id:null, date:today, opponent:"", goalsFor:0, goalsAgainst:0, lineup:new Set(), starters:new Set(), scorers:{}, assists:{}, lineupComplete:true };
+    UI.form={ id:null, date:today, opponent:"", goalsFor:0, goalsAgainst:0, lineup:new Set(), starters:new Set(), scorers:{}, assists:{}, lineupComplete:true, status:"final" };
   }
   render();
 }
@@ -1070,7 +1268,8 @@ function saveForm(){
     starters:[...f.starters].filter(id=>f.lineup.has(id)),
     scorers:Object.entries(f.scorers).map(([a,g])=>({a,g})),
     assists:Object.entries(f.assists).map(([a,n])=>({a,n})),
-    lineupComplete: !!f.lineupComplete, notes:"", archived: prev? !!prev.archived : false
+    lineupComplete: !!f.lineupComplete, notes:"", archived: prev? !!prev.archived : false,
+    status: f.status||"final", events: prev? (prev.events||[]) : [], clock: prev? (prev.clock||null) : null
   };
   if(isEdit){ const i=DATA.matches.findIndex(m=>m.id===f.id); DATA.matches[i]=rec; }
   else DATA.matches.push(rec);
@@ -1129,7 +1328,7 @@ function importJSON(file){
 function resetSeed(){
   if(READONLY) return;
   if(!confirm("Recarregar os 28 jogos de exemplo? Isso substitui os dados atuais. Faça backup antes se precisar.")) return;
-  DATA=JSON.parse(JSON.stringify(DATA_SEED)); DATA.team=TEAM; UI.view="geral"; render(); toast(CLOUD?"Recarregando na nuvem…":"Dados de exemplo recarregados");
+  DATA=seedData(); DATA.team=TEAM; UI.view="geral"; render(); toast(CLOUD?"Recarregando na nuvem…":"Dados de exemplo recarregados");
   Store.replaceAll(DATA).then(()=>{ if(CLOUD) toast("Exemplo recarregado ✓"); }).catch(saveErr);
 }
 function wipe(){
@@ -1161,7 +1360,7 @@ function renderLogin(){
   app().innerHTML = `<div class="login-screen"><div class="login-card">
     <div class="login-crest"><div class="ball"></div><div><h1>Proleta</h1><span>Estatísticas · Esporte</span></div></div>
     <h2>Entrar</h2>
-    <p class="login-sub">Acesso da comissão técnica</p>
+    <p class="login-sub">Acesso da comissão técnica · Elenco ${TEAM.squad}</p>
     <label class="lg-lab">E-mail</label>
     <input class="lg-inp" type="email" id="lg-email" autocomplete="username" placeholder="voce@email.com">
     <label class="lg-lab">Senha</label>
@@ -1184,7 +1383,7 @@ function renderLogin(){
 /* ============ init ============ */
 let pendingReload=false;
 async function reloadFromStore(){
-  if(UI.form){ pendingReload=true; return; }   // não interrompe formulário aberto
+  if(UI.form || UI.livePick){ pendingReload=true; return; }   // não interrompe formulário/anotação aberta
   try{ DATA=await Store.loadState(); DATA.team=TEAM; render(); }
   catch(e){ console.error(e); toast("Erro ao sincronizar."); }
 }
