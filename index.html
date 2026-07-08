@@ -230,6 +230,7 @@
   .lineup-search:focus{border-color:var(--verde-500); box-shadow:0 0 0 3px rgba(47,191,107,.16)}
   .subhead .sh-hint{font-family:'Inter',sans-serif; font-size:11px; font-weight:500; color:var(--carvao-2)}
   .tag.arq{background:rgba(15,32,25,.12); color:var(--carvao-2)}
+  .ro-badge{background:rgba(242,235,214,.16); border:1px solid var(--linha-forte); padding:1px 8px; border-radius:20px; font-size:11px; white-space:nowrap}
   .add-athlete{display:flex; gap:8px; margin-top:10px}
   .add-athlete input{flex:1; padding:9px 12px; border:1.5px dashed rgba(15,32,25,.28); border-radius:10px; background:transparent; font-size:14px; color:var(--carvao)}
   .ga-list{display:flex; flex-direction:column; gap:2px; margin-top:4px}
@@ -310,6 +311,11 @@ const SUPABASE_URL      = "https://jycbewmizgwugoapbbzz.supabase.co";  // ex.: h
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5Y2Jld21pemd3dWdvYXBiYnp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MDY2MzcsImV4cCI6MjA5OTA4MjYzN30.R9jKcenGlt1crYABuHel4Cjz7l_3h8D4cgPc50Hq4Js";  // ex.: eyJhbGciOiJIUzI1NiIsIn...
 const TEAM  = {name:"Proletariado Alviverde", short:"Proleta", squad:"Esporte"};
 const CLOUD = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
+/* MODO PÚBLICO (somente leitura): acesse o app com ?publico no fim da URL,
+   ex.: https://seuusuario.github.io/statsproleta/?publico
+   Entra sem login e esconde tudo que edita. A escrita continua bloqueada
+   no banco (RLS) para quem não está logado — a segurança é de verdade. */
+const READONLY = (typeof location!=="undefined") && new URLSearchParams(location.search).has("publico");
 
 const DATA_SEED = {"version":1,"team":{"name":"Proletariado Alviverde","short":"Proleta","squad":"Esporte"},"roster":[{"id":"a1","name":"Bibico"},{"id":"a2","name":"Dudu"},{"id":"a3","name":"Rosalvo"},{"id":"a4","name":"Vini França"},{"id":"a5","name":"Hashi"},{"id":"a6","name":"Caio"},{"id":"a7","name":"André"},{"id":"a8","name":"Fabiano"},{"id":"a9","name":"Digão"},{"id":"a10","name":"Wellington"},{"id":"a11","name":"Rennan"},{"id":"a12","name":"Meloni"},{"id":"a13","name":"Renan"},{"id":"a14","name":"Eloy"},{"id":"a15","name":"Macapá"},{"id":"a16","name":"Belaz"},{"id":"a17","name":"Rafael"},{"id":"a18","name":"Siqueira"},{"id":"a19","name":"Luis E."},{"id":"a20","name":"Albano"},{"id":"a21","name":"Wez"},{"id":"a22","name":"Gzus"},{"id":"a23","name":"Lima"},{"id":"a24","name":"Brendon"},{"id":"a25","name":"Detona"},{"id":"a26","name":"Euller"},{"id":"a27","name":"Edu"},{"id":"a28","name":"Rufus"},{"id":"a29","name":"Leone"},{"id":"a30","name":"Pelota"},{"id":"a31","name":"Romario"},{"id":"a32","name":"W. Felipe"},{"id":"a33","name":"Gui Dantas"},{"id":"a34","name":"Barone"},{"id":"a35","name":"Igor"},{"id":"a36","name":"Amaral"},{"id":"a37","name":"Diego"},{"id":"a38","name":"Leodan"},{"id":"a39","name":"Lingo"},{"id":"a40","name":"Lucas Vini"},{"id":"a41","name":"Xande"},{"id":"a42","name":"PH"},{"id":"a43","name":"Salvador"}],"matches":[{"id":"m1","date":"2026-01-07","opponent":"Pç Kant","goalsFor":1,"goalsAgainst":3,"lineup":["a20"],"scorers":[{"a":"a20","g":1}],"assists":[],"lineupComplete":false,"notes":""},{"id":"m2","date":"2026-01-17","opponent":"Botafogo Vl Bela","goalsFor":5,"goalsAgainst":3,"lineup":["a11","a2","a10","a7","a3"],"scorers":[{"a":"a11","g":3},{"a":"a2","g":2}],"assists":[{"a":"a10","n":1},{"a":"a7","n":1},{"a":"a3","n":1}],"lineupComplete":false,"notes":""},{"id":"m3","date":"2026-01-20","opponent":"Inker","goalsFor":1,"goalsAgainst":4,"lineup":["a7"],"scorers":[{"a":"a7","g":1}],"assists":[],"lineupComplete":false,"notes":""},{"id":"m4","date":"2026-01-23","opponent":"EC Nacional Mooca","goalsFor":2,"goalsAgainst":1,"lineup":["a8"],"scorers":[{"a":"a8","g":2}],"assists":[],"lineupComplete":false,"notes":""},{"id":"m5","date":"2026-01-31","opponent":"Maque FC","goalsFor":1,"goalsAgainst":2,"lineup":["a3","a1"],"scorers":[{"a":"a3","g":1}],"assists":[{"a":"a1","n":1}],"lineupComplete":false,"notes":""},{"id":"m6","date":"2026-02-03","opponent":"Juventude","goalsFor":1,"goalsAgainst":4,"lineup":["a16","a12"],"scorers":[{"a":"a16","g":1}],"assists":[{"a":"a12","n":1}],"lineupComplete":false,"notes":""},{"id":"m7","date":"2026-02-07","opponent":"Maque FC","goalsFor":2,"goalsAgainst":3,"lineup":["a3","a8","a1"],"scorers":[{"a":"a3","g":1},{"a":"a8","g":1}],"assists":[{"a":"a8","n":1},{"a":"a1","n":1}],"lineupComplete":false,"notes":""},{"id":"m8","date":"2026-02-14","opponent":"Atletico Mangalot","goalsFor":3,"goalsAgainst":2,"lineup":["a12","a11","a2","a8"],"scorers":[{"a":"a12","g":1},{"a":"a11","g":1},{"a":"a2","g":1}],"assists":[{"a":"a8","n":1},{"a":"a11","n":1}],"lineupComplete":false,"notes":""},{"id":"m9","date":"2026-02-21","opponent":"Sufoco FC","goalsFor":1,"goalsAgainst":4,"lineup":["a19","a12"],"scorers":[{"a":"a19","g":1}],"assists":[{"a":"a12","n":1}],"lineupComplete":false,"notes":""},{"id":"m10","date":"2026-02-24","opponent":"Catadão","goalsFor":1,"goalsAgainst":1,"lineup":["a14"],"scorers":[{"a":"a14","g":1}],"assists":[],"lineupComplete":false,"notes":""},{"id":"m11","date":"2026-02-28","opponent":"Das Antigas","goalsFor":1,"goalsAgainst":2,"lineup":["a2"],"scorers":[{"a":"a2","g":1}],"assists":[],"lineupComplete":false,"notes":""},{"id":"m12","date":"2026-03-07","opponent":"Explosão FC","goalsFor":3,"goalsAgainst":3,"lineup":["a8","a27","a11","a10","a4"],"scorers":[{"a":"a8","g":1},{"a":"a27","g":1},{"a":"a11","g":1}],"assists":[{"a":"a10","n":1},{"a":"a4","n":1}],"lineupComplete":false,"notes":""},{"id":"m13","date":"2026-03-14","opponent":"De Primeira","goalsFor":3,"goalsAgainst":3,"lineup":["a10","a8","a23","a2"],"scorers":[{"a":"a10","g":1},{"a":"a8","g":1},{"a":"a23","g":1}],"assists":[{"a":"a8","n":1},{"a":"a2","n":1}],"lineupComplete":false,"notes":""},{"id":"m14","date":"2026-03-21","opponent":"AD Ponte Grande","goalsFor":5,"goalsAgainst":4,"lineup":["a1","a8","a2","a4","a7","a33","a17"],"scorers":[{"a":"a1","g":1},{"a":"a8","g":2},{"a":"a2","g":2}],"assists":[{"a":"a4","n":1},{"a":"a7","n":1},{"a":"a33","n":2},{"a":"a17","n":1}],"lineupComplete":false,"notes":""},{"id":"m15","date":"2026-03-29","opponent":"Futnoia","goalsFor":7,"goalsAgainst":0,"lineup":["a11","a8","a16","a4","a26","a3","a12","a24"],"scorers":[{"a":"a11","g":3},{"a":"a8","g":1},{"a":"a16","g":1},{"a":"a4","g":1},{"a":"a26","g":1}],"assists":[{"a":"a3","n":1},{"a":"a8","n":1},{"a":"a11","n":2},{"a":"a12","n":1},{"a":"a24","n":1}],"lineupComplete":false,"notes":""},{"id":"m16","date":"2026-04-09","opponent":"Al Phumaça","goalsFor":0,"goalsAgainst":1,"lineup":[],"scorers":[],"assists":[],"lineupComplete":false,"notes":""},{"id":"m17","date":"2026-04-11","opponent":"Pinguim FC","goalsFor":0,"goalsAgainst":2,"lineup":[],"scorers":[],"assists":[],"lineupComplete":false,"notes":""},{"id":"m18","date":"2026-04-15","opponent":"Formigueiro","goalsFor":3,"goalsAgainst":6,"lineup":["a11","a8","a10"],"scorers":[{"a":"a11","g":1},{"a":"a8","g":2}],"assists":[{"a":"a10","n":1},{"a":"a11","n":1}],"lineupComplete":false,"notes":""},{"id":"m19","date":"2026-04-18","opponent":"Proleta Vetera/Diverso","goalsFor":0,"goalsAgainst":1,"lineup":[],"scorers":[],"assists":[],"lineupComplete":false,"notes":""},{"id":"m20","date":"2026-04-26","opponent":"LIbertarios","goalsFor":3,"goalsAgainst":1,"lineup":["a8","a11","a2","a3","a25"],"scorers":[{"a":"a8","g":1},{"a":"a11","g":1},{"a":"a2","g":1}],"assists":[{"a":"a3","n":1},{"a":"a25","n":1}],"lineupComplete":false,"notes":""},{"id":"m21","date":"2026-05-05","opponent":"Código Verde","goalsFor":0,"goalsAgainst":0,"lineup":[],"scorers":[],"assists":[],"lineupComplete":false,"notes":""},{"id":"m22","date":"2026-05-09","opponent":"Time do Gueto","goalsFor":2,"goalsAgainst":4,"lineup":["a10","a7","a2","a3"],"scorers":[{"a":"a10","g":1},{"a":"a7","g":1}],"assists":[{"a":"a2","n":1},{"a":"a3","n":1}],"lineupComplete":false,"notes":""},{"id":"m23","date":"2026-05-16","opponent":"Samba São Jorge","goalsFor":1,"goalsAgainst":3,"lineup":[],"scorers":[],"assists":[],"lineupComplete":false,"notes":""},{"id":"m24","date":"2026-05-24","opponent":"XI De Setembro","goalsFor":0,"goalsAgainst":1,"lineup":[],"scorers":[],"assists":[],"lineupComplete":false,"notes":""},{"id":"m25","date":"2026-05-30","opponent":"Corote Molotov","goalsFor":1,"goalsAgainst":1,"lineup":["a8"],"scorers":[{"a":"a8","g":1}],"assists":[],"lineupComplete":false,"notes":""},{"id":"m26","date":"2026-06-07","opponent":"Catadão","goalsFor":1,"goalsAgainst":1,"lineup":["a2","a11"],"scorers":[{"a":"a2","g":1}],"assists":[{"a":"a11","n":1}],"lineupComplete":false,"notes":""},{"id":"m27","date":"2026-06-20","opponent":"Só de Virada","goalsFor":3,"goalsAgainst":0,"lineup":["a2","a11"],"scorers":[{"a":"a2","g":2},{"a":"a11","g":1}],"assists":[{"a":"a2","n":1}],"lineupComplete":false,"notes":""},{"id":"m28","date":"2026-06-27","opponent":"TAP","goalsFor":1,"goalsAgainst":0,"lineup":["a12","a2"],"scorers":[{"a":"a12","g":1}],"assists":[{"a":"a2","n":1}],"lineupComplete":false,"notes":""}],"seededFrom":"Estatísticas_Proleta_Esporte.xlsx"};
 const KEY = "proleta_esporte_v1";
@@ -501,7 +507,7 @@ function headerHTML(s){
   <header class="app-header"><div class="wrap"><div class="hd">
     <div class="crest">
       <div class="mark">PA</div>
-      <div class="txt"><h1>${esc(DATA.team.name)}</h1><div class="sub">${esc(DATA.team.short)} · ${esc(DATA.team.squad)} · Sequência: ${streak}</div></div>
+      <div class="txt"><h1>${esc(DATA.team.name)}</h1><div class="sub">${esc(DATA.team.short)} · ${esc(DATA.team.squad)} · Sequência: ${streak}${READONLY?` · <span class="ro-badge">👁 somente leitura</span>`:""}</div></div>
     </div>
     <div class="scoreboard">
       <div class="kpis">
@@ -520,8 +526,8 @@ function headerHTML(s){
 function tabsHTML(){
   const nArq = archivedMatches().length;
   const tabs=[["geral","Visão Geral"],["atletas","Atletas"],["partidas","Partidas"],["adversarios","Adversários"]];
-  if(nArq>0) tabs.push(["arquivados",`Arquivados · ${nArq}`]);
-  tabs.push(["dados","Dados"]);
+  if(nArq>0 && !READONLY) tabs.push(["arquivados",`Arquivados · ${nArq}`]);
+  if(!READONLY) tabs.push(["dados","Dados"]);
   const activeTab = UI.perfil ? "" : UI.view;
   return `<div class="tabs-outer"><div class="wrap"><div class="tabs">${
     tabs.map(([k,l])=>`<button class="tab ${activeTab===k?"active":""}" data-act="tab" data-tab="${k}">${l}</button>`).join("")
@@ -563,7 +569,7 @@ function viewGeral(s){
           <td class="cell-num">${p.part}</td><td class="cell-num muted">${dec(p.ppj,2)}</td></tr>`).join("")}</tbody>
       </table></div>
     </div>`:"";
-  return `<div class="section-title"><h2>Visão geral da temporada</h2><button class="btn primary sm" data-act="new">+ Nova partida</button></div>${cards}${hl}${extremes}${topTable}`;
+  return `<div class="section-title"><h2>Visão geral da temporada</h2>${READONLY?"":`<button class="btn primary sm" data-act="new">+ Nova partida</button>`}</div>${cards}${hl}${extremes}${topTable}`;
 }
 
 /* ---------- Atletas ---------- */
@@ -645,18 +651,18 @@ function matchCard(m){
       ${lineupSummary(m)}
       ${tags}
     </div>
-    <div class="mc-actions">
+    ${READONLY?"":`<div class="mc-actions">
       <button class="btn sm ghost" data-act="edit" data-id="${m.id}">Editar</button>
       ${arcBtn}
       <button class="btn sm danger" data-act="del" data-id="${m.id}">Excluir</button>
-    </div>
+    </div>`}
   </div>`;
 }
 function viewPartidas(s){
   const list = sortMatches(activeMatches()).reverse();
-  if(list.length===0) return `<div class="section-title"><h2>Partidas</h2><button class="btn primary sm" data-act="new">+ Nova partida</button></div>${emptyState("Nenhuma partida","Cadastre o primeiro jogo do Proleta.","partidas")}`;
+  if(list.length===0) return `<div class="section-title"><h2>Partidas</h2>${READONLY?"":`<button class="btn primary sm" data-act="new">+ Nova partida</button>`}</div>${emptyState("Nenhuma partida","Cadastre o primeiro jogo do Proleta.","partidas")}`;
   const cards = list.map(matchCard).join("");
-  return `<div class="section-title"><h2>Partidas <span class="hint" style="font-weight:400">· ${list.length} jogos</span></h2><button class="btn primary sm" data-act="new">+ Nova partida</button></div>
+  return `<div class="section-title"><h2>Partidas <span class="hint" style="font-weight:400">· ${list.length} jogos</span></h2>${READONLY?"":`<button class="btn primary sm" data-act="new">+ Nova partida</button>`}</div>
     <div class="match-list">${cards}</div>`;
 }
 
@@ -760,7 +766,7 @@ function viewDados(s){
 }
 
 function emptyState(title,sub,tab){
-  return `<div class="empty"><div class="big">⚽</div><h3>${esc(title)}</h3><p>${esc(sub)}</p><div style="margin-top:16px"><button class="btn primary" data-act="new">+ Nova partida</button></div></div>`;
+  return `<div class="empty"><div class="big">⚽</div><h3>${esc(title)}</h3><p>${esc(sub)}</p>${READONLY?"":`<div style="margin-top:16px"><button class="btn primary" data-act="new">+ Nova partida</button></div>`}</div>`;
 }
 
 /* ============ formulário de partida ============ */
@@ -909,6 +915,7 @@ function bind(s){
 
 /* ============ ações de formulário ============ */
 function openForm(id){
+  if(READONLY) return;
   UI.lineupSearch=""; UI.lineupShowAll=false;
   if(id){
     const m=DATA.matches.find(x=>x.id===id);
@@ -936,6 +943,7 @@ function toggleTitular(id){
   renderLineupSection();
 }
 function archiveMatch(id, val){
+  if(READONLY) return;
   const m=DATA.matches.find(x=>x.id===id); if(!m) return;
   m.archived=val; render();
   Store.upsertMatch(m).then(()=>toast(val?"Jogo arquivado":"Jogo desarquivado")).catch(saveErr);
@@ -954,6 +962,7 @@ function step(kind,id,delta){
   } else { renderLineupSection(); }
 }
 function addAthlete(){
+  if(READONLY) return;
   const inp=el("f-newname"); const name=(inp.value||"").trim();
   if(!name) return;
   if(DATA.roster.some(a=>a.name.toLowerCase()===name.toLowerCase())){ toast("Atleta já existe no elenco"); inp.value=""; return; }
@@ -962,6 +971,7 @@ function addAthlete(){
   Store.upsertAthlete(a).catch(saveErr);
 }
 function saveForm(){
+  if(READONLY) return;
   const f=UI.form;
   if(!f.opponent.trim()){ toast("Informe o adversário"); el("f-opp").focus(); return; }
   const isEdit=!!f.id;
@@ -981,6 +991,7 @@ function saveForm(){
   Store.upsertMatch(rec).then(()=>toast(isEdit?"Partida atualizada":"Partida salva ✓")).catch(saveErr);
 }
 function delMatch(id){
+  if(READONLY) return;
   const m=DATA.matches.find(x=>x.id===id);
   if(!confirm(`Excluir a partida contra ${m.opponent} (${fmtDate(m.date)})?\n\nEssa ação não pode ser desfeita.`)) return;
   DATA.matches=DATA.matches.filter(x=>x.id!==id); render();
@@ -1015,6 +1026,7 @@ function exportMatchesCSV(){
   download(`proleta-partidas-${stamp()}.csv`, csv, "text/csv"); toast("CSV de partidas baixado ✓");
 }
 function importJSON(file){
+  if(READONLY) return;
   const r=new FileReader();
   r.onload=()=>{
     try{
@@ -1028,11 +1040,13 @@ function importJSON(file){
   r.readAsText(file);
 }
 function resetSeed(){
+  if(READONLY) return;
   if(!confirm("Recarregar os 28 jogos de exemplo? Isso substitui os dados atuais. Faça backup antes se precisar.")) return;
   DATA=JSON.parse(JSON.stringify(DATA_SEED)); DATA.team=TEAM; UI.view="geral"; render(); toast(CLOUD?"Recarregando na nuvem…":"Dados de exemplo recarregados");
   Store.replaceAll(DATA).then(()=>{ if(CLOUD) toast("Exemplo recarregado ✓"); }).catch(saveErr);
 }
 function wipe(){
+  if(READONLY) return;
   if(!confirm("Apagar TODAS as partidas e manter só o elenco vazio? Essa ação não pode ser desfeita.")) return;
   DATA={version:1, team:TEAM, roster:DATA.roster, matches:[]}; UI.view="geral"; render(); toast(CLOUD?"Apagando na nuvem…":"Partidas apagadas");
   Store.replaceAll(DATA).then(()=>{ if(CLOUD) toast("Partidas apagadas ✓"); }).catch(saveErr);
@@ -1059,7 +1073,7 @@ function renderLogin(){
   UI.form=null;
   app().innerHTML = `<div class="login-screen"><div class="login-card">
     <div class="login-crest"><div class="ball"></div><div><h1>Proleta</h1><span>Estatísticas · Esporte</span></div></div>
-    <h2 id="lg-title">Entrar</h2>
+    <h2>Entrar</h2>
     <p class="login-sub">Acesso da comissão técnica</p>
     <label class="lg-lab">E-mail</label>
     <input class="lg-inp" type="email" id="lg-email" autocomplete="username" placeholder="voce@email.com">
@@ -1067,29 +1081,13 @@ function renderLogin(){
     <input class="lg-inp" type="password" id="lg-pass" autocomplete="current-password" placeholder="••••••••">
     <div id="lg-err" class="login-err"></div>
     <button class="btn primary block" id="lg-go">Entrar</button>
-    <div class="login-alt"><span id="lg-swtxt">Ainda não tem conta?</span> <button class="linklike" id="lg-sw">Criar conta</button></div>
   </div></div>`;
-  let mode="in";
-  const setMode=m=>{ mode=m;
-    el("lg-title").textContent=m==="in"?"Entrar":"Criar conta";
-    el("lg-go").textContent   =m==="in"?"Entrar":"Criar conta";
-    el("lg-swtxt").textContent=m==="in"?"Ainda não tem conta?":"Já tem conta?";
-    el("lg-sw").textContent   =m==="in"?"Criar conta":"Entrar";
-    el("lg-err").textContent="";
-  };
-  el("lg-sw").onclick=()=>setMode(mode==="in"?"up":"in");
   const submit=async ()=>{
     const email=(el("lg-email").value||"").trim(), pass=el("lg-pass").value||"";
     if(!email||!pass){ el("lg-err").textContent="Preencha e-mail e senha."; return; }
     el("lg-go").disabled=true; el("lg-err").textContent="";
-    try{
-      if(mode==="in"){ await Store.signIn(email,pass); }
-      else{
-        await Store.signUp(email,pass);
-        if(!SESSION){ el("lg-err").textContent="Conta criada. Se o Supabase pedir confirmação por e-mail, confirme e entre."; el("lg-go").disabled=false; setMode("in"); return; }
-      }
-      /* onAuth cuida do boot em caso de sucesso */
-    }catch(e){ el("lg-err").textContent=traduzErro(e); el("lg-go").disabled=false; }
+    try{ await Store.signIn(email,pass); /* onAuth cuida do boot */ }
+    catch(e){ el("lg-err").textContent=traduzErro(e); el("lg-go").disabled=false; }
   };
   el("lg-go").onclick=submit;
   el("lg-pass").onkeydown=e=>{ if(e.key==="Enter") submit(); };
@@ -1116,6 +1114,7 @@ async function boot(){
   el("fileInput").addEventListener("change", e=>{ if(e.target.files[0]) importJSON(e.target.files[0]); e.target.value=""; });
   if(!CLOUD){ await boot(); return; }
   try{ Store.initClient(); }catch(e){ renderFatal(e.message); return; }
+  if(READONLY){ await boot(); return; }   // modo público: sem login, lê como anônimo
   let booted=false;
   Store.onAuth(async s=>{ if(s){ if(!booted){ booted=true; await boot(); } } else { booted=false; renderLogin(); } });
   await Store.getSession();
