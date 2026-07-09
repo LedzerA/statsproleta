@@ -295,6 +295,9 @@
   .lv-chip{padding:4px 12px; border-radius:20px; font-size:12px; font-weight:800; letter-spacing:.04em}
   .lv-chip.live{background:rgba(224,112,95,.16); color:#c14b38; animation:lvpulse 1.4s ease-in-out infinite}
   .lv-chip.pause{background:rgba(230,185,75,.18); color:#8a6b1f}
+  .lv-chip.int{background:rgba(15,101,56,.14); color:var(--verde-700); font-weight:800}
+  .lv-per{font-size:12px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--verde-700); margin-top:2px}
+  .ev-per{display:inline-block; font-size:10px; font-weight:800; letter-spacing:.04em; color:var(--carvao-2); margin-right:2px}
   .lv-chip.ag{background:rgba(230,185,75,.14); color:#8a6b1f}
   .lv-chip.fin{background:rgba(15,32,25,.10); color:var(--carvao-2)}
   @keyframes lvpulse{0%,100%{opacity:1}50%{opacity:.55}}
@@ -307,7 +310,7 @@
   .ev-list{padding:4px 14px 14px}
   .ev{padding:8px 2px; border-bottom:1px dashed rgba(15,32,25,.12); font-size:14px; color:var(--carvao)}
   .ev:last-child{border-bottom:none}
-  .ev-min{display:inline-block; min-width:34px; font-weight:800; color:var(--verde-700)}
+  .ev-min{display:inline-block; min-width:62px; font-weight:800; color:var(--verde-700)}
   /* ---- login (modo nuvem) ---- */
   .login-screen{min-height:100vh; min-height:100dvh; display:flex; align-items:center; justify-content:center; padding:24px;
     background:radial-gradient(1200px 600px at 50% -10%, var(--verde-800), var(--verde-900)); }
@@ -832,6 +835,17 @@ function liveMatch(){ return DATA.matches.find(x=>x.id===UI.live); }
 function clockElapsed(c){ if(!c) return 0; const b=c.base||0; return (c.running&&c.startedAt)? b+Math.max(0,(Date.now()-new Date(c.startedAt).getTime())/1000) : b; }
 function fmtClock(sec){ sec=Math.floor(sec||0); const m=Math.floor(sec/60), ss=sec%60; return String(m).padStart(2,"0")+":"+String(ss).padStart(2,"0"); }
 function evMinute(t){ return Math.max(1,Math.floor((t||0)/60)+1)+"'"; }
+/* período: 1º ou 2º tempo. Fica dentro do clock (jsonb) — nada muda no banco.
+   Eventos antigos, sem 'p', contam como 1º tempo. */
+function curPeriod(m){ return (m.clock && m.clock.period) || 1; }
+function atHalfTime(m){
+  for(let i=(m.events||[]).length-1;i>=0;i--){ const t=m.events[i].type; if(t==="ht") return true; if(t==="st") return false; }
+  return false;
+}
+function halfDuration(m,p){ // duração do tempo já encerrado
+  const ev=(m.events||[]).find(e=>e.type===(p===1?"ht":"end") && (e.p||1)===p);
+  return ev? ev.t : null;
+}
 function onFieldOf(m){ const onf=new Set(m.starters||[]); for(const ev of (m.events||[])){ if(ev.type==="sub"){ onf.delete(ev.out); onf.add(ev.in); } } return onf; }
 function syncFromEvents(m){
   let gf=0,ga=0; const sc={},as={}; const lu=new Set(m.lineup||[]);
@@ -846,13 +860,24 @@ function syncFromEvents(m){
   m.lineup=[...lu];
 }
 function saveLive(m){ render(); Store.upsertMatch(m).catch(saveErr); }
-function pushEvent(m,ev){ ev.t=Math.floor(clockElapsed(m.clock)); m.events=[...(m.events||[]),ev]; syncFromEvents(m); saveLive(m); }
+function pushEvent(m,ev){ ev.t=Math.floor(clockElapsed(m.clock)); ev.p=curPeriod(m); m.events=[...(m.events||[]),ev]; syncFromEvents(m); saveLive(m); }
 function liveStart(){ const m=liveMatch(); if(!m||READONLY) return;
-  m.status="live"; m.clock={running:true, base:0, startedAt:new Date().toISOString()};
-  m.events=[...(m.events||[]),{type:"start",t:0}]; saveLive(m); toast("Bola rolando! ▶"); }
+  m.status="live"; m.clock={running:true, base:0, startedAt:new Date().toISOString(), period:1};
+  m.events=[...(m.events||[]),{type:"start",t:0,p:1}]; saveLive(m); toast("Bola rolando! ▶"); }
+/* intervalo: encerra o 1º tempo (o relógio para e guarda a duração) */
+function liveHalfTime(){ const m=liveMatch(); if(!m||READONLY||m.status!=="live"||curPeriod(m)!==1||atHalfTime(m)) return;
+  const t=Math.floor(clockElapsed(m.clock));
+  m.clock={running:false, base:t, period:1};
+  pushEvent(m,{type:"ht"}); toast("Fim do 1º tempo ⏱"); }
+/* 2º tempo: cronômetro recomeça do zero */
+function liveSecondHalf(){ const m=liveMatch(); if(!m||READONLY||!atHalfTime(m)) return;
+  m.clock={running:true, base:0, startedAt:new Date().toISOString(), period:2};
+  pushEvent(m,{type:"st"}); toast("Começa o 2º tempo! ▶"); }
 function livePauseResume(){ const m=liveMatch(); if(!m||READONLY||!m.clock) return;
-  if(m.clock.running){ const t=Math.floor(clockElapsed(m.clock)); m.clock={running:false, base:t}; m.events=[...(m.events||[]),{type:"pause",t}]; }
-  else { m.events=[...(m.events||[]),{type:"resume",t:m.clock.base||0}]; m.clock={running:true, base:m.clock.base||0, startedAt:new Date().toISOString()}; }
+  if(atHalfTime(m)) return;   // no intervalo quem manda é "Iniciar 2º tempo"
+  const per=curPeriod(m);
+  if(m.clock.running){ const t=Math.floor(clockElapsed(m.clock)); m.clock={running:false, base:t, period:per}; m.events=[...(m.events||[]),{type:"pause",t,p:per}]; }
+  else { m.events=[...(m.events||[]),{type:"resume",t:m.clock.base||0,p:per}]; m.clock={running:true, base:m.clock.base||0, startedAt:new Date().toISOString(), period:per}; }
   saveLive(m); }
 function liveGA(){ const m=liveMatch(); if(!m||READONLY) return; pushEvent(m,{type:"ga"}); toast("Gol sofrido anotado"); }
 function liveUndo(){ const m=liveMatch(); if(!m||READONLY) return;
@@ -861,8 +886,9 @@ function liveUndo(){ const m=liveMatch(); if(!m||READONLY) return;
   toast("Nada para desfazer"); }
 function liveEnd(){ const m=liveMatch(); if(!m||READONLY) return;
   if(!confirm(`Encerrar a partida contra ${m.opponent}? O placar ${m.goalsFor}–${m.goalsAgainst} entra nas estatísticas.`)) return;
-  const t=Math.floor(clockElapsed(m.clock)); m.clock={running:false, base:t}; m.status="final";
-  m.events=[...(m.events||[]),{type:"end",t}]; saveLive(m); toast("Partida encerrada 🏁"); }
+  const per=curPeriod(m);
+  const t=Math.floor(clockElapsed(m.clock)); m.clock={running:false, base:t, period:per}; m.status="final";
+  m.events=[...(m.events||[]),{type:"end",t,p:per}]; saveLive(m); toast("Partida encerrada 🏁"); }
 function lpPick(id){
   const m=liveMatch(); const p=UI.livePick; if(!m||!p||READONLY) return;
   if(p.kind==="goal"){
@@ -874,7 +900,8 @@ function lpPick(id){
   }
 }
 function evLine(ev){
-  const min=evMinute(ev.t);
+  const per=ev.p||1;
+  const min=`<span class="ev-per">${per}ºT</span> ${evMinute(ev.t)}`;
   switch(ev.type){
     case "goal": return `<span class="ev-min num">${min}</span> ⚽ Gol de <b>${esc(nameOf(ev.a))}</b>${ev.as?` <span class="muted">(assist. ${esc(nameOf(ev.as))})</span>`:""}`;
     case "ga":   return `<span class="ev-min num">${min}</span> 🥅 Gol sofrido`;
@@ -883,6 +910,8 @@ function evLine(ev){
     case "pause":return `<span class="ev-min num">${min}</span> ⏸ Cronômetro pausado`;
     case "resume":return `<span class="ev-min num">${min}</span> ▶ Cronômetro retomado`;
     case "end":  return `<span class="ev-min num">${min}</span> 🏁 Fim de jogo`;
+    case "ht":   return `<span class="ev-min num">${min}</span> ⏱ Fim do 1º tempo`;
+    case "st":   return `<span class="ev-min num">${min}</span> ▶ Início do 2º tempo`;
   }
   return "";
 }
@@ -910,18 +939,29 @@ function viewLive(s){
   if(!m){ UI.live=null; return viewPartidas(s); }
   const live=m.status==="live", sched=m.status==="scheduled";
   const onf=onFieldOf(m);
-  const stChip = live? (m.clock&&m.clock.running? `<span class="lv-chip live">🔴 AO VIVO</span>`:`<span class="lv-chip pause">⏸ Pausado</span>`) : sched? `<span class="lv-chip ag">📅 Agendada</span>` : `<span class="lv-chip fin">🏁 Encerrada</span>`;
+  const half=atHalfTime(m), per=curPeriod(m);
+  const stChip = live
+    ? (half? `<span class="lv-chip int">⏱ Intervalo</span>`
+           : (m.clock&&m.clock.running? `<span class="lv-chip live">🔴 AO VIVO · ${per}º tempo</span>`
+                                      : `<span class="lv-chip pause">⏸ Pausado · ${per}º tempo</span>`))
+    : sched? `<span class="lv-chip ag">📅 Agendada</span>` : `<span class="lv-chip fin">🏁 Encerrada</span>`;
   const evs=[...(m.events||[])].reverse().map(ev=>`<div class="ev">${evLine(ev)}</div>`).join("") || `<div class="muted" style="padding:10px 14px 14px">Sem eventos ainda.</div>`;
   const onfChips=[...onf].map(id=>`<span class="chip on" style="cursor:default">${esc(nameOf(id))}</span>`).join("")||`<span class="muted">— sem titulares definidos: edite a partida e marque as estrelas (★) —</span>`;
   const bench=(m.lineup||[]).filter(id=>!onf.has(id)).map(id=>`<span class="chip" style="cursor:default">${esc(nameOf(id))}</span>`).join("");
   let controls="";
   if(!READONLY){
-    if(sched) controls=`<div class="lv-actions"><button class="btn primary lv-big" data-act="live-start">▶ Iniciar partida</button></div>`;
+    if(sched) controls=`<div class="lv-actions"><button class="btn primary lv-big" data-act="live-start">▶ Iniciar 1º tempo</button></div>`;
+    else if(live && half) controls=`<div class="lv-actions">
+        <button class="btn primary lv-big" data-act="live-2t">▶ Iniciar 2º tempo</button>
+        <button class="btn ghost" data-act="live-undo">↩ Desfazer</button>
+        <button class="btn danger ghost" data-act="live-end">🏁 Encerrar</button>
+      </div>`;
     else if(live) controls=`<div class="lv-actions">
         <button class="btn primary" data-act="live-goal">⚽ Gol Proleta</button>
         <button class="btn danger" data-act="live-ga">🥅 Gol sofrido</button>
         <button class="btn" data-act="live-sub">🔁 Substituição</button>
         <button class="btn ghost" data-act="live-pr">${m.clock&&m.clock.running?"⏸ Pausar":"▶ Retomar"}</button>
+        ${per===1?`<button class="btn ghost" data-act="live-ht">⏱ Fim do 1º tempo</button>`:""}
         <button class="btn ghost" data-act="live-undo">↩ Desfazer</button>
         <button class="btn danger ghost" data-act="live-end">🏁 Encerrar</button>
       </div>`;
@@ -933,6 +973,7 @@ function viewLive(s){
         <div class="lv-team">Proleta<br><span class="lv-squad">${esc(DATA.team.squad)}</span></div>
         <div class="lv-mid"><div class="lv-score num">${m.goalsFor} – ${m.goalsAgainst}</div>
           <div class="lv-clock num" id="live-clock" role="timer" aria-label="Tempo de jogo">${fmtClock(clockElapsed(m.clock))}</div>
+          <div class="lv-per">${sched?"pré-jogo":half?"intervalo":`${per}º tempo`}${(()=>{ const d1=halfDuration(m,1); return (d1!=null && (per===2||!live))? ` · 1ºT durou ${fmtClock(d1)}`:""; })()}</div>
           <div class="lv-date">${fmtDate(m.date)}</div></div>
         <div class="lv-team">${esc(m.opponent)}</div>
       </div>
@@ -1168,6 +1209,8 @@ function bind(s){
     else if(act==="live-ga"){ liveGA(); }
     else if(act==="live-sub"){ UI.livePick={kind:"sub",step:1}; render(); }
     else if(act==="live-pr"){ livePauseResume(); }
+    else if(act==="live-ht"){ liveHalfTime(); }
+    else if(act==="live-2t"){ liveSecondHalf(); }
     else if(act==="live-undo"){ liveUndo(); }
     else if(act==="live-end"){ liveEnd(); }
     else if(act==="lp-pick"){ lpPick(node.dataset.id); }
