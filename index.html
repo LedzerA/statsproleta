@@ -298,6 +298,15 @@
   .lv-chip.int{background:rgba(15,101,56,.14); color:var(--verde-700); font-weight:800}
   .lv-per{font-size:12px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--verde-700); margin-top:2px}
   .ev-per{display:inline-block; font-size:10px; font-weight:800; letter-spacing:.04em; color:var(--carvao-2); margin-right:2px}
+  .frow{display:flex; gap:10px} .frow .field{flex:1}
+  .pos-inp{width:52px; padding:3px 6px; margin-right:4px; border:1px solid rgba(15,32,25,.2); border-radius:6px;
+    font-size:12px; font-weight:800; text-transform:uppercase; text-align:center; letter-spacing:.03em; color:var(--verde-700); background:var(--creme-3)}
+  .pos-inp::placeholder{color:rgba(15,32,25,.3); font-weight:600}
+  .pos-inp:focus{outline:none; border-color:var(--verde-500)}
+  .pos-badge{display:inline-block; min-width:22px; text-align:center; padding:0 5px; border-radius:5px; font-size:10px; font-weight:800;
+    letter-spacing:.02em; background:rgba(15,101,56,.12); color:var(--verde-700); vertical-align:middle}
+  .mc-meta{font-size:12.5px; color:var(--verde-300); margin:2px 0 6px; font-weight:600}
+  .lv-meta{text-align:center; font-size:13px; color:var(--carvao-2); font-weight:600; padding:2px 14px 8px}
   .lv-chip.ag{background:rgba(230,185,75,.14); color:#8a6b1f}
   .lv-chip.fin{background:rgba(15,32,25,.10); color:var(--carvao-2)}
   @keyframes lvpulse{0%,100%{opacity:1}50%{opacity:.55}}
@@ -362,7 +371,6 @@
    ===================================================================== */
 const SUPABASE_URL      = "https://jycbewmizgwugoapbbzz.supabase.co";  // ex.: https://abcdefgh.supabase.co
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5Y2Jld21pemd3dWdvYXBiYnp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MDY2MzcsImV4cCI6MjA5OTA4MjYzN30.R9jKcenGlt1crYABuHel4Cjz7l_3h8D4cgPc50Hq4Js";  // ex.: eyJhbGciOiJIUzI1NiIsIn...
-
 /* ELENCOS: cada elenco tem tela e registros totalmente separados.
    Troque pelo seletor no topo do app ou direto na URL: ?elenco=feminino
    (combina com o modo público: ?elenco=feminino&publico) */
@@ -370,6 +378,11 @@ const SQUADS = { esporte:"Esporte", veterano:"Veterano", feminino:"Feminino", di
 const _qs = (typeof location!=="undefined")? new URLSearchParams(location.search) : null;
 const _sq = _qs? (_qs.get("elenco")||"").toLowerCase() : "";
 const SQUAD = SQUADS[_sq]? _sq : "esporte";
+/* link direto para a partida:
+   &aovivo        -> abre a que estiver ao vivo (ou a próxima agendada)  [link fixo, reutilizável]
+   &jogo=<id>     -> abre uma partida específica */
+const DEEP_ID  = _qs? (_qs.get("jogo")||"") : "";
+const DEEP_LIVE= _qs? _qs.has("aovivo") : false;
 const TEAM  = {name:"Proletariado Alviverde", short:"Proleta", squad:SQUADS[SQUAD]};
 const CLOUD = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
 /* MODO PÚBLICO (somente leitura): acesse o app com ?publico no fim da URL,
@@ -401,6 +414,7 @@ const rowToMatch = r => ({
   starters:Array.isArray(r.starters)?r.starters:[],
   archived:r.archived===true,
   status:r.status||"final", events:Array.isArray(r.events)?r.events:[], clock:r.clock||null,
+  venue:r.venue||"", kickoff:r.kickoff||"", kit:r.kit||"", positions:(r.positions&&typeof r.positions==="object")?r.positions:{},
   lineupComplete:r.lineup_complete!==false, notes:r.notes||""
 });
 const matchToRow = m => ({
@@ -409,6 +423,7 @@ const matchToRow = m => ({
   lineup:m.lineup||[], scorers:m.scorers||[], assists:m.assists||[],
   starters:m.starters||[], archived:!!m.archived,
   status:m.status||"final", events:m.events||[], clock:m.clock||null, squad:SQUAD,
+  venue:m.venue||null, kickoff:m.kickoff||null, kit:m.kit||null, positions:m.positions||{},
   lineup_complete:!!m.lineupComplete, notes:m.notes||"", updated_at:new Date().toISOString()
 });
 
@@ -726,12 +741,21 @@ function viewAtletas(s){
 }
 
 /* ---------- Partidas ---------- */
+function posBadge(m,id){ const p=m.positions&&m.positions[id]; return p?`<span class="pos-badge">${esc(p)}</span> `:""; }
+function matchMeta(m){
+  const b=[];
+  if(m.kickoff) b.push(`🕐 ${esc(m.kickoff)}`);
+  if(m.venue)   b.push(`📍 ${esc(m.venue)}`);
+  if(m.kit)     b.push(`👕 ${esc(m.kit)}`);
+  return b.length? `<div class="mc-meta">${b.join(" · ")}</div>` : "";
+}
 function lineupSummary(m){
   const st=(m.starters||[]);
   const bench=(m.lineup||[]).filter(id=>!st.includes(id));
   let html="";
-  if(st.length) html+=`<div><span class="k">👥 Titulares:</span> ${st.map(id=>esc(nameOf(id))).join(", ")}</div>`;
-  if(bench.length) html+=`<div><span class="k">🔁 Banco:</span> ${bench.map(id=>esc(nameOf(id))).join(", ")}</div>`;
+  const fmt=id=>`${posBadge(m,id)}${esc(nameOf(id))}`;
+  if(st.length) html+=`<div><span class="k">👥 Titulares:</span> ${st.map(fmt).join(", ")}</div>`;
+  if(bench.length) html+=`<div><span class="k">🔁 Banco:</span> ${bench.map(fmt).join(", ")}</div>`;
   if(!st.length && !bench.length) html=`<div class="muted">Sem relacionados</div>`;
   return html;
 }
@@ -761,6 +785,7 @@ function matchCard(m){
     <div class="mc-detail">
       ${sc?`<div><span class="k">⚽ Gols:</span> ${sc}</div>`:`<div class="muted">Sem gols registrados</div>`}
       ${as?`<div><span class="k">🅰️ Assist.:</span> ${as}</div>`:""}
+      ${matchMeta(m)}
       ${lineupSummary(m)}
       ${tags}
     </div>
@@ -946,8 +971,8 @@ function viewLive(s){
                                       : `<span class="lv-chip pause">⏸ Pausado · ${per}º tempo</span>`))
     : sched? `<span class="lv-chip ag">📅 Agendada</span>` : `<span class="lv-chip fin">🏁 Encerrada</span>`;
   const evs=[...(m.events||[])].reverse().map(ev=>`<div class="ev">${evLine(ev)}</div>`).join("") || `<div class="muted" style="padding:10px 14px 14px">Sem eventos ainda.</div>`;
-  const onfChips=[...onf].map(id=>`<span class="chip on" style="cursor:default">${esc(nameOf(id))}</span>`).join("")||`<span class="muted">— sem titulares definidos: edite a partida e marque as estrelas (★) —</span>`;
-  const bench=(m.lineup||[]).filter(id=>!onf.has(id)).map(id=>`<span class="chip" style="cursor:default">${esc(nameOf(id))}</span>`).join("");
+  const onfChips=[...onf].map(id=>`<span class="chip on" style="cursor:default">${posBadge(m,id)}${esc(nameOf(id))}</span>`).join("")||`<span class="muted">— sem titulares definidos: edite a partida e marque as estrelas (★) —</span>`;
+  const bench=(m.lineup||[]).filter(id=>!onf.has(id)).map(id=>`<span class="chip" style="cursor:default">${posBadge(m,id)}${esc(nameOf(id))}</span>`).join("");
   let controls="";
   if(!READONLY){
     if(sched) controls=`<div class="lv-actions"><button class="btn primary lv-big" data-act="live-start">▶ Iniciar 1º tempo</button></div>`;
@@ -977,6 +1002,7 @@ function viewLive(s){
           <div class="lv-date">${fmtDate(m.date)}</div></div>
         <div class="lv-team">${esc(m.opponent)}</div>
       </div>
+      ${matchMeta(m)?`<div class="lv-meta">${matchMeta(m).replace(/<div class="mc-meta">|<\/div>/g,"")}</div>`:""}
       ${controls}
       ${picker}
     </div>
@@ -1094,6 +1120,11 @@ function formHTML(){
           <option value="final" ${f.status!=="scheduled"?"selected":""}>Encerrada — lançar resultado agora</option>
           <option value="scheduled" ${f.status==="scheduled"?"selected":""}>📅 Agendada — jogo futuro (anotar ao vivo no dia)</option>
         </select></div>`:""}
+        <div class="frow">
+          <div class="field"><label>Horário</label><input type="time" id="f-kickoff" value="${esc(f.kickoff||"")}"></div>
+          <div class="field"><label>Uniforme</label><input type="text" id="f-kit" value="${esc(f.kit||"")}" placeholder="ex.: Verde" autocomplete="off"></div>
+        </div>
+        <div class="field"><label>Local</label><input type="text" id="f-venue" value="${esc(f.venue||"")}" placeholder="ex.: Parque da Mooca" autocomplete="off"></div>
         <div class="field"><label>Placar</label>
           <div class="placar">
             <div class="side"><div class="cap">Proleta</div><input type="number" min="0" id="f-gf" value="${f.goalsFor}"></div>
@@ -1105,7 +1136,7 @@ function formHTML(){
         <input type="text" id="f-search" class="lineup-search" placeholder="🔍 Buscar atleta pelo nome…" autocomplete="off" value="${esc(UI.lineupSearch||"")}">
         <div class="chips" id="f-chips"></div>
         <div class="add-athlete"><input type="text" id="f-newname" placeholder="+ Adicionar atleta ao elenco" autocomplete="off"><button class="btn sm" data-act="add-athlete">Adicionar</button></div>
-        <div class="subhead"><div class="t">Titular (★), gols e assistências</div></div>
+        <div class="subhead"><div class="t">Titular (★), posição, gols e assistências</div></div>
         <div id="f-ga-container"></div>
         <div class="tot-line" id="f-totals"></div>
         <div class="warn" id="f-warn"></div>
@@ -1152,13 +1183,14 @@ function renderLineupSection(){
     const head = `<div class="ga-head"><span>Atleta</span><span>Gols</span><span>Assist.</span></div>`;
     const rows = ordered.map(a=>{
       const g=f.scorers[a.id]||0, n=f.assists[a.id]||0, tit=f.starters.has(a.id);
-      return `<div class="ga-row"><div class="nm"><button class="tit-btn ${tit?"on":""}" data-act="titular" data-id="${a.id}" title="${tit?"Titular":"Marcar titular"}">${tit?"★":"☆"}</button> ${esc(a.name)}</div>
+      return `<div class="ga-row"><div class="nm"><button class="tit-btn ${tit?"on":""}" data-act="titular" data-id="${a.id}" title="${tit?"Titular":"Marcar titular"}">${tit?"★":"☆"}</button><input class="pos-inp" data-id="${a.id}" value="${esc(f.positions[a.id]||"")}" placeholder="pos" maxlength="9" autocomplete="off"> ${esc(a.name)}</div>
         <div class="stepper"><button data-act="g-" data-id="${a.id}">−</button><span class="val ${g?"":"zero"}" id="g-${a.id}">${g}</span><button data-act="g+" data-id="${a.id}">+</button></div>
         <div class="stepper"><button data-act="a-" data-id="${a.id}">−</button><span class="val ${n?"":"zero"}" id="a-${a.id}">${n}</span><button data-act="a+" data-id="${a.id}">+</button></div>
       </div>`;
     }).join("");
     const nTit=[...f.starters].filter(id=>f.lineup.has(id)).length;
     cont.innerHTML = `<div class="ga-list">${head}${rows}</div><div class="tit-count">★ ${nTit} titular${nTit!==1?"es":""} marcado${nTit!==1?"s":""}</div>`;
+    cont.querySelectorAll(".pos-inp").forEach(inp=>{ inp.oninput=e=>{ const id=e.target.dataset.id, v=e.target.value; if(v&&v.trim()) f.positions[id]=v; else delete f.positions[id]; }; });
   }
   updateTotals();
 }
@@ -1237,7 +1269,9 @@ function bind(s){
     else if(act==="signout"){ if(confirm("Sair da conta?")) Store.signOut(); }
   };
   // filtro da aba Atletas (onchange = só ao confirmar, sem perder foco)
-  const ssel=el("squad-sel"); if(ssel) ssel.onchange=e=>{ const p=new URLSearchParams(location.search); if(e.target.value==="esporte") p.delete("elenco"); else p.set("elenco",e.target.value); const q=p.toString(); location.href=location.pathname+(q?"?"+q:""); };
+  const ssel=el("squad-sel"); if(ssel) ssel.onchange=e=>{ const p=new URLSearchParams(location.search); p.delete("jogo"); p.delete("aovivo");
+    if(e.target.value==="esporte") p.delete("elenco"); else p.set("elenco",e.target.value);
+    const q=p.toString(); location.href=location.pathname+(q?"?"+q:""); };
   // cronômetro do ao vivo (atualiza só o texto do relógio, sem re-render)
   if(window.__lt){ clearInterval(window.__lt); window.__lt=null; }
   if(UI.live){ const lm=DATA.matches.find(x=>x.id===UI.live);
@@ -1264,6 +1298,9 @@ function bind(s){
     el("f-ga").oninput=e=>{UI.form.goalsAgainst=parseInt(e.target.value)||0;};
     el("f-complete").onchange=e=>UI.form.lineupComplete=e.target.checked;
     const fst=el("f-status"); if(fst) fst.onchange=e=>{ UI.form.status=e.target.value; };
+    const fv=el("f-venue"); if(fv) fv.oninput=e=>UI.form.venue=e.target.value;
+    const fkk=el("f-kickoff"); if(fkk) fkk.oninput=e=>UI.form.kickoff=e.target.value;
+    const fkt=el("f-kit"); if(fkt) fkt.oninput=e=>UI.form.kit=e.target.value;
     el("f-newname").onkeydown=e=>{ if(e.key==="Enter"){ e.preventDefault(); addAthlete(); } };
     const srch=el("f-search"); if(srch) srch.oninput=e=>{ UI.lineupSearch=e.target.value; renderLineupSection(); };
     renderLineupSection();
@@ -1280,10 +1317,12 @@ function openForm(id){
     UI.form={ id:m.id, date:m.date, opponent:m.opponent, goalsFor:m.goalsFor, goalsAgainst:m.goalsAgainst,
       lineup:new Set(m.lineup||[]), starters:new Set(m.starters||[]),
       scorers:Object.fromEntries((m.scorers||[]).map(x=>[x.a,x.g])),
-      assists:Object.fromEntries((m.assists||[]).map(x=>[x.a,x.n])), lineupComplete:m.lineupComplete!==false, status:m.status||"final" };
+      assists:Object.fromEntries((m.assists||[]).map(x=>[x.a,x.n])), lineupComplete:m.lineupComplete!==false, status:m.status||"final",
+      venue:m.venue||"", kickoff:m.kickoff||"", kit:m.kit||"", positions:Object.assign({}, m.positions||{}) };
   } else {
     const today=todayISO();
-    UI.form={ id:null, date:today, opponent:"", goalsFor:0, goalsAgainst:0, lineup:new Set(), starters:new Set(), scorers:{}, assists:{}, lineupComplete:true, status:"final" };
+    UI.form={ id:null, date:today, opponent:"", goalsFor:0, goalsAgainst:0, lineup:new Set(), starters:new Set(), scorers:{}, assists:{}, lineupComplete:true, status:"final",
+      venue:"", kickoff:"", kit:"", positions:{} };
   }
   render();
 }
@@ -1342,7 +1381,9 @@ function saveForm(){
     scorers:Object.entries(f.scorers).map(([a,g])=>({a,g})),
     assists:Object.entries(f.assists).map(([a,n])=>({a,n})),
     lineupComplete: !!f.lineupComplete, notes:"", archived: prev? !!prev.archived : false,
-    status: f.status||"final", events: prev? (prev.events||[]) : [], clock: prev? (prev.clock||null) : null
+    status: f.status||"final", events: prev? (prev.events||[]) : [], clock: prev? (prev.clock||null) : null,
+    venue:(f.venue||"").trim(), kickoff:(f.kickoff||"").trim(), kit:(f.kit||"").trim(),
+    positions:Object.fromEntries(Object.entries(f.positions||{}).filter(([id,v])=>f.lineup.has(id)&&v&&v.trim()).map(([id,v])=>[id,v.trim().toUpperCase()]))
   };
   if(isEdit){ const i=DATA.matches.findIndex(m=>m.id===f.id); DATA.matches[i]=rec; }
   else DATA.matches.push(rec);
@@ -1464,10 +1505,27 @@ async function reloadFromStore(){
 }
 function afterFormClose(){ if(pendingReload){ pendingReload=false; reloadFromStore(); } }
 
+/* abre direto a partida pedida na URL. Roda uma vez: se a pessoa voltar, não sequestra a navegação. */
+function applyDeepLink(){
+  if(DEEP_ID){
+    const m=DATA.matches.find(x=>x.id===DEEP_ID);
+    if(m){ UI.live=m.id; UI.view="partidas"; return; }
+    toast("Partida não encontrada.");
+  }
+  if(DEEP_LIVE){
+    const ao=activeMatches().find(m=>m.status==="live");
+    const ag=sortMatches(activeMatches().filter(m=>m.status==="scheduled"))[0];
+    const alvo=ao||ag;
+    if(alvo){ UI.live=alvo.id; UI.view="partidas"; return; }
+    UI.view="partidas"; toast("Nenhuma partida ao vivo agora.");
+  }
+}
 async function boot(){
   DATA=await Store.loadState();
   if(!DATA.team) DATA.team=TEAM;
-  UI.view="geral"; render();
+  UI.view="geral";
+  applyDeepLink();
+  render();
   Store.subscribe(()=>scheduleReload());
 }
 
