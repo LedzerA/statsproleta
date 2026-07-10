@@ -1,0 +1,1067 @@
+{
+ "squads": [
+  {
+   "id": "esporte",
+   "name": "Esporte",
+   "position": 1
+  }
+ ],
+ "athletes": [
+  {
+   "id": "a1",
+   "squad_id": "esporte",
+   "name": "Bibico"
+  },
+  {
+   "id": "a2",
+   "squad_id": "esporte",
+   "name": "Dudu"
+  },
+  {
+   "id": "a3",
+   "squad_id": "esporte",
+   "name": "Rosalvo"
+  },
+  {
+   "id": "a4",
+   "squad_id": "esporte",
+   "name": "Vini França"
+  },
+  {
+   "id": "a5",
+   "squad_id": "esporte",
+   "name": "Hashi"
+  },
+  {
+   "id": "a6",
+   "squad_id": "esporte",
+   "name": "Caio"
+  },
+  {
+   "id": "a7",
+   "squad_id": "esporte",
+   "name": "André"
+  },
+  {
+   "id": "a8",
+   "squad_id": "esporte",
+   "name": "Fabiano"
+  },
+  {
+   "id": "a9",
+   "squad_id": "esporte",
+   "name": "Digão"
+  },
+  {
+   "id": "a10",
+   "squad_id": "esporte",
+   "name": "Wellington"
+  },
+  {
+   "id": "a11",
+   "squad_id": "esporte",
+   "name": "Rennan"
+  },
+  {
+   "id": "a12",
+   "squad_id": "esporte",
+   "name": "Meloni"
+  },
+  {
+   "id": "a13",
+   "squad_id": "esporte",
+   "name": "Renan"
+  },
+  {
+   "id": "a14",
+   "squad_id": "esporte",
+   "name": "Eloy"
+  },
+  {
+   "id": "a15",
+   "squad_id": "esporte",
+   "name": "Macapá"
+  },
+  {
+   "id": "a16",
+   "squad_id": "esporte",
+   "name": "Belaz"
+  },
+  {
+   "id": "a17",
+   "squad_id": "esporte",
+   "name": "Rafael"
+  },
+  {
+   "id": "a18",
+   "squad_id": "esporte",
+   "name": "Siqueira"
+  },
+  {
+   "id": "a19",
+   "squad_id": "esporte",
+   "name": "Luis E."
+  },
+  {
+   "id": "a20",
+   "squad_id": "esporte",
+   "name": "Albano"
+  },
+  {
+   "id": "a21",
+   "squad_id": "esporte",
+   "name": "Wez"
+  },
+  {
+   "id": "a22",
+   "squad_id": "esporte",
+   "name": "Gzus"
+  },
+  {
+   "id": "a23",
+   "squad_id": "esporte",
+   "name": "Lima"
+  },
+  {
+   "id": "a24",
+   "squad_id": "esporte",
+   "name": "Brendon"
+  },
+  {
+   "id": "a25",
+   "squad_id": "esporte",
+   "name": "Detona"
+  },
+  {
+   "id": "a26",
+   "squad_id": "esporte",
+   "name": "Euller"
+  },
+  {
+   "id": "a27",
+   "squad_id": "esporte",
+   "name": "Edu"
+  },
+  {
+   "id": "a28",
+   "squad_id": "esporte",
+   "name": "Rufus"
+  },
+  {
+   "id": "a29",
+   "squad_id": "esporte",
+   "name": "Leone"
+  },
+  {
+   "id": "a30",
+   "squad_id": "esporte",
+   "name": "Pelota"
+  },
+  {
+   "id": "a31",
+   "squad_id": "esporte",
+   "name": "Romario"
+  },
+  {
+   "id": "a32",
+   "squad_id": "esporte",
+   "name": "W. Felipe"
+  },
+  {
+   "id": "a33",
+   "squad_id": "esporte",
+   "name": "Gui Dantas"
+  },
+  {
+   "id": "a34",
+   "squad_id": "esporte",
+   "name": "Barone"
+  },
+  {
+   "id": "a35",
+   "squad_id": "esporte",
+   "name": "Igor"
+  },
+  {
+   "id": "a36",
+   "squad_id": "esporte",
+   "name": "Amaral"
+  },
+  {
+   "id": "a37",
+   "squad_id": "esporte",
+   "name": "Diego"
+  },
+  {
+   "id": "a38",
+   "squad_id": "esporte",
+   "name": "Leodan"
+  },
+  {
+   "id": "a39",
+   "squad_id": "esporte",
+   "name": "Lingo"
+  },
+  {
+   "id": "a40",
+   "squad_id": "esporte",
+   "name": "Lucas Vini"
+  },
+  {
+   "id": "a41",
+   "squad_id": "esporte",
+   "name": "Xande"
+  },
+  {
+   "id": "a42",
+   "squad_id": "esporte",
+   "name": "PH"
+  },
+  {
+   "id": "a43",
+   "squad_id": "esporte",
+   "name": "Salvador"
+  }
+ ],
+ "matches": [
+  {
+   "id": "m1",
+   "squad_id": "esporte",
+   "date": "2026-01-07",
+   "opponent": "Pç Kant",
+   "status": "encerrada",
+   "goals_for": 1,
+   "goals_against": 3,
+   "lineup": [
+    "a20"
+   ],
+   "scorers": [
+    {
+     "a": "a20",
+     "g": 1
+    }
+   ],
+   "assists": [],
+   "lineup_complete": false,
+   "notes": "",
+   "started_at": null
+  },
+  {
+   "id": "m2",
+   "squad_id": "esporte",
+   "date": "2026-01-17",
+   "opponent": "Botafogo Vl Bela",
+   "status": "encerrada",
+   "goals_for": 5,
+   "goals_against": 3,
+   "lineup": [
+    "a11",
+    "a2",
+    "a10",
+    "a7",
+    "a3"
+   ],
+   "scorers": [
+    {
+     "a": "a11",
+     "g": 3
+    },
+    {
+     "a": "a2",
+     "g": 2
+    }
+   ],
+   "assists": [
+    {
+     "a": "a10",
+     "n": 1
+    },
+    {
+     "a": "a7",
+     "n": 1
+    },
+    {
+     "a": "a3",
+     "n": 1
+    }
+   ],
+   "lineup_complete": false,
+   "notes": "",
+   "started_at": null
+  },
+  {
+   "id": "m3",
+   "squad_id": "esporte",
+   "date": "2026-01-20",
+   "opponent": "Inker",
+   "status": "encerrada",
+   "goals_for": 1,
+   "goals_against": 4,
+   "lineup": [
+    "a7"
+   ],
+   "scorers": [
+    {
+     "a": "a7",
+     "g": 1
+    }
+   ],
+   "assists": [],
+   "lineup_complete": false,
+   "notes": "",
+   "started_at": null
+  },
+  {
+   "id": "m4",
+   "squad_id": "esporte",
+   "date": "2026-01-23",
+   "opponent": "EC Nacional Mooca",
+   "status": "encerrada",
+   "goals_for": 2,
+   "goals_against": 1,
+   "lineup": [
+    "a8"
+   ],
+   "scorers": [
+    {
+     "a": "a8",
+     "g": 2
+    }
+   ],
+   "assists": [],
+   "lineup_complete": false,
+   "notes": "",
+   "started_at": null
+  },
+  {
+   "id": "m5",
+   "squad_id": "esporte",
+   "date": "2026-01-31",
+   "opponent": "Maque FC",
+   "status": "encerrada",
+   "goals_for": 1,
+   "goals_against": 2,
+   "lineup": [
+    "a3",
+    "a1"
+   ],
+   "scorers": [
+    {
+     "a": "a3",
+     "g": 1
+    }
+   ],
+   "assists": [
+    {
+     "a": "a1",
+     "n": 1
+    }
+   ],
+   "lineup_complete": false,
+   "notes": "",
+   "started_at": null
+  },
+  {
+   "id": "m6",
+   "squad_id": "esporte",
+   "date": "2026-02-03",
+   "opponent": "Juventude",
+   "status": "encerrada",
+   "goals_for": 1,
+   "goals_against": 4,
+   "lineup": [
+    "a16",
+    "a12"
+   ],
+   "scorers": [
+    {
+     "a": "a16",
+     "g": 1
+    }
+   ],
+   "assists": [
+    {
+     "a": "a12",
+     "n": 1
+    }
+   ],
+   "lineup_complete": false,
+   "notes": "",
+   "started_at": null
+  },
+  {
+   "id": "m7",
+   "squad_id": "esporte",
+   "date": "2026-02-07",
+   "opponent": "Maque FC",
+   "status": "encerrada",
+   "goals_for": 2,
+   "goals_against": 3,
+   "lineup": [
+    "a3",
+    "a8",
+    "a1"
+   ],
+   "scorers": [
+    {
+     "a": "a3",
+     "g": 1
+    },
+    {
+     "a": "a8",
+     "g": 1
+    }
+   ],
+   "assists": [
+    {
+     "a": "a8",
+     "n": 1
+    },
+    {
+     "a": "a1",
+     "n": 1
+    }
+   ],
+   "lineup_complete": false,
+   "notes": "",
+   "started_at": null
+  },
+  {
+   "id": "m8",
+   "squad_id": "esporte",
+   "date": "2026-02-14",
+   "opponent": "Atletico Mangalot",
+   "status": "encerrada",
+   "goals_for": 3,
+   "goals_against": 2,
+   "lineup": [
+    "a12",
+    "a11",
+    "a2",
+    "a8"
+   ],
+   "scorers": [
+    {
+     "a": "a12",
+     "g": 1
+    },
+    {
+     "a": "a11",
+     "g": 1
+    },
+    {
+     "a": "a2",
+     "g": 1
+    }
+   ],
+   "assists": [
+    {
+     "a": "a8",
+     "n": 1
+    },
+    {
+     "a": "a11",
+     "n": 1
+    }
+   ],
+   "lineup_complete": false,
+   "notes": "",
+   "started_at": null
+  },
+  {
+   "id": "m9",
+   "squad_id": "esporte",
+   "date": "2026-02-21",
+   "opponent": "Sufoco FC",
+   "status": "encerrada",
+   "goals_for": 1,
+   "goals_against": 4,
+   "lineup": [
+    "a19",
+    "a12"
+   ],
+   "scorers": [
+    {
+     "a": "a19",
+     "g": 1
+    }
+   ],
+   "assists": [
+    {
+     "a": "a12",
+     "n": 1
+    }
+   ],
+   "lineup_complete": false,
+   "notes": "",
+   "started_at": null
+  },
+  {
+   "id": "m10",
+   "squad_id": "esporte",
+   "date": "2026-02-24",
+   "opponent": "Catadão",
+   "status": "encerrada",
+   "goals_for": 1,
+   "goals_against": 1,
+   "lineup": [
+    "a14"
+   ],
+   "scorers": [
+    {
+     "a": "a14",
+     "g": 1
+    }
+   ],
+   "assists": [],
+   "lineup_complete": false,
+   "notes": "",
+   "started_at": null
+  },
+  {
+   "id": "m11",
+   "squad_id": "esporte",
+   "date": "2026-02-28",
+   "opponent": "Das Antigas",
+   "status": "encerrada",
+   "goals_for": 1,
+   "goals_against": 2,
+   "lineup": [
+    "a2"
+   ],
+   "scorers": [
+    {
+     "a": "a2",
+     "g": 1
+    }
+   ],
+   "assists": [],
+   "lineup_complete": false,
+   "notes": "",
+   "started_at": null
+  },
+  {
+   "id": "m12",
+   "squad_id": "esporte",
+   "date": "2026-03-07",
+   "opponent": "Explosão FC",
+   "status": "encerrada",
+   "goals_for": 3,
+   "goals_against": 3,
+   "lineup": [
+    "a8",
+    "a27",
+    "a11",
+    "a10",
+    "a4"
+   ],
+   "scorers": [
+    {
+     "a": "a8",
+     "g": 1
+    },
+    {
+     "a": "a27",
+     "g": 1
+    },
+    {
+     "a": "a11",
+     "g": 1
+    }
+   ],
+   "assists": [
+    {
+     "a": "a10",
+     "n": 1
+    },
+    {
+     "a": "a4",
+     "n": 1
+    }
+   ],
+   "lineup_complete": false,
+   "notes": "",
+   "started_at": null
+  },
+  {
+   "id": "m13",
+   "squad_id": "esporte",
+   "date": "2026-03-14",
+   "opponent": "De Primeira",
+   "status": "encerrada",
+   "goals_for": 3,
+   "goals_against": 3,
+   "lineup": [
+    "a10",
+    "a8",
+    "a23",
+    "a2"
+   ],
+   "scorers": [
+    {
+     "a": "a10",
+     "g": 1
+    },
+    {
+     "a": "a8",
+     "g": 1
+    },
+    {
+     "a": "a23",
+     "g": 1
+    }
+   ],
+   "assists": [
+    {
+     "a": "a8",
+     "n": 1
+    },
+    {
+     "a": "a2",
+     "n": 1
+    }
+   ],
+   "lineup_complete": false,
+   "notes": "",
+   "started_at": null
+  },
+  {
+   "id": "m14",
+   "squad_id": "esporte",
+   "date": "2026-03-21",
+   "opponent": "AD Ponte Grande",
+   "status": "encerrada",
+   "goals_for": 5,
+   "goals_against": 4,
+   "lineup": [
+    "a1",
+    "a8",
+    "a2",
+    "a4",
+    "a7",
+    "a33",
+    "a17"
+   ],
+   "scorers": [
+    {
+     "a": "a1",
+     "g": 1
+    },
+    {
+     "a": "a8",
+     "g": 2
+    },
+    {
+     "a": "a2",
+     "g": 2
+    }
+   ],
+   "assists": [
+    {
+     "a": "a4",
+     "n": 1
+    },
+    {
+     "a": "a7",
+     "n": 1
+    },
+    {
+     "a": "a33",
+     "n": 2
+    },
+    {
+     "a": "a17",
+     "n": 1
+    }
+   ],
+   "lineup_complete": false,
+   "notes": "",
+   "started_at": null
+  },
+  {
+   "id": "m15",
+   "squad_id": "esporte",
+   "date": "2026-03-29",
+   "opponent": "Futnoia",
+   "status": "encerrada",
+   "goals_for": 7,
+   "goals_against": 0,
+   "lineup": [
+    "a11",
+    "a8",
+    "a16",
+    "a4",
+    "a26",
+    "a3",
+    "a12",
+    "a24"
+   ],
+   "scorers": [
+    {
+     "a": "a11",
+     "g": 3
+    },
+    {
+     "a": "a8",
+     "g": 1
+    },
+    {
+     "a": "a16",
+     "g": 1
+    },
+    {
+     "a": "a4",
+     "g": 1
+    },
+    {
+     "a": "a26",
+     "g": 1
+    }
+   ],
+   "assists": [
+    {
+     "a": "a3",
+     "n": 1
+    },
+    {
+     "a": "a8",
+     "n": 1
+    },
+    {
+     "a": "a11",
+     "n": 2
+    },
+    {
+     "a": "a12",
+     "n": 1
+    },
+    {
+     "a": "a24",
+     "n": 1
+    }
+   ],
+   "lineup_complete": false,
+   "notes": "",
+   "started_at": null
+  },
+  {
+   "id": "m16",
+   "squad_id": "esporte",
+   "date": "2026-04-09",
+   "opponent": "Al Phumaça",
+   "status": "encerrada",
+   "goals_for": 0,
+   "goals_against": 1,
+   "lineup": [],
+   "scorers": [],
+   "assists": [],
+   "lineup_complete": false,
+   "notes": "",
+   "started_at": null
+  },
+  {
+   "id": "m17",
+   "squad_id": "esporte",
+   "date": "2026-04-11",
+   "opponent": "Pinguim FC",
+   "status": "encerrada",
+   "goals_for": 0,
+   "goals_against": 2,
+   "lineup": [],
+   "scorers": [],
+   "assists": [],
+   "lineup_complete": false,
+   "notes": "",
+   "started_at": null
+  },
+  {
+   "id": "m18",
+   "squad_id": "esporte",
+   "date": "2026-04-15",
+   "opponent": "Formigueiro",
+   "status": "encerrada",
+   "goals_for": 3,
+   "goals_against": 6,
+   "lineup": [
+    "a11",
+    "a8",
+    "a10"
+   ],
+   "scorers": [
+    {
+     "a": "a11",
+     "g": 1
+    },
+    {
+     "a": "a8",
+     "g": 2
+    }
+   ],
+   "assists": [
+    {
+     "a": "a10",
+     "n": 1
+    },
+    {
+     "a": "a11",
+     "n": 1
+    }
+   ],
+   "lineup_complete": false,
+   "notes": "",
+   "started_at": null
+  },
+  {
+   "id": "m19",
+   "squad_id": "esporte",
+   "date": "2026-04-18",
+   "opponent": "Proleta Vetera/Diverso",
+   "status": "encerrada",
+   "goals_for": 0,
+   "goals_against": 1,
+   "lineup": [],
+   "scorers": [],
+   "assists": [],
+   "lineup_complete": false,
+   "notes": "",
+   "started_at": null
+  },
+  {
+   "id": "m20",
+   "squad_id": "esporte",
+   "date": "2026-04-26",
+   "opponent": "LIbertarios",
+   "status": "encerrada",
+   "goals_for": 3,
+   "goals_against": 1,
+   "lineup": [
+    "a8",
+    "a11",
+    "a2",
+    "a3",
+    "a25"
+   ],
+   "scorers": [
+    {
+     "a": "a8",
+     "g": 1
+    },
+    {
+     "a": "a11",
+     "g": 1
+    },
+    {
+     "a": "a2",
+     "g": 1
+    }
+   ],
+   "assists": [
+    {
+     "a": "a3",
+     "n": 1
+    },
+    {
+     "a": "a25",
+     "n": 1
+    }
+   ],
+   "lineup_complete": false,
+   "notes": "",
+   "started_at": null
+  },
+  {
+   "id": "m21",
+   "squad_id": "esporte",
+   "date": "2026-05-05",
+   "opponent": "Código Verde",
+   "status": "encerrada",
+   "goals_for": 0,
+   "goals_against": 0,
+   "lineup": [],
+   "scorers": [],
+   "assists": [],
+   "lineup_complete": false,
+   "notes": "",
+   "started_at": null
+  },
+  {
+   "id": "m22",
+   "squad_id": "esporte",
+   "date": "2026-05-09",
+   "opponent": "Time do Gueto",
+   "status": "encerrada",
+   "goals_for": 2,
+   "goals_against": 4,
+   "lineup": [
+    "a10",
+    "a7",
+    "a2",
+    "a3"
+   ],
+   "scorers": [
+    {
+     "a": "a10",
+     "g": 1
+    },
+    {
+     "a": "a7",
+     "g": 1
+    }
+   ],
+   "assists": [
+    {
+     "a": "a2",
+     "n": 1
+    },
+    {
+     "a": "a3",
+     "n": 1
+    }
+   ],
+   "lineup_complete": false,
+   "notes": "",
+   "started_at": null
+  },
+  {
+   "id": "m23",
+   "squad_id": "esporte",
+   "date": "2026-05-16",
+   "opponent": "Samba São Jorge",
+   "status": "encerrada",
+   "goals_for": 1,
+   "goals_against": 3,
+   "lineup": [],
+   "scorers": [],
+   "assists": [],
+   "lineup_complete": false,
+   "notes": "",
+   "started_at": null
+  },
+  {
+   "id": "m24",
+   "squad_id": "esporte",
+   "date": "2026-05-24",
+   "opponent": "XI De Setembro",
+   "status": "encerrada",
+   "goals_for": 0,
+   "goals_against": 1,
+   "lineup": [],
+   "scorers": [],
+   "assists": [],
+   "lineup_complete": false,
+   "notes": "",
+   "started_at": null
+  },
+  {
+   "id": "m25",
+   "squad_id": "esporte",
+   "date": "2026-05-30",
+   "opponent": "Corote Molotov",
+   "status": "encerrada",
+   "goals_for": 1,
+   "goals_against": 1,
+   "lineup": [
+    "a8"
+   ],
+   "scorers": [
+    {
+     "a": "a8",
+     "g": 1
+    }
+   ],
+   "assists": [],
+   "lineup_complete": false,
+   "notes": "",
+   "started_at": null
+  },
+  {
+   "id": "m26",
+   "squad_id": "esporte",
+   "date": "2026-06-07",
+   "opponent": "Catadão",
+   "status": "encerrada",
+   "goals_for": 1,
+   "goals_against": 1,
+   "lineup": [
+    "a2",
+    "a11"
+   ],
+   "scorers": [
+    {
+     "a": "a2",
+     "g": 1
+    }
+   ],
+   "assists": [
+    {
+     "a": "a11",
+     "n": 1
+    }
+   ],
+   "lineup_complete": false,
+   "notes": "",
+   "started_at": null
+  },
+  {
+   "id": "m27",
+   "squad_id": "esporte",
+   "date": "2026-06-20",
+   "opponent": "Só de Virada",
+   "status": "encerrada",
+   "goals_for": 3,
+   "goals_against": 0,
+   "lineup": [
+    "a2",
+    "a11"
+   ],
+   "scorers": [
+    {
+     "a": "a2",
+     "g": 2
+    },
+    {
+     "a": "a11",
+     "g": 1
+    }
+   ],
+   "assists": [
+    {
+     "a": "a2",
+     "n": 1
+    }
+   ],
+   "lineup_complete": false,
+   "notes": "",
+   "started_at": null
+  },
+  {
+   "id": "m28",
+   "squad_id": "esporte",
+   "date": "2026-06-27",
+   "opponent": "TAP",
+   "status": "encerrada",
+   "goals_for": 1,
+   "goals_against": 0,
+   "lineup": [
+    "a12",
+    "a2"
+   ],
+   "scorers": [
+    {
+     "a": "a12",
+     "g": 1
+    }
+   ],
+   "assists": [
+    {
+     "a": "a2",
+     "n": 1
+    }
+   ],
+   "lineup_complete": false,
+   "notes": "",
+   "started_at": null
+  }
+ ],
+ "match_events": []
+}
