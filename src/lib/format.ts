@@ -1,4 +1,4 @@
-import type { Match, Result } from "./types";
+import type { Clock, Match, Result } from "./types";
 
 export function fmtDate(iso: string): string {
   if (!iso) return "";
@@ -61,4 +61,25 @@ export function sortMatches(list: Match[]): Match[] {
   return [...list].sort((a, b) =>
     a.date < b.date ? -1 : a.date > b.date ? 1 : a.id < b.id ? -1 : 1
   );
+}
+
+/** Segundos decorridos do período atual do cronômetro. */
+export function clockSeconds(clock: Clock | null | undefined): number {
+  if (!clock) return 0;
+  const extra = clock.running && clock.at
+    ? Math.max(0, (Date.now() - new Date(clock.at).getTime()) / 1000)
+    : 0;
+  return Math.round(clock.base + extra);
+}
+
+export function fmtClock(totalSeconds: number): string {
+  const m = Math.floor(totalSeconds / 60);
+  const s = Math.floor(totalSeconds % 60);
+  return `${m}:${String(s).padStart(2, "0")}`;
+}
+
+/** Minuto do lance para exibição ("2T 12'"). */
+export function fmtEventMinute(minute: number | null, period?: number): string {
+  if (minute == null) return "";
+  return `${period === 2 ? "2T " : period === 1 ? "1T " : ""}${minute}'`;
 }

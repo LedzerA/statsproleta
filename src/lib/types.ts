@@ -27,6 +27,16 @@ export interface Assist {
   n: number; // assistências
 }
 
+/** Cronômetro da partida.
+    base = segundos acumulados no período até a última mudança;
+    at   = instante ISO da última mudança (para somar tempo quando running). */
+export interface Clock {
+  base: number;
+  period: 1 | 2;
+  running: boolean;
+  at?: string | null;
+}
+
 export interface Match {
   id: string;
   squad_id: string;
@@ -35,11 +45,18 @@ export interface Match {
   status: MatchStatus;
   goals_for: number;
   goals_against: number;
-  lineup: string[];
+  lineup: string[]; // todos os relacionados
+  starters: string[]; // titulares (subconjunto do lineup)
+  positions: Record<string, string>; // {atletaId: "posição"}
   scorers: Scorer[];
   assists: Assist[];
   lineup_complete: boolean;
   notes: string;
+  venue: string | null; // local
+  kickoff: string | null; // horário ("11:30")
+  kit: string | null; // uniforme
+  archived: boolean;
+  clock: Clock | null;
   started_at: string | null;
 }
 
@@ -51,15 +68,21 @@ export type EventType =
   | "penalti_contra"
   | "fim_1t"
   | "inicio_2t"
-  | "fim_jogo";
+  | "fim_jogo"
+  | "sub";
 
 export interface EventPayload {
-  title: string;
-  body: string;
+  title?: string;
+  body?: string;
   goals_for?: number;
   goals_against?: number;
   scorer?: string;
   assist?: string;
+  in?: string; // id de quem entra (sub)
+  out?: string; // id de quem sai (sub)
+  period?: number;
+  seconds?: number;
+  legacy?: boolean;
 }
 
 export interface MatchEvent {

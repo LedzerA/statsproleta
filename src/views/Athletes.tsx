@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useStore } from "../state/store";
+import { navigate } from "../lib/router";
 import { dec, pct } from "../lib/format";
 import type { PlayerStats } from "../lib/stats";
 
@@ -72,7 +73,7 @@ export default function Athletes() {
             </thead>
             <tbody>
               {list.map((p, i) => (
-                <tr key={p.id}>
+                <tr key={p.id} className="row-link" onClick={() => navigate(`#/atleta/${p.id}`)}>
                   {COLS.map((c) => {
                     if (c.k === "name") {
                       return <td key={c.k} className="name"><span className="rk">{i + 1}</span>{p.name}</td>;

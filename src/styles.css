@@ -202,7 +202,17 @@ code { background: rgba(0, 0, 0, .25); padding: 1px 5px; border-radius: 5px; fon
 .hl {
   background: var(--creme-2); border-radius: var(--r); padding: 14px 17px;
   display: flex; align-items: center; gap: 13px; box-shadow: var(--sombra); color: var(--carvao);
+  border: none; width: 100%; text-align: left; font: inherit;
 }
+button.hl { cursor: pointer; }
+button.hl:hover { filter: brightness(1.02); }
+button.card.clickable {
+  cursor: pointer; text-align: left; font: inherit; border: none; width: 100%;
+}
+button.card.clickable:hover { filter: brightness(1.02); }
+tr.row-link { cursor: pointer; }
+tr.row-link:hover td { background: rgba(26, 160, 74, .09); }
+tr.row-link:hover td:first-child { background: rgba(26, 160, 74, .12); }
 .hl .medal {
   width: 44px; height: 44px; border-radius: 12px; background: var(--verde-700); color: var(--gold);
   display: grid; place-items: center; font-size: 21px; flex-shrink: 0;
@@ -314,6 +324,12 @@ table.stats .muted { color: rgba(50, 75, 64, .55); }
 .sh-teams { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; }
 .sh-team { font-family: 'Zilla Slab', serif; font-size: 18px; font-weight: 700; color: var(--creme-3); overflow-wrap: anywhere; }
 .sh-score { font-size: 44px; font-weight: 700; color: var(--creme-3); line-height: 1; white-space: nowrap; }
+.sh-clock {
+  display: inline-block; margin-top: 12px; padding: 4px 14px; border-radius: 20px;
+  background: rgba(0, 0, 0, .25); border: 1px solid var(--linha-forte);
+  font-size: 20px; font-weight: 700; color: var(--creme-3); letter-spacing: 1px;
+}
+.sh-info { margin-top: 12px; font-size: 13px; color: var(--verde-300); white-space: pre-wrap; }
 
 .live-controls { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
 .lc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -394,6 +410,8 @@ table.stats .muted { color: rgba(50, 75, 64, .55); }
   border-top: 1px solid rgba(15, 32, 25, .1); position: sticky; bottom: 0; background: var(--creme-2);
 }
 .field { margin-bottom: 15px; }
+.field-row { display: flex; gap: 10px; }
+.field-row .field { min-width: 0; }
 .field > label {
   display: block; font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
   color: var(--carvao-2); font-weight: 700; margin-bottom: 7px;
@@ -447,6 +465,33 @@ button.chip:hover { border-color: var(--verde-500); }
 .stepper .val { width: 26px; text-align: center; font-family: 'Zilla Slab', serif; font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; }
 .stepper .val.zero { color: rgba(15, 32, 25, .3); }
 .ga-empty { font-size: 13px; color: var(--carvao-2); padding: 10px 6px; font-style: italic; }
+
+/* titulares & posições (formulário) */
+.st-list { display: flex; flex-direction: column; gap: 2px; margin-top: 4px; }
+.st-row { display: grid; grid-template-columns: 34px 1fr 88px; gap: 8px; align-items: center; padding: 4px 6px; border-radius: 8px; }
+.st-row:nth-child(even) { background: rgba(15, 32, 25, .03); }
+.st-row .nm { font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.st-toggle {
+  width: 30px; height: 30px; border-radius: 7px; border: 1px solid rgba(15, 32, 25, .2);
+  background: var(--creme-3); color: rgba(15, 32, 25, .4); font-size: 16px; line-height: 1;
+  display: grid; place-items: center;
+}
+.st-toggle.on { background: var(--verde-700); border-color: var(--verde-700); color: var(--gold); }
+.st-pos {
+  width: 100%; padding: 6px 8px; border: 1px solid rgba(15, 32, 25, .2); border-radius: 8px;
+  background: var(--creme-3); color: var(--carvao); font-size: 13px; font-weight: 600; text-align: center;
+}
+.st-pos:focus { outline: none; border-color: var(--verde-500); }
+.esc-label {
+  font-size: 10.5px; letter-spacing: 1.2px; text-transform: uppercase; font-weight: 700;
+  color: var(--carvao-2); margin: 4px 0 7px;
+}
+.mm-contrib { font-size: 12px; flex-shrink: 0; }
+.linklike {
+  background: none; border: none; color: var(--verde-700); font-weight: 600;
+  cursor: pointer; font-size: 13px; padding: 0;
+}
+.linklike:hover { text-decoration: underline; }
 .warn {
   background: rgba(230, 185, 75, .16); border: 1px solid rgba(230, 185, 75, .45); border-radius: 9px;
   padding: 9px 12px; font-size: 12.5px; color: #7a5c0e; margin-top: 10px;

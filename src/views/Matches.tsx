@@ -84,6 +84,14 @@ export default function Matches({ openNew }: { openNew?: boolean }) {
               ? <span className="mc-badge live"><span className="pulse sm" />{statusLabel(m.status)}</span>
               : <span className={`mc-badge ${r.toLowerCase()}`}>{r}</span>}
         </div>
+        {scheduled && (m.venue || m.kickoff || m.kit) && (
+          <div className="mc-detail">
+            <div>
+              {[m.kickoff && `🕒 ${m.kickoff}`, m.venue && `📍 ${m.venue}`, m.kit && `👕 ${m.kit}`]
+                .filter(Boolean).join("  ·  ")}
+            </div>
+          </div>
+        )}
         {!scheduled && (
           <div className="mc-detail">
             {sc

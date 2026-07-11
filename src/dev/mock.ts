@@ -34,4 +34,7 @@ window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
   return realFetch(input as any, init);
 };
 
-console.info("%c[MOCK] Supabase simulado — dados de exemplo, nada é salvo.", "color:#e6b94b");
+// no mock você é "admin" para poder testar o fluxo completo (nada é salvo)
+(window as any).__MOCK_ADMIN__ = true;
+
+console.info("%c[MOCK] Supabase simulado — dados de exemplo, nada é salvo. Você é admin de mentira.", "color:#e6b94b");

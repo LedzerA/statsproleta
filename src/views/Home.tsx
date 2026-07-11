@@ -41,7 +41,11 @@ export default function Home() {
         <button className="next-match" onClick={() => navigate(`#/partida/${next.id}`)}>
           <span className="nm-tag">Próximo jogo</span>
           <b>{TEAM.short} × {next.opponent}</b>
-          <span className="muted">{fmtDate(next.date)}</span>
+          <span className="muted">
+            {fmtDate(next.date)}
+            {next.kickoff ? ` · ${next.kickoff}` : ""}
+            {next.venue ? ` · ${next.venue}` : ""}
+          </span>
         </button>
       )}
 
@@ -72,46 +76,46 @@ export default function Home() {
 
       <div className="highlight-row">
         {stats.artilheiro && (
-          <div className="hl">
+          <button className="hl" onClick={() => navigate(`#/atleta/${stats.artilheiro!.id}`)}>
             <div className="medal">⚽</div>
             <div>
               <div className="who">{stats.artilheiro.name}</div>
               <div className="role">Artilheiro</div>
             </div>
             <div className="val"><div className="n num">{stats.artilheiro.gols}</div><div className="u">gols</div></div>
-          </div>
+          </button>
         )}
         {stats.garcom && (
-          <div className="hl">
+          <button className="hl" onClick={() => navigate(`#/atleta/${stats.garcom!.id}`)}>
             <div className="medal">🅰️</div>
             <div>
               <div className="who">{stats.garcom.name}</div>
               <div className="role">Garçom</div>
             </div>
             <div className="val"><div className="n num">{stats.garcom.assist}</div><div className="u">assist.</div></div>
-          </div>
+          </button>
         )}
       </div>
 
       {(mg || pd) && (
         <div className="grid">
           {mg && (
-            <div className="card">
+            <button className="card clickable" onClick={() => navigate(`#/partida/${mg.m.id}`)}>
               <div className="stat-label">Maior goleada</div>
               <div className="stat-num num pos" style={{ fontSize: 26, marginTop: 6 }}>
                 {mg.m.goals_for}–{mg.m.goals_against}
               </div>
-              <div className="stat-sub">vs {mg.m.opponent} · {fmtDate(mg.m.date)}</div>
-            </div>
+              <div className="stat-sub">vs {mg.m.opponent} · {fmtDate(mg.m.date)} →</div>
+            </button>
           )}
           {pd && (
-            <div className="card">
+            <button className="card clickable" onClick={() => navigate(`#/partida/${pd.m.id}`)}>
               <div className="stat-label">Pior derrota</div>
               <div className="stat-num num neg" style={{ fontSize: 26, marginTop: 6 }}>
                 {pd.m.goals_for}–{pd.m.goals_against}
               </div>
-              <div className="stat-sub">vs {pd.m.opponent} · {fmtDate(pd.m.date)}</div>
-            </div>
+              <div className="stat-sub">vs {pd.m.opponent} · {fmtDate(pd.m.date)} →</div>
+            </button>
           )}
         </div>
       )}
@@ -149,7 +153,7 @@ export default function Home() {
               <thead><tr><th>Atleta</th><th>J</th><th>G</th><th>A</th><th>Part.</th><th>Part./J</th></tr></thead>
               <tbody>
                 {top.map((p, i) => (
-                  <tr key={p.id}>
+                  <tr key={p.id} className="row-link" onClick={() => navigate(`#/atleta/${p.id}`)}>
                     <td className="name"><span className="rk">{i + 1}</span>{p.name}</td>
                     <td className="cell-num">{p.jogos}</td>
                     <td className="cell-num">{p.gols}</td>

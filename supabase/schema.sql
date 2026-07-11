@@ -55,11 +55,18 @@ create table if not exists public.matches (
     check (status in ('agendada','ao_vivo_1t','intervalo','ao_vivo_2t','encerrada')),
   goals_for       int  not null default 0,
   goals_against   int  not null default 0,
-  lineup          jsonb not null default '[]',
+  lineup          jsonb not null default '[]',   -- todos os relacionados
+  starters        jsonb not null default '[]',   -- titulares (subconjunto do lineup)
+  positions       jsonb not null default '{}',   -- {atletaId: "posição"}
   scorers         jsonb not null default '[]',
   assists         jsonb not null default '[]',
   lineup_complete boolean not null default true,
   notes           text not null default '',
+  venue           text,                          -- local do jogo
+  kickoff         text,                          -- horário (ex.: "11:30")
+  kit             text,                          -- uniforme
+  archived        boolean not null default false,
+  clock           jsonb,                         -- cronômetro {base,period,running,at}
   started_at      timestamptz,
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now()
@@ -70,7 +77,7 @@ create table if not exists public.match_events (
   match_id   text not null references public.matches(id) on delete cascade,
   squad_id   text not null,
   type       text not null
-    check (type in ('inicio','gol_pro','gol_contra','penalti_pro','penalti_contra','fim_1t','inicio_2t','fim_jogo')),
+    check (type in ('inicio','gol_pro','gol_contra','penalti_pro','penalti_contra','fim_1t','inicio_2t','fim_jogo','sub')),
   minute     int,
   athlete_id text,
   assist_id  text,

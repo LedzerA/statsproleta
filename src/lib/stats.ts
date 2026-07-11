@@ -58,9 +58,9 @@ export interface SquadStats {
   totalJogadores: number;
 }
 
-/** Estatísticas do elenco a partir das partidas ENCERRADAS. */
+/** Estatísticas do elenco a partir das partidas ENCERRADAS (não arquivadas). */
 export function compute(roster: Athlete[], allMatches: Match[]): SquadStats {
-  const matches = allMatches.filter((m) => m.status === "encerrada");
+  const matches = allMatches.filter((m) => m.status === "encerrada" && !m.archived);
   const players: PlayerStats[] = roster.map((a) => ({
     id: a.id, name: a.name,
     jogos: 0, gols: 0, assist: 0, part: 0, ppj: 0, gpj: 0,

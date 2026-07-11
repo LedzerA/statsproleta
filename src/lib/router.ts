@@ -5,6 +5,7 @@ export type Route =
   | { view: "partidas"; nova?: boolean }
   | { view: "partida"; id: string }
   | { view: "atletas" }
+  | { view: "atleta"; id: string }
   | { view: "adversarios" }
   | { view: "mais" };
 
@@ -14,6 +15,7 @@ function parse(hash: string): Route {
     case "partidas": return { view: "partidas", nova: parts[1] === "nova" };
     case "partida": return parts[1] ? { view: "partida", id: parts[1] } : { view: "partidas" };
     case "atletas": return { view: "atletas" };
+    case "atleta": return parts[1] ? { view: "atleta", id: parts[1] } : { view: "atletas" };
     case "adversarios": return { view: "adversarios" };
     case "mais": return { view: "mais" };
     default: return { view: "inicio" };

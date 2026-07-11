@@ -11,15 +11,20 @@ interface Props {
 }
 
 export default function MatchForm({ match, schedule, onClose }: Props) {
-  const { roster, squadId, upsertMatch, addAthlete, toast } = useStore();
+  const { roster, squadId, schemaLegacy, upsertMatch, addAthlete, toast } = useStore();
   const isEdit = !!match;
   const scheduling = schedule || match?.status === "agendada";
 
   const [date, setDate] = useState(match?.date || todayISO());
   const [opponent, setOpponent] = useState(match?.opponent || "");
+  const [venue, setVenue] = useState(match?.venue || "");
+  const [kickoff, setKickoff] = useState(match?.kickoff || "");
+  const [kit, setKit] = useState(match?.kit || "");
   const [gf, setGf] = useState(match?.goals_for ?? 0);
   const [ga, setGa] = useState(match?.goals_against ?? 0);
   const [lineup, setLineup] = useState<Set<string>>(new Set(match?.lineup || []));
+  const [starters, setStarters] = useState<Set<string>>(new Set(match?.starters || []));
+  const [positions, setPositions] = useState<Record<string, string>>({ ...(match?.positions || {}) });
   const [scorers, setScorers] = useState<Record<string, number>>(
     Object.fromEntries((match?.scorers || []).map((x) => [x.a, x.g]))
   );
@@ -32,6 +37,7 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
   const gSum = useMemo(() => Object.values(scorers).reduce((a, b) => a + b, 0), [scorers]);
   const aSum = useMemo(() => Object.values(assists).reduce((a, b) => a + b, 0), [assists]);
 
+  const related = useMemo(() => roster.filter((a) => lineup.has(a.id)), [roster, lineup]);
   const listed = useMemo(() => {
     const ids = new Set([...lineup, ...Object.keys(scorers), ...Object.keys(assists)]);
     return roster.filter((a) => ids.has(a.id));
@@ -40,7 +46,26 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
   function toggle(id: string) {
     setLineup((old) => {
       const cp = new Set(old);
+      if (cp.has(id)) {
+        cp.delete(id);
+        setStarters((st) => { const s2 = new Set(st); s2.delete(id); return s2; });
+      } else cp.add(id);
+      return cp;
+    });
+  }
+
+  function toggleStarter(id: string) {
+    setStarters((old) => {
+      const cp = new Set(old);
       if (cp.has(id)) cp.delete(id); else cp.add(id);
+      return cp;
+    });
+  }
+
+  function setPosition(id: string, v: string) {
+    setPositions((old) => {
+      const cp = { ...old };
+      if (v.trim()) cp[id] = v; else delete cp[id];
       return cp;
     });
   }
@@ -62,6 +87,9 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
 
   async function save() {
     if (!opponent.trim()) { toast("Informe o adversário"); return; }
+    const cleanPositions = Object.fromEntries(
+      Object.entries(positions).filter(([id, v]) => lineup.has(id) && v.trim())
+    );
     const rec: Match = {
       id: match?.id || uid("m"),
       squad_id: match?.squad_id || squadId,
@@ -71,10 +99,17 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
       goals_for: scheduling ? 0 : gf,
       goals_against: scheduling ? 0 : ga,
       lineup: [...lineup],
+      starters: [...starters].filter((id) => lineup.has(id)),
+      positions: cleanPositions,
       scorers: Object.entries(scorers).map(([a, g]) => ({ a, g })),
       assists: Object.entries(assists).map(([a, n]) => ({ a, n })),
       lineup_complete: complete,
       notes: match?.notes || "",
+      venue: venue.trim() || null,
+      kickoff: kickoff.trim() || null,
+      kit: kit.trim() || null,
+      archived: match?.archived === true,
+      clock: match?.clock || null,
       started_at: match?.started_at || null,
     };
     await upsertMatch(rec);
@@ -95,9 +130,17 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
         </>
       }
     >
-      <div className="field">
-        <label>Data</label>
-        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+      <div className="field-row">
+        <div className="field" style={{ flex: 1 }}>
+          <label>Data</label>
+          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+        </div>
+        {!schemaLegacy && (
+          <div className="field" style={{ width: 110 }}>
+            <label>Horário</label>
+            <input type="time" value={kickoff} onChange={(e) => setKickoff(e.target.value)} />
+          </div>
+        )}
       </div>
       <div className="field">
         <label>Adversário</label>
@@ -107,6 +150,20 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
           onChange={(e) => setOpponent(e.target.value)}
         />
       </div>
+      {!schemaLegacy && (
+        <div className="field-row">
+          <div className="field" style={{ flex: 1.4 }}>
+            <label>Local</label>
+            <input type="text" value={venue} placeholder="Ex.: Parque da Mooca"
+              autoComplete="off" onChange={(e) => setVenue(e.target.value)} />
+          </div>
+          <div className="field" style={{ flex: 1 }}>
+            <label>Uniforme</label>
+            <input type="text" value={kit} placeholder="Ex.: Verde"
+              autoComplete="off" onChange={(e) => setKit(e.target.value)} />
+          </div>
+        </div>
+      )}
 
       {!scheduling && (
         <div className="field">
@@ -129,7 +186,7 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
         <div className="t">Relacionados</div>
         <div className="mini">
           <button className="btn sm ghost" onClick={() => setLineup(new Set(roster.map((a) => a.id)))}>Todos</button>
-          <button className="btn sm ghost" onClick={() => setLineup(new Set())}>Limpar</button>
+          <button className="btn sm ghost" onClick={() => { setLineup(new Set()); setStarters(new Set()); }}>Limpar</button>
         </div>
       </div>
       <div className="chips">
@@ -148,6 +205,35 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
         />
         <button className="btn sm" onClick={handleAddAthlete}>Adicionar</button>
       </div>
+
+      {!schemaLegacy && related.length > 0 && (
+        <>
+          <div className="subhead">
+            <div className="t">Titulares &amp; posições <span className="muted" style={{ fontWeight: 400, fontSize: 12 }}>· {starters.size} titular{starters.size !== 1 ? "es" : ""}</span></div>
+          </div>
+          <div className="st-list">
+            {related.map((a) => (
+              <div key={a.id} className="st-row">
+                <button
+                  type="button"
+                  className={`st-toggle ${starters.has(a.id) ? "on" : ""}`}
+                  title={starters.has(a.id) ? "Titular (toque para mandar ao banco)" : "Banco (toque para promover a titular)"}
+                  onClick={() => toggleStarter(a.id)}
+                >
+                  {starters.has(a.id) ? "★" : "☆"}
+                </button>
+                <div className="nm">{a.name}</div>
+                <input
+                  type="text" className="st-pos" placeholder="pos." autoComplete="off"
+                  value={positions[a.id] || ""}
+                  onChange={(e) => setPosition(a.id, e.target.value.toUpperCase())}
+                />
+              </div>
+            ))}
+          </div>
+          <div className="tot-line">★ titular · ☆ banco · posição livre (GL, ZG, LD, MEI, CA…)</div>
+        </>
+      )}
 
       {!scheduling && (
         <>

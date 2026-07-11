@@ -63,11 +63,23 @@ export default function More() {
         await unsubscribePush();
         setPushOn(false);
         toast("Notificações desativadas");
-      } else {
-        const ok = await subscribePush(squad?.id || "");
-        setPushOn(ok);
-        toast(ok ? "Notificações ativadas ✓" : "Não foi possível ativar. Verifique a permissão do navegador.");
+        return;
       }
+      const res = await subscribePush(squad?.id || "");
+      setPushOn(res.ok);
+      if (res.ok) { toast("Notificações ativadas ✓ Você receberá os lances ao vivo."); return; }
+      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+      const msg =
+        res.reason === "denied"
+          ? "Permissão negada no navegador. Toque no cadeado ao lado do endereço → Notificações → Permitir, e tente de novo."
+          : res.reason === "unsupported"
+            ? isIOS
+              ? "No iPhone, primeiro adicione o app à tela de início (menu compartilhar) e abra por lá."
+              : "Este navegador não suporta notificações push."
+            : res.reason === "server"
+              ? "O navegador aprovou, mas o servidor recusou o registro. Me avise se continuar."
+              : "Não foi possível ativar as notificações neste aparelho.";
+      alert(msg + (res.detail ? `\n\nDetalhe técnico: ${res.detail}` : ""));
     } finally { setPushBusy(false); }
   }
 

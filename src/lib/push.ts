@@ -29,31 +29,59 @@ export async function getSubscription(): Promise<PushSubscription | null> {
   return reg.pushManager.getSubscription();
 }
 
+export type PushResult =
+  | { ok: true }
+  | { ok: false; reason: "unsupported" | "denied" | "sw" | "subscribe" | "server"; detail?: string };
+
 /** Ativa push: pede permissão, assina e grava a assinatura no Supabase. */
-export async function subscribePush(squadId: string): Promise<boolean> {
-  if (!pushSupported || !VAPID_PUBLIC_KEY) return false;
+export async function subscribePush(squadId: string): Promise<PushResult> {
+  if (!pushSupported || !VAPID_PUBLIC_KEY) return { ok: false, reason: "unsupported" };
+
   const perm = await Notification.requestPermission();
-  if (perm !== "granted") return false;
-  const reg = (await navigator.serviceWorker.getRegistration()) || (await registerSW());
-  if (!reg) return false;
-  const sub =
-    (await reg.pushManager.getSubscription()) ||
-    (await reg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) as BufferSource,
-    }));
+  if (perm !== "granted") return { ok: false, reason: "denied" };
+
+  let reg: ServiceWorkerRegistration | null = null;
+  try {
+    reg = (await navigator.serviceWorker.getRegistration()) || (await registerSW());
+    if (reg) reg = await navigator.serviceWorker.ready; // espera o SW ficar ativo
+  } catch (e: any) {
+    return { ok: false, reason: "sw", detail: e?.message };
+  }
+  if (!reg) return { ok: false, reason: "sw" };
+
+  let sub: PushSubscription;
+  try {
+    sub =
+      (await reg.pushManager.getSubscription()) ||
+      (await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) as BufferSource,
+      }));
+  } catch (e: any) {
+    console.error("pushManager.subscribe:", e);
+    return { ok: false, reason: "subscribe", detail: e?.message };
+  }
+
   const json = sub.toJSON();
-  const { error } = await sb.from("push_subscriptions").upsert(
-    {
-      endpoint: sub.endpoint,
-      p256dh: json.keys?.p256dh || "",
-      auth: json.keys?.auth || "",
-      squad_id: squadId,
-    },
-    { onConflict: "endpoint" }
-  );
-  if (error) { console.error(error); return false; }
-  return true;
+  const row = {
+    endpoint: sub.endpoint,
+    p256dh: json.keys?.p256dh || "",
+    auth: json.keys?.auth || "",
+    squad_id: squadId,
+  };
+  // upsert manual (insert -> update se já existe): o upsert do PostgREST
+  // exige política de SELECT, que esta tabela não tem de propósito.
+  let { error } = await sb.from("push_subscriptions").insert(row);
+  if (error && error.code === "23505") {
+    ({ error } = await sb.from("push_subscriptions")
+      .update({ p256dh: row.p256dh, auth: row.auth, squad_id: row.squad_id })
+      .eq("endpoint", row.endpoint));
+  }
+  if (error) {
+    console.error("push_subscriptions:", error);
+    return { ok: false, reason: "server", detail: error.message };
+  }
+  return { ok: true };
 }
 
 export async function unsubscribePush(): Promise<void> {

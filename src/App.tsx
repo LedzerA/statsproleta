@@ -7,6 +7,7 @@ import Home from "./views/Home";
 import Matches from "./views/Matches";
 import MatchDetail from "./views/MatchDetail";
 import Athletes from "./views/Athletes";
+import Athlete from "./views/Athlete";
 import Opponents from "./views/Opponents";
 import More from "./views/More";
 
@@ -19,7 +20,10 @@ const NAV = [
 ] as const;
 
 export default function App() {
-  const { loading, fatal, squads, squadId, setSquadId, squad, stats, liveMatch, toastMsg } = useStore();
+  const {
+    loading, fatal, schemaLegacy, squads, squadId, setSquadId, squad, stats,
+    liveMatch, isAdmin, toastMsg,
+  } = useStore();
   const route = useRoute();
 
   if (loading) return <Spinner />;
@@ -35,7 +39,8 @@ export default function App() {
     );
   }
 
-  const activeView = route.view === "partida" ? "partidas" : route.view;
+  const activeView =
+    route.view === "partida" ? "partidas" : route.view === "atleta" ? "atletas" : route.view;
   const t = stats.team;
   const streak = t.streak
     ? `${t.streak.n} ${t.streak.r === "V" ? "vitória" : t.streak.r === "E" ? "empate" : "derrota"}${t.streak.n > 1 ? "s" : ""}`
@@ -115,10 +120,21 @@ export default function App() {
 
       <main className="content">
         <div className="wrap">
+          {schemaLegacy && isAdmin && (
+            <div className="banner">
+              <span className="ic">⚠️</span>
+              <div>
+                <b>Atualização do banco pendente.</b> Rode o arquivo{" "}
+                <code>supabase/atualizacao-1.sql</code> no SQL Editor do Supabase para liberar
+                elencos, titulares, posições e cronômetro (passo a passo no README).
+              </div>
+            </div>
+          )}
           {route.view === "inicio" && <Home />}
           {route.view === "partidas" && <Matches openNew={route.nova} />}
           {route.view === "partida" && <MatchDetail id={route.id} />}
           {route.view === "atletas" && <Athletes />}
+          {route.view === "atleta" && <Athlete id={route.id} />}
           {route.view === "adversarios" && <Opponents />}
           {route.view === "mais" && <More />}
         </div>

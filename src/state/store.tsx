@@ -7,19 +7,45 @@ import { sb } from "../lib/supabase";
 import { TEAM } from "../config";
 import type { Assist, Athlete, EventPayload, EventType, Match, MatchEvent, Scorer, Squad } from "../lib/types";
 import { compute, type SquadStats } from "../lib/stats";
-import { result, uid } from "../lib/format";
+import { clockSeconds, result, uid } from "../lib/format";
 
 const SQUAD_KEY = "proleta_squad_v2";
+
+/* colunas que só existem depois do supabase/atualizacao-1.sql; enquanto o
+   banco não tiver sido atualizado, elas são removidas das escritas */
+const V21_FIELDS = ["starters", "positions", "venue", "kickoff", "kit", "archived", "clock"] as const;
+
+function normalizeMatch(r: any): Match {
+  return {
+    ...r,
+    lineup: Array.isArray(r.lineup) ? r.lineup : [],
+    starters: Array.isArray(r.starters) ? r.starters : [],
+    positions: r.positions && typeof r.positions === "object" ? r.positions : {},
+    scorers: Array.isArray(r.scorers) ? r.scorers : [],
+    assists: Array.isArray(r.assists) ? r.assists : [],
+    venue: r.venue ?? null,
+    kickoff: r.kickoff ?? null,
+    kit: r.kit ?? null,
+    archived: r.archived === true,
+    clock: r.clock ?? null,
+    started_at: r.started_at ?? null,
+  };
+}
 
 interface StoreValue {
   loading: boolean;
   fatal: string | null;
+  schemaLegacy: boolean;
   squads: Squad[];
   squadId: string;
   setSquadId: (id: string) => void;
   squad: Squad | null;
   roster: Athlete[];
+  athletes: Athlete[];
+  athleteName: (id: string) => string;
   matches: Match[];
+  allMatches: Match[];
+  findMatch: (id: string) => Match | undefined;
   stats: SquadStats;
   liveMatch: Match | null;
   events: Record<string, MatchEvent[]>;
@@ -32,7 +58,12 @@ interface StoreValue {
   deleteMatch: (id: string) => Promise<void>;
   addAthlete: (name: string) => Promise<Athlete | null>;
   addSquad: (name: string) => Promise<void>;
-  addEvent: (m: Match, type: EventType, opts?: { scorerId?: string; assistId?: string }) => Promise<void>;
+  addEvent: (
+    m: Match,
+    type: EventType,
+    opts?: { scorerId?: string; assistId?: string; inId?: string; outId?: string }
+  ) => Promise<void>;
+  toggleClock: (m: Match) => Promise<void>;
   importBackup: (raw: unknown) => Promise<{ athletes: number; matches: number }>;
   wipeMatches: () => Promise<void>;
   toast: (msg: string) => void;
@@ -49,7 +80,7 @@ export function useStore(): StoreValue {
 
 function eventPayload(
   type: EventType, m: Match, gf: number, ga: number,
-  scorer?: string, assist?: string
+  names: { scorer?: string; assist?: string; inName?: string; outName?: string }
 ): EventPayload {
   const placar = `${TEAM.short} ${gf} × ${ga} ${m.opponent}`;
   switch (type) {
@@ -58,8 +89,8 @@ function eventPayload(
     case "gol_pro":
       return {
         title: "⚽ GOL DO PROLETA!",
-        body: `${scorer || "Gol"}${assist ? ` (assist. ${assist})` : ""} — ${placar}`,
-        goals_for: gf, goals_against: ga, scorer, assist,
+        body: `${names.scorer || "Gol"}${names.assist ? ` (assist. ${names.assist})` : ""} — ${placar}`,
+        goals_for: gf, goals_against: ga, scorer: names.scorer, assist: names.assist,
       };
     case "gol_contra":
       return { title: `Gol do ${m.opponent} 😕`, body: placar, goals_for: gf, goals_against: ga };
@@ -71,6 +102,11 @@ function eventPayload(
       return { title: "⏸️ Fim do 1º tempo", body: placar, goals_for: gf, goals_against: ga };
     case "inicio_2t":
       return { title: "▶️ Começa o 2º tempo", body: placar };
+    case "sub":
+      return {
+        title: "🔁 Substituição",
+        body: `Entra ${names.inName || "?"}, sai ${names.outName || "?"} — ${placar}`,
+      };
     case "fim_jogo": {
       const r = result({ goals_for: gf, goals_against: ga });
       const t = r === "V" ? "🏆 Vitória do Proleta!" : r === "E" ? "🤝 Empate" : "🏁 Fim de jogo";
@@ -90,6 +126,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
+  const [schemaLegacy, setSchemaLegacy] = useState(false);
   const toastTimer = useRef<number>(0);
   const ownEvents = useRef<Set<string>>(new Set());
 
@@ -110,8 +147,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
     setSquads((sq.data as Squad[]) || []);
     setAthletes((at.data as Athlete[]) || []);
-    setAllMatches((ma.data as Match[]) || []);
+    setAllMatches(((ma.data as any[]) || []).map(normalizeMatch));
     return (sq.data as Squad[]) || [];
+  }, []);
+
+  /* o banco já recebeu a atualização 1 (colunas de titulares etc.)? */
+  useEffect(() => {
+    sb.from("matches").select("starters").limit(1).then(({ error }) => {
+      setSchemaLegacy(!!error);
+      if (error) console.warn("Banco sem a atualização 1 — rode supabase/atualizacao-1.sql:", error.message);
+    });
   }, []);
 
   /* ---- boot ---- */
@@ -142,6 +187,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    // modo mock de desenvolvimento simula um admin logado
+    if (import.meta.env.DEV && (window as any).__MOCK_ADMIN__) { setIsAdmin(true); return; }
     if (!session?.user) { setIsAdmin(false); return; }
     sb.from("admins").select("user_id").eq("user_id", session.user.id).maybeSingle()
       .then(({ data }) => setIsAdmin(!!data));
@@ -168,13 +215,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           return { ...old, [ev.match_id]: [...list, ev] };
         });
         // notificação em primeiro plano (quem criou o evento não precisa)
-        if (!ownEvents.current.has(ev.id) && ev.payload?.title) {
-          toast(`${ev.payload.title} ${ev.payload.body || ""}`);
+        const title = ev.payload?.title;
+        if (!ownEvents.current.has(ev.id) && title) {
+          const body = ev.payload?.body || "";
+          toast(`${title} ${body}`);
           if ("Notification" in window && Notification.permission === "granted" && document.hidden) {
             navigator.serviceWorker?.getRegistration().then((reg) => {
-              reg?.showNotification(ev.payload.title, {
-                body: ev.payload.body, tag: ev.id, icon: "./icon-192.png",
-              });
+              reg?.showNotification(title, { body, tag: ev.id, icon: "./icon-192.png" });
             });
           }
         }
@@ -193,6 +240,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const roster = useMemo(() => athletes.filter((a) => a.squad_id === squadId), [athletes, squadId]);
   const matches = useMemo(() => allMatches.filter((m) => m.squad_id === squadId), [allMatches, squadId]);
   const stats = useMemo(() => compute(roster, matches), [roster, matches]);
+  const athleteName = useCallback(
+    (id: string) => athletes.find((a) => a.id === id)?.name || "?",
+    [athletes]
+  );
+  const findMatch = useCallback(
+    (id: string) => allMatches.find((m) => m.id === id),
+    [allMatches]
+  );
   const liveMatch = useMemo(
     () => matches.find((m) => m.status === "ao_vivo_1t" || m.status === "intervalo" || m.status === "ao_vivo_2t") || null,
     [matches]
@@ -212,9 +267,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (i >= 0) { const cp = [...old]; cp[i] = m; return cp; }
       return [...old, m];
     });
-    const { error } = await sb.from("matches").upsert({ ...m, updated_at: new Date().toISOString() });
+    const row: any = { ...m, updated_at: new Date().toISOString() };
+    if (schemaLegacy) for (const f of V21_FIELDS) delete row[f];
+    const { error } = await sb.from("matches").upsert(row);
     if (error) { console.error(error); toast("Erro ao salvar. Verifique a conexão."); }
-  }, [toast]);
+  }, [toast, schemaLegacy]);
 
   const deleteMatch = useCallback(async (id: string) => {
     setAllMatches((old) => old.filter((m) => m.id !== id));
@@ -249,13 +306,31 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [squads.length, setSquadId, toast]);
 
   const addEvent = useCallback(
-    async (m: Match, type: EventType, opts?: { scorerId?: string; assistId?: string }) => {
+    async (
+      m: Match,
+      type: EventType,
+      opts?: { scorerId?: string; assistId?: string; inId?: string; outId?: string }
+    ) => {
+      const now = new Date().toISOString();
       const upd: Match = { ...m };
-      if (type === "inicio") { upd.status = "ao_vivo_1t"; upd.started_at = new Date().toISOString(); }
-      else if (type === "fim_1t") upd.status = "intervalo";
-      else if (type === "inicio_2t") upd.status = "ao_vivo_2t";
-      else if (type === "fim_jogo") upd.status = "encerrada";
-      else if (type === "gol_pro") {
+      // cronômetro no momento do lance (antes de qualquer transição)
+      const secs = clockSeconds(m.clock);
+      const period = m.clock?.period ?? (m.status === "ao_vivo_2t" ? 2 : 1);
+
+      if (type === "inicio") {
+        upd.status = "ao_vivo_1t";
+        upd.started_at = now;
+        upd.clock = { base: 0, period: 1, running: true, at: now };
+      } else if (type === "fim_1t") {
+        upd.status = "intervalo";
+        upd.clock = { base: secs, period: 1, running: false, at: now };
+      } else if (type === "inicio_2t") {
+        upd.status = "ao_vivo_2t";
+        upd.clock = { base: 0, period: 2, running: true, at: now };
+      } else if (type === "fim_jogo") {
+        upd.status = "encerrada";
+        upd.clock = { base: secs, period, running: false, at: now };
+      } else if (type === "gol_pro") {
         upd.goals_for = m.goals_for + 1;
         if (opts?.scorerId) {
           const sc = [...(m.scorers || [])];
@@ -271,23 +346,38 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           upd.assists = as;
           if (!upd.lineup.includes(opts.assistId)) upd.lineup = [...upd.lineup, opts.assistId];
         }
-      } else if (type === "gol_contra") upd.goals_against = m.goals_against + 1;
+      } else if (type === "gol_contra") {
+        upd.goals_against = m.goals_against + 1;
+      } else if (type === "sub") {
+        if (opts?.inId && !upd.lineup.includes(opts.inId)) upd.lineup = [...upd.lineup, opts.inId];
+      }
 
-      const scorerName = opts?.scorerId ? roster.find((a) => a.id === opts.scorerId)?.name : undefined;
-      const assistName = opts?.assistId ? roster.find((a) => a.id === opts.assistId)?.name : undefined;
-      const minute = m.started_at
-        ? Math.min(130, Math.max(0, Math.round((Date.now() - new Date(m.started_at).getTime()) / 60000)))
+      const minute = m.clock || m.started_at
+        ? Math.max(0, Math.round(
+            m.clock ? secs / 60
+              : (Date.now() - new Date(m.started_at!).getTime()) / 60000
+          ))
         : null;
+      const payload = eventPayload(type, m, upd.goals_for, upd.goals_against, {
+        scorer: opts?.scorerId ? athleteName(opts.scorerId) : undefined,
+        assist: opts?.assistId ? athleteName(opts.assistId) : undefined,
+        inName: opts?.inId ? athleteName(opts.inId) : undefined,
+        outName: opts?.outId ? athleteName(opts.outId) : undefined,
+      });
+      payload.period = period;
+      payload.seconds = secs;
+      if (type === "sub") { payload.in = opts?.inId; payload.out = opts?.outId; }
+
       const ev: MatchEvent = {
         id: uid("e"),
         match_id: m.id,
         squad_id: m.squad_id,
         type,
         minute,
-        athlete_id: opts?.scorerId || null,
-        assist_id: opts?.assistId || null,
-        payload: eventPayload(type, m, upd.goals_for, upd.goals_against, scorerName, assistName),
-        created_at: new Date().toISOString(),
+        athlete_id: opts?.scorerId || opts?.inId || null,
+        assist_id: opts?.assistId || opts?.outId || null,
+        payload,
+        created_at: now,
       };
       ownEvents.current.add(ev.id);
       setEvents((old) => ({ ...old, [m.id]: [...(old[m.id] || []), ev] }));
@@ -295,8 +385,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const { error } = await sb.from("match_events").insert(ev);
       if (error) { console.error(error); toast("Erro ao registrar evento."); }
     },
-    [roster, upsertMatch, toast]
+    [athleteName, upsertMatch, toast]
   );
+
+  /** Pausa / retoma o cronômetro (sem gerar lance). */
+  const toggleClock = useCallback(async (m: Match) => {
+    if (!m.clock) return;
+    const now = new Date().toISOString();
+    const clock = m.clock.running
+      ? { ...m.clock, base: clockSeconds(m.clock), running: false, at: now }
+      : { ...m.clock, running: true, at: now };
+    await upsertMatch({ ...m, clock });
+  }, [upsertMatch]);
 
   /** Importa backup .json (formato v1 do arquivo único OU v2) substituindo
       atletas e partidas do ELENCO ATUAL. IDs são remapeados para não colidir
@@ -332,6 +432,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         .filter((s: Assist) => !!s.a && s.n > 0),
       lineup_complete: (m.lineup_complete ?? m.lineupComplete) !== false,
       notes: String(m.notes || ""),
+      starters: (Array.isArray(m.starters) ? m.starters : [])
+        .map((x: any) => idMap.get(String(x))).filter(Boolean) as string[],
+      positions: Object.fromEntries(
+        Object.entries(m.positions && typeof m.positions === "object" ? m.positions : {})
+          .map(([k, v]) => [idMap.get(String(k)), String(v)])
+          .filter(([k]) => !!k)
+      ) as Record<string, string>,
+      venue: m.venue ?? null,
+      kickoff: m.kickoff ?? null,
+      kit: m.kit ?? null,
+      archived: m.archived === true,
+      clock: m.clock ?? null,
       started_at: null,
     }));
 
@@ -367,9 +479,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(async () => { await sb.auth.signOut(); }, []);
 
   const value: StoreValue = {
-    loading, fatal, squads, squadId, setSquadId, squad, roster, matches, stats,
+    loading, fatal, schemaLegacy, squads, squadId, setSquadId, squad,
+    roster, athletes, athleteName, matches, allMatches, findMatch, stats,
     liveMatch, events, loadEvents, session, isAdmin, signIn, signOut,
-    upsertMatch, deleteMatch, addAthlete, addSquad, addEvent,
+    upsertMatch, deleteMatch, addAthlete, addSquad, addEvent, toggleClock,
     importBackup, wipeMatches, toast, toastMsg,
   };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

@@ -30,7 +30,10 @@ No painel do Supabase → **SQL Editor**:
 1. Rode o arquivo **`supabase/schema.sql`** inteiro (tabelas + segurança RLS + realtime).
    Se o projeto ainda tem as tabelas do app antigo, ele **migra os dados sozinho**
    (as tabelas velhas viram `athletes_v1`/`matches_v1`, nada é apagado).
-2. Rode **`supabase/seed.sql`** — só completa o que faltar (elenco Esporte + os 28 jogos
+2. Rode **`supabase/atualizacao-1.sql`** — recupera do banco antigo os **elencos**
+   (Esporte/Veterano), **titulares**, **posições por atleta**, local/horário/uniforme,
+   cronômetro e converte os lances antigos para a linha do tempo. Idempotente.
+3. Rode **`supabase/seed.sql`** — só completa o que faltar (elenco Esporte + os 28 jogos
    históricos); não sobrescreve dados migrados nem edições feitas depois.
 
 As credenciais do projeto (URL + anon key) ficam em **`src/config.ts`**. A anon key é pública

@@ -5,6 +5,11 @@
    "name": "Esporte",
    "position": 1,
    "created_at": "2026-07-10T22:46:13.282876+00:00"
+  },
+  {
+   "id": "veterano",
+   "name": "Veterano",
+   "position": 2
   }
  ],
  "athletes": [
@@ -316,103 +321,103 @@
   },
   {
    "id": "amrdsdpcn4zq",
-   "squad_id": "esporte",
+   "squad_id": "veterano",
    "name": "Guilherme",
    "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "amrdsdsen3su",
-   "squad_id": "esporte",
+   "squad_id": "veterano",
    "name": "Jacomo",
    "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "amrdse11a2t5",
-   "squad_id": "esporte",
+   "squad_id": "veterano",
    "name": "Albano",
    "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "amrdse3fj5ff",
-   "squad_id": "esporte",
+   "squad_id": "veterano",
    "name": "Amaral",
    "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "amrdse5592tl",
-   "squad_id": "esporte",
+   "squad_id": "veterano",
    "name": "Luan",
    "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "amrdse7fn687",
-   "squad_id": "esporte",
+   "squad_id": "veterano",
    "name": "Fabão",
    "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "amrdsgr6o4dy",
-   "squad_id": "esporte",
+   "squad_id": "veterano",
    "name": "Fabiano",
    "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "amrdsgtqi45k",
-   "squad_id": "esporte",
+   "squad_id": "veterano",
    "name": "André",
    "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "amrdsgvsu2dx",
-   "squad_id": "esporte",
+   "squad_id": "veterano",
    "name": "Meloni",
    "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "amrdsh60j124",
-   "squad_id": "esporte",
+   "squad_id": "veterano",
    "name": "Gui Dantas",
    "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "v_78a39788",
-   "squad_id": "esporte",
+   "squad_id": "veterano",
    "name": "Fabricio",
    "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "v_5a681924",
-   "squad_id": "esporte",
+   "squad_id": "veterano",
    "name": "Felipe",
    "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "v_144e9d3b",
-   "squad_id": "esporte",
+   "squad_id": "veterano",
    "name": "Chipilo",
    "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "v_22494c72",
-   "squad_id": "esporte",
+   "squad_id": "veterano",
    "name": "Côco",
    "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "v_725bbf8b",
-   "squad_id": "esporte",
+   "squad_id": "veterano",
    "name": "Carlinhos",
    "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "v_dc1d67d1",
-   "squad_id": "esporte",
+   "squad_id": "veterano",
    "name": "Sergio",
    "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "v_a5d80dd8",
-   "squad_id": "esporte",
+   "squad_id": "veterano",
    "name": "Bato",
    "created_at": "2026-07-10T22:46:13.282876+00:00"
   }
@@ -455,7 +460,26 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00"
+   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "starters": [
+    "a13",
+    "a6",
+    "a20",
+    "a28",
+    "a29",
+    "a5",
+    "a24",
+    "a10",
+    "a12",
+    "a3",
+    "a11"
+   ],
+   "positions": {},
+   "venue": null,
+   "kickoff": null,
+   "kit": null,
+   "archived": false,
+   "clock": null
   },
   {
    "id": "m2",
@@ -511,7 +535,26 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00"
+   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "starters": [
+    "a13",
+    "a3",
+    "a20",
+    "a18",
+    "a6",
+    "a1",
+    "a10",
+    "a14",
+    "a2",
+    "a11",
+    "a8"
+   ],
+   "positions": {},
+   "venue": null,
+   "kickoff": null,
+   "kit": null,
+   "archived": false,
+   "clock": null
   },
   {
    "id": "m3",
@@ -553,7 +596,26 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00"
+   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "starters": [
+    "a13",
+    "a12",
+    "a28",
+    "a4",
+    "a6",
+    "a1",
+    "a18",
+    "a14",
+    "a2",
+    "a3",
+    "a11"
+   ],
+   "positions": {},
+   "venue": null,
+   "kickoff": null,
+   "kit": null,
+   "archived": false,
+   "clock": null
   },
   {
    "id": "m4",
@@ -592,7 +654,26 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00"
+   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "starters": [
+    "a13",
+    "a3",
+    "a20",
+    "a36",
+    "a6",
+    "a1",
+    "a4",
+    "a24",
+    "a7",
+    "a2",
+    "a8"
+   ],
+   "positions": {},
+   "venue": null,
+   "kickoff": null,
+   "kit": null,
+   "archived": false,
+   "clock": null
   },
   {
    "id": "m5",
@@ -636,7 +717,26 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00"
+   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "starters": [
+    "a13",
+    "a12",
+    "a20",
+    "a29",
+    "a6",
+    "a1",
+    "a4",
+    "a10",
+    "a7",
+    "a3",
+    "a8"
+   ],
+   "positions": {},
+   "venue": null,
+   "kickoff": null,
+   "kit": null,
+   "archived": false,
+   "clock": null
   },
   {
    "id": "m6",
@@ -682,7 +782,26 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00"
+   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "starters": [
+    "a13",
+    "a12",
+    "a29",
+    "a28",
+    "a6",
+    "a1",
+    "a10",
+    "a4",
+    "a7",
+    "a3",
+    "a8"
+   ],
+   "positions": {},
+   "venue": null,
+   "kickoff": null,
+   "kit": null,
+   "archived": false,
+   "clock": null
   },
   {
    "id": "m7",
@@ -732,7 +851,26 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00"
+   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "starters": [
+    "a13",
+    "a49",
+    "a5",
+    "a4",
+    "a6",
+    "a1",
+    "a19",
+    "a7",
+    "a3",
+    "a8",
+    "a17"
+   ],
+   "positions": {},
+   "venue": null,
+   "kickoff": null,
+   "kit": null,
+   "archived": false,
+   "clock": null
   },
   {
    "id": "m8",
@@ -786,7 +924,26 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00"
+   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "starters": [
+    "a13",
+    "a12",
+    "a28",
+    "a16",
+    "a6",
+    "a1",
+    "a7",
+    "a5",
+    "a3",
+    "a2",
+    "a8"
+   ],
+   "positions": {},
+   "venue": null,
+   "kickoff": null,
+   "kit": null,
+   "archived": false,
+   "clock": null
   },
   {
    "id": "m9",
@@ -829,7 +986,26 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00"
+   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "starters": [
+    "a13",
+    "a12",
+    "a5",
+    "a4",
+    "a6",
+    "a1",
+    "a19",
+    "a7",
+    "a3",
+    "a11",
+    "a14"
+   ],
+   "positions": {},
+   "venue": null,
+   "kickoff": null,
+   "kit": null,
+   "archived": false,
+   "clock": null
   },
   {
    "id": "m10",
@@ -870,7 +1046,26 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00"
+   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "starters": [
+    "a13",
+    "a12",
+    "a4",
+    "a5",
+    "a6",
+    "a1",
+    "a19",
+    "a7",
+    "a3",
+    "a2",
+    "a11"
+   ],
+   "positions": {},
+   "venue": null,
+   "kickoff": null,
+   "kit": null,
+   "archived": false,
+   "clock": null
   },
   {
    "id": "m11",
@@ -905,7 +1100,26 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00"
+   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "starters": [
+    "a32",
+    "a3",
+    "a1",
+    "a15",
+    "a46",
+    "a23",
+    "a31",
+    "a19",
+    "a47",
+    "a2",
+    "a17"
+   ],
+   "positions": {},
+   "venue": null,
+   "kickoff": null,
+   "kit": null,
+   "archived": false,
+   "clock": null
   },
   {
    "id": "m12",
@@ -961,7 +1175,26 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00"
+   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "starters": [
+    "a32",
+    "a3",
+    "a5",
+    "a4",
+    "a6",
+    "a1",
+    "a10",
+    "a7",
+    "a14",
+    "a11",
+    "a8"
+   ],
+   "positions": {},
+   "venue": null,
+   "kickoff": null,
+   "kit": null,
+   "archived": false,
+   "clock": null
   },
   {
    "id": "m13",
@@ -1016,7 +1249,26 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00"
+   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "starters": [
+    "a13",
+    "a3",
+    "a15",
+    "a16",
+    "a6",
+    "a1",
+    "a10",
+    "a7",
+    "a14",
+    "a2",
+    "a8"
+   ],
+   "positions": {},
+   "venue": null,
+   "kickoff": null,
+   "kit": null,
+   "archived": false,
+   "clock": null
   },
   {
    "id": "m14",
@@ -1080,7 +1332,26 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00"
+   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "starters": [
+    "a14",
+    "a12",
+    "a15",
+    "a5",
+    "a27",
+    "a1",
+    "a4",
+    "a7",
+    "a2",
+    "a8",
+    "a33"
+   ],
+   "positions": {},
+   "venue": null,
+   "kickoff": null,
+   "kit": null,
+   "archived": false,
+   "clock": null
   },
   {
    "id": "m15",
@@ -1159,7 +1430,26 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00"
+   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "starters": [
+    "a14",
+    "a3",
+    "a5",
+    "a4",
+    "a6",
+    "a1",
+    "a10",
+    "a19",
+    "a12",
+    "a11",
+    "a8"
+   ],
+   "positions": {},
+   "venue": null,
+   "kickoff": null,
+   "kit": null,
+   "archived": false,
+   "clock": null
   },
   {
    "id": "m16",
@@ -1191,7 +1481,26 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00"
+   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "starters": [
+    "a14",
+    "a3",
+    "a15",
+    "a4",
+    "a6",
+    "a1",
+    "a22",
+    "a7",
+    "a12",
+    "a2",
+    "a11"
+   ],
+   "positions": {},
+   "venue": null,
+   "kickoff": null,
+   "kit": null,
+   "archived": false,
+   "clock": null
   },
   {
    "id": "m17",
@@ -1226,7 +1535,26 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00"
+   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "starters": [
+    "a14",
+    "a37",
+    "a15",
+    "a5",
+    "a18",
+    "a24",
+    "a19",
+    "a9",
+    "a2",
+    "a26",
+    "a8"
+   ],
+   "positions": {},
+   "venue": null,
+   "kickoff": null,
+   "kit": null,
+   "archived": false,
+   "clock": null
   },
   {
    "id": "m18",
@@ -1280,7 +1608,14 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00"
+   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "starters": [],
+   "positions": {},
+   "venue": null,
+   "kickoff": null,
+   "kit": null,
+   "archived": false,
+   "clock": null
   },
   {
    "id": "m19",
@@ -1354,7 +1689,26 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00"
+   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "starters": [
+    "a14",
+    "a3",
+    "a5",
+    "a16",
+    "a6",
+    "a1",
+    "a10",
+    "a19",
+    "a2",
+    "a11",
+    "a8"
+   ],
+   "positions": {},
+   "venue": null,
+   "kickoff": null,
+   "kit": null,
+   "archived": false,
+   "clock": null
   },
   {
    "id": "m21",
@@ -1391,7 +1745,26 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00"
+   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "starters": [
+    "a13",
+    "a3",
+    "a5",
+    "a16",
+    "a12",
+    "a1",
+    "a10",
+    "a19",
+    "a2",
+    "a11",
+    "a8"
+   ],
+   "positions": {},
+   "venue": null,
+   "kickoff": null,
+   "kit": null,
+   "archived": false,
+   "clock": null
   },
   {
    "id": "m22",
@@ -1443,7 +1816,26 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00"
+   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "starters": [
+    "a14",
+    "a15",
+    "a20",
+    "a4",
+    "a3",
+    "a1",
+    "a10",
+    "a7",
+    "a9",
+    "a2",
+    "a25"
+   ],
+   "positions": {},
+   "venue": null,
+   "kickoff": null,
+   "kit": null,
+   "archived": false,
+   "clock": null
   },
   {
    "id": "m23",
@@ -1475,7 +1867,26 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00"
+   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "starters": [
+    "a45",
+    "a15",
+    "a28",
+    "a5",
+    "a3",
+    "a4",
+    "a1",
+    "a19",
+    "a12",
+    "a2",
+    "a8"
+   ],
+   "positions": {},
+   "venue": null,
+   "kickoff": null,
+   "kit": null,
+   "archived": false,
+   "clock": null
   },
   {
    "id": "m24",
@@ -1509,7 +1920,26 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00"
+   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "starters": [
+    "a13",
+    "a15",
+    "a5",
+    "a4",
+    "a1",
+    "a16",
+    "a10",
+    "a19",
+    "a11",
+    "a7",
+    "a8"
+   ],
+   "positions": {},
+   "venue": null,
+   "kickoff": null,
+   "kit": null,
+   "archived": false,
+   "clock": null
   },
   {
    "id": "m25",
@@ -1548,7 +1978,25 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00"
+   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "starters": [
+    "a13",
+    "a15",
+    "a5",
+    "a4",
+    "a16",
+    "a1",
+    "a24",
+    "a10",
+    "a2",
+    "a8"
+   ],
+   "positions": {},
+   "venue": null,
+   "kickoff": null,
+   "kit": null,
+   "archived": false,
+   "clock": null
   },
   {
    "id": "m26",
@@ -1595,7 +2043,26 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00"
+   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "starters": [
+    "a14",
+    "a3",
+    "a4",
+    "a16",
+    "a6",
+    "a1",
+    "a10",
+    "a7",
+    "a12",
+    "a11",
+    "a8"
+   ],
+   "positions": {},
+   "venue": null,
+   "kickoff": null,
+   "kit": null,
+   "archived": false,
+   "clock": null
   },
   {
    "id": "m27",
@@ -1644,7 +2111,26 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00"
+   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "starters": [
+    "a13",
+    "a15",
+    "a5",
+    "a4",
+    "a6",
+    "a1",
+    "a21",
+    "a7",
+    "a2",
+    "a8",
+    "a11"
+   ],
+   "positions": {},
+   "venue": null,
+   "kickoff": null,
+   "kit": null,
+   "archived": false,
+   "clock": null
   },
   {
    "id": "m28",
@@ -1689,11 +2175,30 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00"
+   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "starters": [
+    "a13",
+    "a3",
+    "a5",
+    "a4",
+    "a16",
+    "a1",
+    "a7",
+    "a21",
+    "a2",
+    "a10",
+    "a12"
+   ],
+   "positions": {},
+   "venue": null,
+   "kickoff": null,
+   "kit": null,
+   "archived": false,
+   "clock": null
   },
   {
    "id": "mmrdsea473y4",
-   "squad_id": "esporte",
+   "squad_id": "veterano",
    "date": "2026-07-09",
    "opponent": "Real Cope",
    "status": "encerrada",
@@ -1734,8 +2239,494 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00"
+   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "starters": [
+    "amrdsdpcn4zq",
+    "amrdsdsen3su",
+    "amrdse11a2t5",
+    "amrdse3fj5ff",
+    "amrdse5592tl",
+    "amrdse7fn687",
+    "amrdsgr6o4dy",
+    "amrdsgtqi45k",
+    "amrdsgvsu2dx",
+    "amrdsh60j124",
+    "v_78a39788"
+   ],
+   "positions": {},
+   "venue": null,
+   "kickoff": null,
+   "kit": null,
+   "archived": false,
+   "clock": {
+    "base": 2199,
+    "period": 2,
+    "running": false
+   }
+  },
+  {
+   "id": "mmrflxu2l78k",
+   "squad_id": "esporte",
+   "date": "2026-07-11",
+   "opponent": "Shaktar",
+   "status": "ao_vivo_2t",
+   "goals_for": 2,
+   "goals_against": 0,
+   "lineup": [
+    "a1",
+    "a2",
+    "a3",
+    "a4",
+    "a5",
+    "a6",
+    "a7",
+    "a9",
+    "a10",
+    "a11",
+    "a12",
+    "a13",
+    "a14",
+    "a15",
+    "a8",
+    "a16",
+    "a17",
+    "a18",
+    "a19",
+    "a20"
+   ],
+   "scorers": [
+    {
+     "a": "a1",
+     "g": 1
+    }
+   ],
+   "assists": [
+    {
+     "a": "a2",
+     "n": 1
+    }
+   ],
+   "lineup_complete": true,
+   "notes": "",
+   "started_at": "2026-07-11T00:09:41.833+00:00",
+   "created_at": "2026-07-11T00:09:36.439945+00:00",
+   "updated_at": "2026-07-11T00:11:39.826+00:00"
+  },
+  {
+   "id": "m_esp_shaktar_20260711",
+   "squad_id": "esporte",
+   "date": "2026-07-11",
+   "opponent": "Shaktar",
+   "status": "agendada",
+   "goals_for": 0,
+   "goals_against": 0,
+   "lineup": [
+    "a13",
+    "a22",
+    "a5",
+    "a4",
+    "a16",
+    "a24",
+    "a7",
+    "a21",
+    "a2",
+    "a11",
+    "a8",
+    "a15",
+    "a6",
+    "a9",
+    "a12",
+    "a3"
+   ],
+   "starters": [
+    "a13",
+    "a22",
+    "a5",
+    "a4",
+    "a16",
+    "a24",
+    "a7",
+    "a21",
+    "a2",
+    "a11",
+    "a8"
+   ],
+   "positions": {
+    "a2": "PD",
+    "a3": "LD/LE/PD",
+    "a4": "ZG",
+    "a5": "ZG",
+    "a6": "LE/PE",
+    "a7": "MC",
+    "a8": "CA",
+    "a9": "MC/MEI",
+    "a11": "PE",
+    "a12": "PD/CA",
+    "a13": "GL",
+    "a15": "ZG/LD",
+    "a16": "LE",
+    "a21": "MEI",
+    "a22": "LD",
+    "a24": "VOL"
+   },
+   "scorers": [],
+   "assists": [],
+   "lineup_complete": true,
+   "notes": "",
+   "venue": "Parque da Mooca",
+   "kickoff": "11:30",
+   "kit": "Verde do Diverso",
+   "archived": false,
+   "clock": null,
+   "started_at": null
   }
  ],
- "match_events": []
+ "match_events": [
+  {
+   "id": "emrflxya124m",
+   "match_id": "mmrflxu2l78k",
+   "squad_id": "esporte",
+   "type": "inicio",
+   "minute": null,
+   "athlete_id": null,
+   "assist_id": null,
+   "payload": {
+    "body": "Proleta × Shaktar — acompanhe ao vivo",
+    "title": "🔴 Bola rolando!"
+   },
+   "created_at": "2026-07-11T00:09:41.833+00:00"
+  },
+  {
+   "id": "emrfly4uo7e",
+   "match_id": "mmrflxu2l78k",
+   "squad_id": "esporte",
+   "type": "gol_pro",
+   "minute": 0,
+   "athlete_id": "a1",
+   "assist_id": "a2",
+   "payload": {
+    "body": "Bibico (assist. Dudu) — Proleta 1 × 0 Shaktar",
+    "title": "⚽ GOL DO PROLETA!",
+    "assist": "Dudu",
+    "scorer": "Bibico",
+    "goals_for": 1,
+    "goals_against": 0
+   },
+   "created_at": "2026-07-11T00:09:50.352+00:00"
+  },
+  {
+   "id": "emrfly9ch77h",
+   "match_id": "mmrflxu2l78k",
+   "squad_id": "esporte",
+   "type": "penalti_pro",
+   "minute": 0,
+   "athlete_id": null,
+   "assist_id": null,
+   "payload": {
+    "body": "Proleta 1 × 0 Shaktar",
+    "title": "🎯 Pênalti para o Proleta!"
+   },
+   "created_at": "2026-07-11T00:09:56.177+00:00"
+  },
+  {
+   "id": "emrflycgw4fq",
+   "match_id": "mmrflxu2l78k",
+   "squad_id": "esporte",
+   "type": "penalti_contra",
+   "minute": 0,
+   "athlete_id": null,
+   "assist_id": null,
+   "payload": {
+    "body": "Proleta 1 × 0 Shaktar",
+    "title": "⚠️ Pênalti para o Shaktar"
+   },
+   "created_at": "2026-07-11T00:10:00.224+00:00"
+  },
+  {
+   "id": "emrfm0blj3jl",
+   "match_id": "mmrflxu2l78k",
+   "squad_id": "esporte",
+   "type": "gol_pro",
+   "minute": 2,
+   "athlete_id": null,
+   "assist_id": null,
+   "payload": {
+    "body": "Gol — Proleta 2 × 0 Shaktar",
+    "title": "⚽ GOL DO PROLETA!",
+    "goals_for": 2,
+    "goals_against": 0
+   },
+   "created_at": "2026-07-11T00:11:32.407+00:00"
+  },
+  {
+   "id": "emrfm0dad3am",
+   "match_id": "mmrflxu2l78k",
+   "squad_id": "esporte",
+   "type": "fim_1t",
+   "minute": 2,
+   "athlete_id": null,
+   "assist_id": null,
+   "payload": {
+    "body": "Proleta 2 × 0 Shaktar",
+    "title": "⏸️ Fim do 1º tempo",
+    "goals_for": 2,
+    "goals_against": 0
+   },
+   "created_at": "2026-07-11T00:11:34.597+00:00"
+  },
+  {
+   "id": "emrfm0hbm23f",
+   "match_id": "mmrflxu2l78k",
+   "squad_id": "esporte",
+   "type": "inicio_2t",
+   "minute": 2,
+   "athlete_id": null,
+   "assist_id": null,
+   "payload": {
+    "body": "Proleta 2 × 0 Shaktar",
+    "title": "▶️ Começa o 2º tempo"
+   },
+   "created_at": "2026-07-11T00:11:39.826+00:00"
+  },
+  {
+   "id": "mmrdsea473y4-lg-1",
+   "match_id": "mmrdsea473y4",
+   "squad_id": "veterano",
+   "type": "inicio",
+   "minute": 0,
+   "athlete_id": null,
+   "assist_id": null,
+   "payload": {
+    "legacy": true,
+    "period": 1,
+    "seconds": 0
+   },
+   "created_at": "2026-07-09T12:01:00Z"
+  },
+  {
+   "id": "mmrdsea473y4-lg-2",
+   "match_id": "mmrdsea473y4",
+   "squad_id": "veterano",
+   "type": "gol_contra",
+   "minute": 11,
+   "athlete_id": null,
+   "assist_id": null,
+   "payload": {
+    "legacy": true,
+    "period": 1,
+    "seconds": 690
+   },
+   "created_at": "2026-07-09T12:01:00Z"
+  },
+  {
+   "id": "mmrdsea473y4-lg-3",
+   "match_id": "mmrdsea473y4",
+   "squad_id": "veterano",
+   "type": "gol_contra",
+   "minute": 29,
+   "athlete_id": null,
+   "assist_id": null,
+   "payload": {
+    "legacy": true,
+    "period": 1,
+    "seconds": 1749
+   },
+   "created_at": "2026-07-09T12:01:00Z"
+  },
+  {
+   "id": "mmrdsea473y4-lg-4",
+   "match_id": "mmrdsea473y4",
+   "squad_id": "veterano",
+   "type": "fim_1t",
+   "minute": 33,
+   "athlete_id": null,
+   "assist_id": null,
+   "payload": {
+    "legacy": true,
+    "period": 1,
+    "seconds": 1993
+   },
+   "created_at": "2026-07-09T12:01:00Z"
+  },
+  {
+   "id": "mmrdsea473y4-lg-5",
+   "match_id": "mmrdsea473y4",
+   "squad_id": "veterano",
+   "type": "inicio_2t",
+   "minute": 0,
+   "athlete_id": null,
+   "assist_id": null,
+   "payload": {
+    "legacy": true,
+    "period": 2,
+    "seconds": 0
+   },
+   "created_at": "2026-07-09T12:02:00Z"
+  },
+  {
+   "id": "mmrdsea473y4-lg-6",
+   "match_id": "mmrdsea473y4",
+   "squad_id": "veterano",
+   "type": "sub",
+   "minute": 0,
+   "athlete_id": "v_5a681924",
+   "assist_id": "amrdse3fj5ff",
+   "payload": {
+    "legacy": true,
+    "period": 2,
+    "seconds": 8
+   },
+   "created_at": "2026-07-09T12:02:00Z"
+  },
+  {
+   "id": "mmrdsea473y4-lg-7",
+   "match_id": "mmrdsea473y4",
+   "squad_id": "veterano",
+   "type": "sub",
+   "minute": 0,
+   "athlete_id": "v_144e9d3b",
+   "assist_id": "amrdsdsen3su",
+   "payload": {
+    "legacy": true,
+    "period": 2,
+    "seconds": 35
+   },
+   "created_at": "2026-07-09T12:02:00Z"
+  },
+  {
+   "id": "mmrdsea473y4-lg-8",
+   "match_id": "mmrdsea473y4",
+   "squad_id": "veterano",
+   "type": "sub",
+   "minute": 0,
+   "athlete_id": "v_22494c72",
+   "assist_id": "amrdsh60j124",
+   "payload": {
+    "legacy": true,
+    "period": 2,
+    "seconds": 58
+   },
+   "created_at": "2026-07-09T12:02:00Z"
+  },
+  {
+   "id": "mmrdsea473y4-lg-9",
+   "match_id": "mmrdsea473y4",
+   "squad_id": "veterano",
+   "type": "sub",
+   "minute": 1,
+   "athlete_id": "v_725bbf8b",
+   "assist_id": "v_78a39788",
+   "payload": {
+    "legacy": true,
+    "period": 2,
+    "seconds": 74
+   },
+   "created_at": "2026-07-09T12:02:00Z"
+  },
+  {
+   "id": "mmrdsea473y4-lg-10",
+   "match_id": "mmrdsea473y4",
+   "squad_id": "veterano",
+   "type": "sub",
+   "minute": 1,
+   "athlete_id": "v_dc1d67d1",
+   "assist_id": "amrdsgvsu2dx",
+   "payload": {
+    "legacy": true,
+    "period": 2,
+    "seconds": 84
+   },
+   "created_at": "2026-07-09T12:02:00Z"
+  },
+  {
+   "id": "mmrdsea473y4-lg-11",
+   "match_id": "mmrdsea473y4",
+   "squad_id": "veterano",
+   "type": "sub",
+   "minute": 3,
+   "athlete_id": "v_a5d80dd8",
+   "assist_id": "amrdsgr6o4dy",
+   "payload": {
+    "legacy": true,
+    "period": 2,
+    "seconds": 208
+   },
+   "created_at": "2026-07-09T12:02:00Z"
+  },
+  {
+   "id": "mmrdsea473y4-lg-12",
+   "match_id": "mmrdsea473y4",
+   "squad_id": "veterano",
+   "type": "gol_pro",
+   "minute": 7,
+   "athlete_id": "v_144e9d3b",
+   "assist_id": "amrdsgtqi45k",
+   "payload": {
+    "legacy": true,
+    "period": 2,
+    "seconds": 440
+   },
+   "created_at": "2026-07-09T12:02:00Z"
+  },
+  {
+   "id": "mmrdsea473y4-lg-13",
+   "match_id": "mmrdsea473y4",
+   "squad_id": "veterano",
+   "type": "sub",
+   "minute": 14,
+   "athlete_id": "amrdsgvsu2dx",
+   "assist_id": "amrdse7fn687",
+   "payload": {
+    "legacy": true,
+    "period": 2,
+    "seconds": 860
+   },
+   "created_at": "2026-07-09T12:02:00Z"
+  },
+  {
+   "id": "mmrdsea473y4-lg-14",
+   "match_id": "mmrdsea473y4",
+   "squad_id": "veterano",
+   "type": "sub",
+   "minute": 15,
+   "athlete_id": "v_78a39788",
+   "assist_id": "amrdse5592tl",
+   "payload": {
+    "legacy": true,
+    "period": 2,
+    "seconds": 954
+   },
+   "created_at": "2026-07-09T12:02:00Z"
+  },
+  {
+   "id": "mmrdsea473y4-lg-15",
+   "match_id": "mmrdsea473y4",
+   "squad_id": "veterano",
+   "type": "sub",
+   "minute": 20,
+   "athlete_id": "amrdsgr6o4dy",
+   "assist_id": "v_dc1d67d1",
+   "payload": {
+    "legacy": true,
+    "period": 2,
+    "seconds": 1215
+   },
+   "created_at": "2026-07-09T12:02:00Z"
+  },
+  {
+   "id": "mmrdsea473y4-lg-16",
+   "match_id": "mmrdsea473y4",
+   "squad_id": "veterano",
+   "type": "fim_jogo",
+   "minute": 36,
+   "athlete_id": null,
+   "assist_id": null,
+   "payload": {
+    "legacy": true,
+    "period": 2,
+    "seconds": 2199
+   },
+   "created_at": "2026-07-09T12:02:00Z"
+  }
+ ]
 }
