@@ -64,6 +64,7 @@ interface StoreValue {
     opts?: { scorerId?: string; assistId?: string; inId?: string; outId?: string }
   ) => Promise<void>;
   toggleClock: (m: Match) => Promise<void>;
+  resetToScheduled: (m: Match) => Promise<void>;
   importBackup: (raw: unknown) => Promise<{ athletes: number; matches: number }>;
   wipeMatches: () => Promise<void>;
   toast: (msg: string) => void;
@@ -388,6 +389,25 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [athleteName, upsertMatch, toast]
   );
 
+  /** Volta a partida para "agendada": zera placar, gols, lances e relógio.
+      Mantém relacionados, titulares, posições, local, horário e uniforme. */
+  const resetToScheduled = useCallback(async (m: Match) => {
+    const { error } = await sb.from("match_events").delete().eq("match_id", m.id);
+    if (error) { console.error(error); toast("Erro ao limpar os lances."); return; }
+    setEvents((old) => ({ ...old, [m.id]: [] }));
+    await upsertMatch({
+      ...m,
+      status: "agendada",
+      goals_for: 0,
+      goals_against: 0,
+      scorers: [],
+      assists: [],
+      clock: null,
+      started_at: null,
+    });
+    toast("Partida zerada e reagendada ✓");
+  }, [upsertMatch, toast]);
+
   /** Pausa / retoma o cronômetro (sem gerar lance). */
   const toggleClock = useCallback(async (m: Match) => {
     if (!m.clock) return;
@@ -483,7 +503,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     roster, athletes, athleteName, matches, allMatches, findMatch, stats,
     liveMatch, events, loadEvents, session, isAdmin, signIn, signOut,
     upsertMatch, deleteMatch, addAthlete, addSquad, addEvent, toggleClock,
-    importBackup, wipeMatches, toast, toastMsg,
+    resetToScheduled, importBackup, wipeMatches, toast, toastMsg,
   };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

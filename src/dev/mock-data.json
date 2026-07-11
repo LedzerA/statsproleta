@@ -9,7 +9,8 @@
   {
    "id": "veterano",
    "name": "Veterano",
-   "position": 2
+   "position": 2,
+   "created_at": "2026-07-11T00:48:42.618254+00:00"
   }
  ],
  "athletes": [
@@ -1618,23 +1619,6 @@
    "clock": null
   },
   {
-   "id": "m19",
-   "squad_id": "esporte",
-   "date": "2026-04-18",
-   "opponent": "Proleta Vetera/Diverso",
-   "status": "encerrada",
-   "goals_for": 0,
-   "goals_against": 1,
-   "lineup": [],
-   "scorers": [],
-   "assists": [],
-   "lineup_complete": false,
-   "notes": "",
-   "started_at": null,
-   "created_at": "2026-07-10T22:46:26.31661+00:00",
-   "updated_at": "2026-07-10T22:46:26.31661+00:00"
-  },
-  {
    "id": "m20",
    "squad_id": "esporte",
    "date": "2026-04-26",
@@ -2265,61 +2249,13 @@
    }
   },
   {
-   "id": "mmrflxu2l78k",
-   "squad_id": "esporte",
-   "date": "2026-07-11",
-   "opponent": "Shaktar",
-   "status": "ao_vivo_2t",
-   "goals_for": 2,
-   "goals_against": 0,
-   "lineup": [
-    "a1",
-    "a2",
-    "a3",
-    "a4",
-    "a5",
-    "a6",
-    "a7",
-    "a9",
-    "a10",
-    "a11",
-    "a12",
-    "a13",
-    "a14",
-    "a15",
-    "a8",
-    "a16",
-    "a17",
-    "a18",
-    "a19",
-    "a20"
-   ],
-   "scorers": [
-    {
-     "a": "a1",
-     "g": 1
-    }
-   ],
-   "assists": [
-    {
-     "a": "a2",
-     "n": 1
-    }
-   ],
-   "lineup_complete": true,
-   "notes": "",
-   "started_at": "2026-07-11T00:09:41.833+00:00",
-   "created_at": "2026-07-11T00:09:36.439945+00:00",
-   "updated_at": "2026-07-11T00:11:39.826+00:00"
-  },
-  {
    "id": "m_esp_shaktar_20260711",
    "squad_id": "esporte",
    "date": "2026-07-11",
    "opponent": "Shaktar",
-   "status": "agendada",
-   "goals_for": 0,
-   "goals_against": 0,
+   "status": "ao_vivo_1t",
+   "goals_for": 2,
+   "goals_against": 5,
    "lineup": [
     "a13",
     "a22",
@@ -2338,6 +2274,31 @@
     "a12",
     "a3"
    ],
+   "scorers": [
+    {
+     "a": "a2",
+     "g": 1
+    },
+    {
+     "a": "a3",
+     "g": 1
+    }
+   ],
+   "assists": [
+    {
+     "a": "a3",
+     "n": 1
+    },
+    {
+     "a": "a2",
+     "n": 1
+    }
+   ],
+   "lineup_complete": true,
+   "notes": "",
+   "started_at": "2026-07-11T00:51:58.147+00:00",
+   "created_at": "2026-07-11T00:48:42.618254+00:00",
+   "updated_at": "2026-07-11T00:57:33.668+00:00",
    "starters": [
     "a13",
     "a22",
@@ -2369,125 +2330,19 @@
     "a22": "LD",
     "a24": "VOL"
    },
-   "scorers": [],
-   "assists": [],
-   "lineup_complete": true,
-   "notes": "",
    "venue": "Parque da Mooca",
    "kickoff": "11:30",
    "kit": "Verde do Diverso",
    "archived": false,
-   "clock": null,
-   "started_at": null
+   "clock": {
+    "at": "2026-07-11T00:51:58.147Z",
+    "base": 0,
+    "period": 1,
+    "running": true
+   }
   }
  ],
  "match_events": [
-  {
-   "id": "emrflxya124m",
-   "match_id": "mmrflxu2l78k",
-   "squad_id": "esporte",
-   "type": "inicio",
-   "minute": null,
-   "athlete_id": null,
-   "assist_id": null,
-   "payload": {
-    "body": "Proleta × Shaktar — acompanhe ao vivo",
-    "title": "🔴 Bola rolando!"
-   },
-   "created_at": "2026-07-11T00:09:41.833+00:00"
-  },
-  {
-   "id": "emrfly4uo7e",
-   "match_id": "mmrflxu2l78k",
-   "squad_id": "esporte",
-   "type": "gol_pro",
-   "minute": 0,
-   "athlete_id": "a1",
-   "assist_id": "a2",
-   "payload": {
-    "body": "Bibico (assist. Dudu) — Proleta 1 × 0 Shaktar",
-    "title": "⚽ GOL DO PROLETA!",
-    "assist": "Dudu",
-    "scorer": "Bibico",
-    "goals_for": 1,
-    "goals_against": 0
-   },
-   "created_at": "2026-07-11T00:09:50.352+00:00"
-  },
-  {
-   "id": "emrfly9ch77h",
-   "match_id": "mmrflxu2l78k",
-   "squad_id": "esporte",
-   "type": "penalti_pro",
-   "minute": 0,
-   "athlete_id": null,
-   "assist_id": null,
-   "payload": {
-    "body": "Proleta 1 × 0 Shaktar",
-    "title": "🎯 Pênalti para o Proleta!"
-   },
-   "created_at": "2026-07-11T00:09:56.177+00:00"
-  },
-  {
-   "id": "emrflycgw4fq",
-   "match_id": "mmrflxu2l78k",
-   "squad_id": "esporte",
-   "type": "penalti_contra",
-   "minute": 0,
-   "athlete_id": null,
-   "assist_id": null,
-   "payload": {
-    "body": "Proleta 1 × 0 Shaktar",
-    "title": "⚠️ Pênalti para o Shaktar"
-   },
-   "created_at": "2026-07-11T00:10:00.224+00:00"
-  },
-  {
-   "id": "emrfm0blj3jl",
-   "match_id": "mmrflxu2l78k",
-   "squad_id": "esporte",
-   "type": "gol_pro",
-   "minute": 2,
-   "athlete_id": null,
-   "assist_id": null,
-   "payload": {
-    "body": "Gol — Proleta 2 × 0 Shaktar",
-    "title": "⚽ GOL DO PROLETA!",
-    "goals_for": 2,
-    "goals_against": 0
-   },
-   "created_at": "2026-07-11T00:11:32.407+00:00"
-  },
-  {
-   "id": "emrfm0dad3am",
-   "match_id": "mmrflxu2l78k",
-   "squad_id": "esporte",
-   "type": "fim_1t",
-   "minute": 2,
-   "athlete_id": null,
-   "assist_id": null,
-   "payload": {
-    "body": "Proleta 2 × 0 Shaktar",
-    "title": "⏸️ Fim do 1º tempo",
-    "goals_for": 2,
-    "goals_against": 0
-   },
-   "created_at": "2026-07-11T00:11:34.597+00:00"
-  },
-  {
-   "id": "emrfm0hbm23f",
-   "match_id": "mmrflxu2l78k",
-   "squad_id": "esporte",
-   "type": "inicio_2t",
-   "minute": 2,
-   "athlete_id": null,
-   "assist_id": null,
-   "payload": {
-    "body": "Proleta 2 × 0 Shaktar",
-    "title": "▶️ Começa o 2º tempo"
-   },
-   "created_at": "2026-07-11T00:11:39.826+00:00"
-  },
   {
    "id": "mmrdsea473y4-lg-1",
    "match_id": "mmrdsea473y4",
@@ -2501,7 +2356,7 @@
     "period": 1,
     "seconds": 0
    },
-   "created_at": "2026-07-09T12:01:00Z"
+   "created_at": "2026-07-09T00:00:00+00:00"
   },
   {
    "id": "mmrdsea473y4-lg-2",
@@ -2516,7 +2371,7 @@
     "period": 1,
     "seconds": 690
    },
-   "created_at": "2026-07-09T12:01:00Z"
+   "created_at": "2026-07-09T00:11:30+00:00"
   },
   {
    "id": "mmrdsea473y4-lg-3",
@@ -2531,7 +2386,7 @@
     "period": 1,
     "seconds": 1749
    },
-   "created_at": "2026-07-09T12:01:00Z"
+   "created_at": "2026-07-09T00:29:09+00:00"
   },
   {
    "id": "mmrdsea473y4-lg-4",
@@ -2546,7 +2401,7 @@
     "period": 1,
     "seconds": 1993
    },
-   "created_at": "2026-07-09T12:01:00Z"
+   "created_at": "2026-07-09T00:33:13+00:00"
   },
   {
    "id": "mmrdsea473y4-lg-5",
@@ -2561,7 +2416,7 @@
     "period": 2,
     "seconds": 0
    },
-   "created_at": "2026-07-09T12:02:00Z"
+   "created_at": "2026-07-09T01:00:00+00:00"
   },
   {
    "id": "mmrdsea473y4-lg-6",
@@ -2576,7 +2431,7 @@
     "period": 2,
     "seconds": 8
    },
-   "created_at": "2026-07-09T12:02:00Z"
+   "created_at": "2026-07-09T01:00:08+00:00"
   },
   {
    "id": "mmrdsea473y4-lg-7",
@@ -2591,7 +2446,7 @@
     "period": 2,
     "seconds": 35
    },
-   "created_at": "2026-07-09T12:02:00Z"
+   "created_at": "2026-07-09T01:00:35+00:00"
   },
   {
    "id": "mmrdsea473y4-lg-8",
@@ -2606,7 +2461,7 @@
     "period": 2,
     "seconds": 58
    },
-   "created_at": "2026-07-09T12:02:00Z"
+   "created_at": "2026-07-09T01:00:58+00:00"
   },
   {
    "id": "mmrdsea473y4-lg-9",
@@ -2621,7 +2476,7 @@
     "period": 2,
     "seconds": 74
    },
-   "created_at": "2026-07-09T12:02:00Z"
+   "created_at": "2026-07-09T01:01:14+00:00"
   },
   {
    "id": "mmrdsea473y4-lg-10",
@@ -2636,7 +2491,7 @@
     "period": 2,
     "seconds": 84
    },
-   "created_at": "2026-07-09T12:02:00Z"
+   "created_at": "2026-07-09T01:01:24+00:00"
   },
   {
    "id": "mmrdsea473y4-lg-11",
@@ -2651,7 +2506,7 @@
     "period": 2,
     "seconds": 208
    },
-   "created_at": "2026-07-09T12:02:00Z"
+   "created_at": "2026-07-09T01:03:28+00:00"
   },
   {
    "id": "mmrdsea473y4-lg-12",
@@ -2666,7 +2521,7 @@
     "period": 2,
     "seconds": 440
    },
-   "created_at": "2026-07-09T12:02:00Z"
+   "created_at": "2026-07-09T01:07:20+00:00"
   },
   {
    "id": "mmrdsea473y4-lg-13",
@@ -2681,7 +2536,7 @@
     "period": 2,
     "seconds": 860
    },
-   "created_at": "2026-07-09T12:02:00Z"
+   "created_at": "2026-07-09T01:14:20+00:00"
   },
   {
    "id": "mmrdsea473y4-lg-14",
@@ -2696,7 +2551,7 @@
     "period": 2,
     "seconds": 954
    },
-   "created_at": "2026-07-09T12:02:00Z"
+   "created_at": "2026-07-09T01:15:54+00:00"
   },
   {
    "id": "mmrdsea473y4-lg-15",
@@ -2711,7 +2566,7 @@
     "period": 2,
     "seconds": 1215
    },
-   "created_at": "2026-07-09T12:02:00Z"
+   "created_at": "2026-07-09T01:20:15+00:00"
   },
   {
    "id": "mmrdsea473y4-lg-16",
@@ -2726,7 +2581,169 @@
     "period": 2,
     "seconds": 2199
    },
-   "created_at": "2026-07-09T12:02:00Z"
+   "created_at": "2026-07-09T01:36:39+00:00"
+  },
+  {
+   "id": "emrfngbb756j",
+   "match_id": "m_esp_shaktar_20260711",
+   "squad_id": "esporte",
+   "type": "inicio",
+   "minute": null,
+   "athlete_id": null,
+   "assist_id": null,
+   "payload": {
+    "body": "Proleta × Shaktar — acompanhe ao vivo",
+    "title": "🔴 Bola rolando!",
+    "period": 1,
+    "seconds": 0
+   },
+   "created_at": "2026-07-11T00:51:58.147+00:00"
+  },
+  {
+   "id": "emrfnhyxy6mo",
+   "match_id": "m_esp_shaktar_20260711",
+   "squad_id": "esporte",
+   "type": "gol_pro",
+   "minute": 1,
+   "athlete_id": "a2",
+   "assist_id": "a3",
+   "payload": {
+    "body": "Dudu (assist. Rosalvo) — Proleta 1 × 0 Shaktar",
+    "title": "⚽ GOL DO PROLETA!",
+    "assist": "Rosalvo",
+    "period": 1,
+    "scorer": "Dudu",
+    "seconds": 77,
+    "goals_for": 1,
+    "goals_against": 0
+   },
+   "created_at": "2026-07-11T00:53:15.43+00:00"
+  },
+  {
+   "id": "emrfnjho82fr",
+   "match_id": "m_esp_shaktar_20260711",
+   "squad_id": "esporte",
+   "type": "gol_contra",
+   "minute": 2,
+   "athlete_id": null,
+   "assist_id": null,
+   "payload": {
+    "body": "Proleta 1 × 1 Shaktar",
+    "title": "Gol do Shaktar 😕",
+    "period": 1,
+    "seconds": 148,
+    "goals_for": 1,
+    "goals_against": 1
+   },
+   "created_at": "2026-07-11T00:54:26.36+00:00"
+  },
+  {
+   "id": "emrfnjon65lj",
+   "match_id": "m_esp_shaktar_20260711",
+   "squad_id": "esporte",
+   "type": "penalti_pro",
+   "minute": 3,
+   "athlete_id": null,
+   "assist_id": null,
+   "payload": {
+    "body": "Proleta 1 × 1 Shaktar",
+    "title": "🎯 Pênalti para o Proleta!",
+    "period": 1,
+    "seconds": 157
+   },
+   "created_at": "2026-07-11T00:54:35.394+00:00"
+  },
+  {
+   "id": "emrfnjwkd5cb",
+   "match_id": "m_esp_shaktar_20260711",
+   "squad_id": "esporte",
+   "type": "gol_contra",
+   "minute": 3,
+   "athlete_id": null,
+   "assist_id": null,
+   "payload": {
+    "body": "Proleta 1 × 2 Shaktar",
+    "title": "Gol do Shaktar 😕",
+    "period": 1,
+    "seconds": 168,
+    "goals_for": 1,
+    "goals_against": 2
+   },
+   "created_at": "2026-07-11T00:54:45.661+00:00"
+  },
+  {
+   "id": "emrfnkbqn4l2",
+   "match_id": "m_esp_shaktar_20260711",
+   "squad_id": "esporte",
+   "type": "gol_contra",
+   "minute": 3,
+   "athlete_id": null,
+   "assist_id": null,
+   "payload": {
+    "body": "Proleta 1 × 3 Shaktar",
+    "title": "Gol do Shaktar 😕",
+    "period": 1,
+    "seconds": 187,
+    "goals_for": 1,
+    "goals_against": 3
+   },
+   "created_at": "2026-07-11T00:55:05.327+00:00"
+  },
+  {
+   "id": "emrfnkl922jx",
+   "match_id": "m_esp_shaktar_20260711",
+   "squad_id": "esporte",
+   "type": "gol_contra",
+   "minute": 3,
+   "athlete_id": null,
+   "assist_id": null,
+   "payload": {
+    "body": "Proleta 1 × 4 Shaktar",
+    "title": "Gol do Shaktar 😕",
+    "period": 1,
+    "seconds": 200,
+    "goals_for": 1,
+    "goals_against": 4
+   },
+   "created_at": "2026-07-11T00:55:17.654+00:00"
+  },
+  {
+   "id": "emrfnkqd85et",
+   "match_id": "m_esp_shaktar_20260711",
+   "squad_id": "esporte",
+   "type": "gol_contra",
+   "minute": 3,
+   "athlete_id": null,
+   "assist_id": null,
+   "payload": {
+    "body": "Proleta 1 × 5 Shaktar",
+    "title": "Gol do Shaktar 😕",
+    "period": 1,
+    "seconds": 206,
+    "goals_for": 1,
+    "goals_against": 5
+   },
+   "created_at": "2026-07-11T00:55:24.284+00:00"
+  },
+  {
+   "id": "emrfnni777d5",
+   "match_id": "m_esp_shaktar_20260711",
+   "squad_id": "esporte",
+   "type": "gol_pro",
+   "minute": 6,
+   "athlete_id": "a3",
+   "assist_id": "a2",
+   "payload": {
+    "body": "Rosalvo (assist. Dudu) — Proleta 2 × 5 Shaktar",
+    "title": "⚽ GOL DO PROLETA!",
+    "assist": "Dudu",
+    "period": 1,
+    "scorer": "Rosalvo",
+    "seconds": 336,
+    "goals_for": 2,
+    "goals_against": 5
+   },
+   "created_at": "2026-07-11T00:57:33.655+00:00"
   }
  ]
 }

@@ -1,14 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useStore } from "../state/store";
 import { navigate } from "../lib/router";
 import { fmtDate, isLive, result, sortMatches, statusLabel } from "../lib/format";
 import { EmptyState } from "../components/ui";
 import MatchForm from "./MatchForm";
-import type { Match } from "../lib/types";
+import type { Match, Result } from "../lib/types";
 
 export default function Matches({ openNew }: { openNew?: boolean }) {
   const { matches, roster, isAdmin, deleteMatch } = useStore();
   const [form, setForm] = useState<null | { match?: Match; schedule?: boolean }>(null);
+  const [fFrom, setFFrom] = useState("");
+  const [fTo, setFTo] = useState("");
+  const [fRes, setFRes] = useState<Set<Result>>(new Set());
 
   // rota #/partidas/nova (atalho do Início) abre o formulário direto
   useEffect(() => {
@@ -20,19 +23,64 @@ export default function Matches({ openNew }: { openNew?: boolean }) {
 
   const nameOf = (id: string) => roster.find((a) => a.id === id)?.name || "?";
   const list = sortMatches(matches).reverse();
-  const upcoming = list.filter((m) => m.status === "agendada");
-  const played = list.filter((m) => m.status !== "agendada");
+  const hasFilters = !!(fFrom || fTo || fRes.size);
 
+  const inRange = (m: Match) => (!fFrom || m.date >= fFrom) && (!fTo || m.date <= fTo);
+  const upcoming = useMemo(
+    () => list.filter((m) => m.status === "agendada" && inRange(m)),
+    [list, fFrom, fTo]
+  );
+  const played = useMemo(
+    () => list.filter((m) =>
+      m.status !== "agendada" && inRange(m) &&
+      // condições (V/E/D) valem para jogos encerrados; ao vivo sempre aparece
+      (fRes.size === 0 || isLive(m.status) || fRes.has(result(m)))
+    ),
+    [list, fFrom, fTo, fRes]
+  );
+
+  function toggleRes(r: Result) {
+    setFRes((old) => {
+      const cp = new Set(old);
+      if (cp.has(r)) cp.delete(r); else cp.add(r);
+      return cp;
+    });
+  }
+  function clearFilters() { setFFrom(""); setFTo(""); setFRes(new Set()); }
+
+  const shown = upcoming.length + played.length;
   const header = (
-    <div className="section-title">
-      <h2>Partidas {list.length > 0 && <span className="hint">· {list.length} jogos</span>}</h2>
-      {isAdmin && (
-        <div className="row-gap">
-          <button className="btn sm ghost-light" onClick={() => setForm({ schedule: true })}>Agendar</button>
-          <button className="btn primary sm" onClick={() => setForm({})}>+ Nova partida</button>
+    <>
+      <div className="section-title">
+        <h2>
+          Partidas{" "}
+          {list.length > 0 && (
+            <span className="hint">
+              · {hasFilters ? `${shown} de ${list.length}` : list.length} jogos
+            </span>
+          )}
+        </h2>
+        {isAdmin && (
+          <div className="row-gap">
+            <button className="btn sm ghost-light" onClick={() => setForm({ schedule: true })}>Agendar</button>
+            <button className="btn primary sm" onClick={() => setForm({})}>+ Nova partida</button>
+          </div>
+        )}
+      </div>
+      {list.length > 0 && (
+        <div className="filter-bar">
+          <label>De <input type="date" value={fFrom} onChange={(e) => setFFrom(e.target.value)} /></label>
+          <label>Até <input type="date" value={fTo} onChange={(e) => setFTo(e.target.value)} /></label>
+          <span className="fb-sep" />
+          <button className={`f-chip v ${fRes.has("V") ? "on" : ""}`} onClick={() => toggleRes("V")}>Vitórias</button>
+          <button className={`f-chip e ${fRes.has("E") ? "on" : ""}`} onClick={() => toggleRes("E")}>Empates</button>
+          <button className={`f-chip d ${fRes.has("D") ? "on" : ""}`} onClick={() => toggleRes("D")}>Derrotas</button>
+          {hasFilters && (
+            <button className="linklike light" onClick={clearFilters}>Limpar filtros</button>
+          )}
         </div>
       )}
-    </div>
+    </>
   );
 
   if (list.length === 0) {
@@ -135,7 +183,16 @@ export default function Matches({ openNew }: { openNew?: boolean }) {
           <div className="list-label">Realizadas</div>
         </>
       )}
-      <div className="match-list">{played.map(card)}</div>
+      {shown === 0 ? (
+        <EmptyState
+          icon="🔍"
+          title="Nenhum jogo com esses filtros"
+          sub="Ajuste o período ou as condições acima."
+          action={<button className="btn ghost-light" onClick={clearFilters}>Limpar filtros</button>}
+        />
+      ) : (
+        <div className="match-list">{played.map(card)}</div>
+      )}
       {form && <MatchForm match={form.match} schedule={form.schedule} onClose={() => setForm(null)} />}
     </>
   );

@@ -41,7 +41,8 @@ function LiveClock({ m }: { m: Match }) {
 export default function MatchDetail({ id }: { id: string }) {
   const {
     findMatch, roster, athleteName, isAdmin, schemaLegacy,
-    events, loadEvents, addEvent, toggleClock, deleteMatch, upsertMatch, toast,
+    events, loadEvents, addEvent, toggleClock, resetToScheduled,
+    deleteMatch, upsertMatch, toast,
   } = useStore();
   const [editing, setEditing] = useState(false);
   const [goalPicker, setGoalPicker] = useState(false);
@@ -161,6 +162,14 @@ export default function MatchDetail({ id }: { id: string }) {
               🏁 Encerrar partida
             </button>
           )}
+          <button className="btn ghost-light block sm" disabled={busy}
+            onClick={() => {
+              if (confirm("Zerar e REAGENDAR esta partida? Placar, gols e lances são apagados (escalação, local e horário ficam). Bom para desfazer um teste.")) {
+                resetToScheduled(m);
+              }
+            }}>
+            ↩ Zerar e reagendar (desfazer início)
+          </button>
         </div>
       )}
 
@@ -234,6 +243,13 @@ export default function MatchDetail({ id }: { id: string }) {
               {m.archived ? "Desarquivar" : "Arquivar (sai das estatísticas)"}
             </button>
           )}
+          <button className="btn ghost-light block" onClick={() => {
+            if (confirm("Zerar e REAGENDAR esta partida? Placar, gols e lances são apagados (escalação, local e horário ficam). Bom para desfazer um teste ou um encerramento por engano.")) {
+              resetToScheduled(m);
+            }
+          }}>
+            ↩ Zerar e reagendar
+          </button>
           <button className="btn danger block" onClick={() => {
             if (confirm(`Excluir a partida contra ${m.opponent} (${fmtDate(m.date)})?\n\nEssa ação não pode ser desfeita.`)) {
               deleteMatch(m.id); navigate("#/partidas");
