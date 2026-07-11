@@ -132,12 +132,22 @@ export default function Matches({ openNew }: { openNew?: boolean }) {
               ? <span className="mc-badge live"><span className="pulse sm" />{statusLabel(m.status)}</span>
               : <span className={`mc-badge ${r.toLowerCase()}`}>{r}</span>}
         </div>
-        {scheduled && (m.venue || m.kickoff || m.kit) && (
+        {scheduled && (m.venue || m.kickoff || m.kit || nRel > 0) && (
           <div className="mc-detail">
-            <div>
-              {[m.kickoff && `🕒 ${m.kickoff}`, m.venue && `📍 ${m.venue}`, m.kit && `👕 ${m.kit}`]
-                .filter(Boolean).join("  ·  ")}
-            </div>
+            {(m.venue || m.kickoff || m.kit) && (
+              <div>
+                {[m.kickoff && `🕒 ${m.kickoff}`, m.venue && `📍 ${m.venue}`, m.kit && `👕 ${m.kit}`]
+                  .filter(Boolean).join("  ·  ")}
+              </div>
+            )}
+            {nRel > 0 && (
+              <div className="mc-tags">
+                <span className="tag n">{nRel} relacionado{nRel !== 1 ? "s" : ""}</span>
+                {(m.starters || []).length > 0 && (
+                  <span className="tag n">★ {m.starters.length} titulares</span>
+                )}
+              </div>
+            )}
           </div>
         )}
         {!scheduled && (
@@ -148,6 +158,9 @@ export default function Matches({ openNew }: { openNew?: boolean }) {
             {as && <div><span className="k">🅰️ Assist.:</span> {as}</div>}
             <div className="mc-tags">
               <span className="tag n">{nRel} relacionado{nRel !== 1 ? "s" : ""}</span>
+              {(m.starters || []).length > 0 && (
+                <span className="tag n">★ {m.starters.length} titulares · {nRel - m.starters.length} banco</span>
+              )}
               {m.lineup_complete === false && <span className="tag">escalação parcial</span>}
               {live && <span className="tag live">ao vivo — toque para acompanhar</span>}
             </div>
