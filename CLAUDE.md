@@ -14,9 +14,13 @@ Football stats + live-match app for the amateur team "Proletariado Alviverde" (P
 - `node scripts/gen-icons.mjs` — regenerate PWA PNG icons (dependency-free PNG encoder)
 - Deploy: push to `main` → `.github/workflows/deploy.yml` builds and publishes to GitHub Pages. Vite uses `base: "./"` so the app works at any path; never introduce absolute URLs for assets or the service worker.
 
+## Data-model history (read before schema work)
+
+The user's final v1 app (single-file, iterated beyond `legacy/proleta-esporte.html`) stored per-match `starters`, `positions` (id→text map), `venue`/`kickoff`/`kit`, `archived`, a pausable `clock` `{base,period,running}`, in-row `events` (`start/goal/ga/ht/st/end/sub`, `p`=period, `t`=seconds), and a `squad` column on athletes/matches. Those live on in `athletes_v1`/`matches_v1` (renamed, anon-readable). `supabase/atualizacao-1.sql` copies all of it into the v2 tables and converts legacy events into `match_events` rows (`payload.legacy=true`; display text is derived client-side in `TimelineItem`). Never drop the `*_v1` tables; never remove a field that exists in v1 data. The store probes for the `starters` column on boot (`schemaLegacy`) and, when the DB predates atualizacao-1, strips new fields from writes and hides the related UI.
+
 ## Access model (core invariant)
 
-Viewers browse everything **without login**; only admins authenticate. Enforcement is server-side via RLS in `supabase/schema.sql`: public `select` on data tables, writes gated by `is_admin()` (a `security definer` function checking the `admins` table). The client-side `isAdmin` flag in the store only shows/hides UI — never treat it as security. `push_subscriptions` is anon-writable (viewers subscribe without accounts) and has no select policy. The Supabase URL/anon key in `src/config.ts` are intentionally public.
+Viewers browse everything **without login**; only admins authenticate. Enforcement is server-side via RLS in `supabase/schema.sql`: public `select` on data tables, writes gated by `is_admin()` (a `security definer` function checking the `admins` table). The client-side `isAdmin` flag in the store only shows/hides UI — never treat it as security. `push_subscriptions` is anon-writable (viewers subscribe without accounts) and deliberately has **no select policy** — which means PostgREST UPSERT fails against it; `subscribePush` must INSERT and fall back to UPDATE on error 23505. The Supabase URL/anon key in `src/config.ts` are intentionally public. `npm run dev:mock` mirrors live DB data and fakes an admin session (`__MOCK_ADMIN__`, dev-only).
 
 ## Architecture
 
