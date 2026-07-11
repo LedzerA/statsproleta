@@ -155,6 +155,12 @@ code { background: rgba(0, 0, 0, .25); padding: 1px 5px; border-radius: 5px; fon
   border-radius: 8px; padding: 6px 8px; font-size: 13px; color-scheme: dark; min-width: 0;
 }
 .filter-bar input[type=date]:focus { outline: none; border-color: var(--verde-400); }
+.filter-bar .fb-num {
+  width: 58px; background: var(--verde-850); border: 1px solid var(--linha-forte);
+  color: var(--creme); border-radius: 8px; padding: 6px 8px; font-size: 13px; text-align: center;
+  font-family: 'Zilla Slab', serif; font-weight: 600;
+}
+.filter-bar .fb-num:focus { outline: none; border-color: var(--verde-400); }
 .fb-sep { width: 1px; height: 22px; background: var(--linha-forte); }
 .fb-note { font-size: 11px; color: var(--gold); font-weight: 600; }
 .f-chip {

@@ -26,25 +26,28 @@ export default function Athletes() {
   const [newName, setNewName] = useState("");
   const [pFrom, setPFrom] = useState("");
   const [pTo, setPTo] = useState("");
+  const [minJogos, setMinJogos] = useState(0);
+  const [minGols, setMinGols] = useState(0);
 
-  const filtering = !!(pFrom || pTo);
+  const periodFiltering = !!(pFrom || pTo);
+  const filtering = periodFiltering || minJogos > 0 || minGols > 0;
   const stats = useMemo(() => {
-    if (!filtering) return seasonStats;
+    if (!periodFiltering) return seasonStats;
     return compute(
       roster,
       matches.filter((m) => (!pFrom || m.date >= pFrom) && (!pTo || m.date <= pTo))
     );
-  }, [seasonStats, filtering, roster, matches, pFrom, pTo]);
+  }, [seasonStats, periodFiltering, roster, matches, pFrom, pTo]);
 
   const list = useMemo(() => {
-    const cp = [...stats.players];
+    const cp = stats.players.filter((p) => p.jogos >= minJogos && p.gols >= minGols);
     cp.sort((a, b) => {
       if (sortKey === "name") return sortDir * a.name.localeCompare(b.name, "pt");
       const va = a[sortKey] as number, vb = b[sortKey] as number;
       return va === vb ? a.name.localeCompare(b.name, "pt") : sortDir * (va - vb);
     });
     return cp;
-  }, [stats.players, sortKey, sortDir]);
+  }, [stats.players, sortKey, sortDir, minJogos, minGols]);
 
   function clickSort(k: keyof PlayerStats) {
     if (sortKey === k) setSortDir((d) => -d);
@@ -56,18 +59,38 @@ export default function Athletes() {
       <div className="section-title">
         <h2>Classificação de atletas</h2>
         <span className="hint">
-          {stats.totalJogadores} atletas com registro
-          {filtering && ` · ${stats.team.J} jogo${stats.team.J !== 1 ? "s" : ""} no período`}
+          {filtering
+            ? `${list.length} de ${stats.players.length} atletas`
+            : `${stats.totalJogadores} atletas com registro`}
+          {periodFiltering && ` · ${stats.team.J} jogo${stats.team.J !== 1 ? "s" : ""} no período`}
         </span>
       </div>
 
       <div className="filter-bar">
         <label>De <input type="date" value={pFrom} onChange={(e) => setPFrom(e.target.value)} /></label>
         <label>Até <input type="date" value={pTo} onChange={(e) => setPTo(e.target.value)} /></label>
+        <span className="fb-sep" />
+        <label>Mín. jogos
+          <input
+            type="number" className="fb-num" min={0} placeholder="0"
+            value={minJogos || ""}
+            onChange={(e) => setMinJogos(Math.max(0, parseInt(e.target.value) || 0))}
+          />
+        </label>
+        <label>Mín. gols
+          <input
+            type="number" className="fb-num" min={0} placeholder="0"
+            value={minGols || ""}
+            onChange={(e) => setMinGols(Math.max(0, parseInt(e.target.value) || 0))}
+          />
+        </label>
         {filtering && (
           <>
-            <span className="fb-note">estatísticas só do período</span>
-            <button className="linklike light" onClick={() => { setPFrom(""); setPTo(""); }}>
+            {periodFiltering && <span className="fb-note">estatísticas só do período</span>}
+            <button
+              className="linklike light"
+              onClick={() => { setPFrom(""); setPTo(""); setMinJogos(0); setMinGols(0); }}
+            >
               Limpar
             </button>
           </>
