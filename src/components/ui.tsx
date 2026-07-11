@@ -31,10 +31,11 @@ export function EmptyState({ icon = "⚽", title, sub, action }: {
   );
 }
 
-export function FormDots({ form }: { form: Result[] }) {
+export function FormDots({ form, label }: { form: Result[]; label?: string }) {
   const dots = form.length ? form : null;
   return (
     <div className="form-dots">
+      {label && <span className="lbl">{label}</span>}
       {dots
         ? dots.map((r, i) => <span key={i} className={`dot ${r.toLowerCase()}`}>{r}</span>)
         : <span className="dot empty" />}

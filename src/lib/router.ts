@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 export type Route =
   | { view: "inicio" }
-  | { view: "partidas" }
+  | { view: "partidas"; nova?: boolean }
   | { view: "partida"; id: string }
   | { view: "atletas" }
   | { view: "adversarios" }
@@ -11,7 +11,7 @@ export type Route =
 function parse(hash: string): Route {
   const parts = hash.replace(/^#\/?/, "").split("/").filter(Boolean);
   switch (parts[0]) {
-    case "partidas": return { view: "partidas" };
+    case "partidas": return { view: "partidas", nova: parts[1] === "nova" };
     case "partida": return parts[1] ? { view: "partida", id: parts[1] } : { view: "partidas" };
     case "atletas": return { view: "atletas" };
     case "adversarios": return { view: "adversarios" };

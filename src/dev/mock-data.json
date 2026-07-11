@@ -3,224 +3,418 @@
   {
    "id": "esporte",
    "name": "Esporte",
-   "position": 1
+   "position": 1,
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   }
  ],
  "athletes": [
   {
    "id": "a1",
    "squad_id": "esporte",
-   "name": "Bibico"
+   "name": "Bibico",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a2",
    "squad_id": "esporte",
-   "name": "Dudu"
+   "name": "Dudu",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a3",
    "squad_id": "esporte",
-   "name": "Rosalvo"
+   "name": "Rosalvo",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a4",
    "squad_id": "esporte",
-   "name": "Vini França"
+   "name": "Vini França",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a5",
    "squad_id": "esporte",
-   "name": "Hashi"
+   "name": "Hashi",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a6",
    "squad_id": "esporte",
-   "name": "Caio"
+   "name": "Caio",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a7",
    "squad_id": "esporte",
-   "name": "André"
+   "name": "André",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a8",
    "squad_id": "esporte",
-   "name": "Fabiano"
+   "name": "Fabiano",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a9",
    "squad_id": "esporte",
-   "name": "Digão"
+   "name": "Digão",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a10",
    "squad_id": "esporte",
-   "name": "Wellington"
+   "name": "Wellington",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a11",
    "squad_id": "esporte",
-   "name": "Rennan"
+   "name": "Rennan",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a12",
    "squad_id": "esporte",
-   "name": "Meloni"
+   "name": "Meloni",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a13",
    "squad_id": "esporte",
-   "name": "Renan"
+   "name": "Renan",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a14",
    "squad_id": "esporte",
-   "name": "Eloy"
+   "name": "Eloy",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a15",
    "squad_id": "esporte",
-   "name": "Macapá"
+   "name": "Macapá",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a16",
    "squad_id": "esporte",
-   "name": "Belaz"
+   "name": "Belaz",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a17",
    "squad_id": "esporte",
-   "name": "Rafael"
+   "name": "Rafael",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a18",
    "squad_id": "esporte",
-   "name": "Siqueira"
+   "name": "Siqueira",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a19",
    "squad_id": "esporte",
-   "name": "Luis E."
+   "name": "Luis E.",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a20",
    "squad_id": "esporte",
-   "name": "Albano"
+   "name": "Albano",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a21",
    "squad_id": "esporte",
-   "name": "Wez"
+   "name": "Wez",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a22",
    "squad_id": "esporte",
-   "name": "Gzus"
+   "name": "Gzus",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a23",
    "squad_id": "esporte",
-   "name": "Lima"
+   "name": "Lima",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a24",
    "squad_id": "esporte",
-   "name": "Brendon"
+   "name": "Brendon",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a25",
    "squad_id": "esporte",
-   "name": "Detona"
+   "name": "Detona",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a26",
    "squad_id": "esporte",
-   "name": "Euller"
+   "name": "Euller",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a27",
    "squad_id": "esporte",
-   "name": "Edu"
+   "name": "Edu",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a28",
    "squad_id": "esporte",
-   "name": "Rufus"
+   "name": "Rufus",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a29",
    "squad_id": "esporte",
-   "name": "Leone"
+   "name": "Leone",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a30",
    "squad_id": "esporte",
-   "name": "Pelota"
+   "name": "Pelota",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a31",
    "squad_id": "esporte",
-   "name": "Romario"
+   "name": "Romario",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a32",
    "squad_id": "esporte",
-   "name": "W. Felipe"
+   "name": "W. Felipe",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a33",
    "squad_id": "esporte",
-   "name": "Gui Dantas"
+   "name": "Gui Dantas",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a34",
    "squad_id": "esporte",
-   "name": "Barone"
+   "name": "Barone",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a35",
    "squad_id": "esporte",
-   "name": "Igor"
+   "name": "Igor",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a36",
    "squad_id": "esporte",
-   "name": "Amaral"
+   "name": "Amaral",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a37",
    "squad_id": "esporte",
-   "name": "Diego"
+   "name": "Diego",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a38",
    "squad_id": "esporte",
-   "name": "Leodan"
+   "name": "Leodan",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a39",
    "squad_id": "esporte",
-   "name": "Lingo"
+   "name": "Lingo",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a40",
    "squad_id": "esporte",
-   "name": "Lucas Vini"
+   "name": "Lucas Vini",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a41",
    "squad_id": "esporte",
-   "name": "Xande"
+   "name": "Xande",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a42",
    "squad_id": "esporte",
-   "name": "PH"
+   "name": "PH",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "a43",
    "squad_id": "esporte",
-   "name": "Salvador"
+   "name": "Salvador",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
+  },
+  {
+   "id": "a44",
+   "squad_id": "esporte",
+   "name": "Bruninho",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
+  },
+  {
+   "id": "a45",
+   "squad_id": "esporte",
+   "name": "Goleiro de Aluguel",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
+  },
+  {
+   "id": "a46",
+   "squad_id": "esporte",
+   "name": "Kauã",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
+  },
+  {
+   "id": "a47",
+   "squad_id": "esporte",
+   "name": "Beto",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
+  },
+  {
+   "id": "a48",
+   "squad_id": "esporte",
+   "name": "Alef",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
+  },
+  {
+   "id": "a49",
+   "squad_id": "esporte",
+   "name": "Lin",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
+  },
+  {
+   "id": "a50",
+   "squad_id": "esporte",
+   "name": "Led",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
+  },
+  {
+   "id": "a51",
+   "squad_id": "esporte",
+   "name": "Valts",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
+  },
+  {
+   "id": "amrdsdpcn4zq",
+   "squad_id": "esporte",
+   "name": "Guilherme",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
+  },
+  {
+   "id": "amrdsdsen3su",
+   "squad_id": "esporte",
+   "name": "Jacomo",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
+  },
+  {
+   "id": "amrdse11a2t5",
+   "squad_id": "esporte",
+   "name": "Albano",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
+  },
+  {
+   "id": "amrdse3fj5ff",
+   "squad_id": "esporte",
+   "name": "Amaral",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
+  },
+  {
+   "id": "amrdse5592tl",
+   "squad_id": "esporte",
+   "name": "Luan",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
+  },
+  {
+   "id": "amrdse7fn687",
+   "squad_id": "esporte",
+   "name": "Fabão",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
+  },
+  {
+   "id": "amrdsgr6o4dy",
+   "squad_id": "esporte",
+   "name": "Fabiano",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
+  },
+  {
+   "id": "amrdsgtqi45k",
+   "squad_id": "esporte",
+   "name": "André",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
+  },
+  {
+   "id": "amrdsgvsu2dx",
+   "squad_id": "esporte",
+   "name": "Meloni",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
+  },
+  {
+   "id": "amrdsh60j124",
+   "squad_id": "esporte",
+   "name": "Gui Dantas",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
+  },
+  {
+   "id": "v_78a39788",
+   "squad_id": "esporte",
+   "name": "Fabricio",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
+  },
+  {
+   "id": "v_5a681924",
+   "squad_id": "esporte",
+   "name": "Felipe",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
+  },
+  {
+   "id": "v_144e9d3b",
+   "squad_id": "esporte",
+   "name": "Chipilo",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
+  },
+  {
+   "id": "v_22494c72",
+   "squad_id": "esporte",
+   "name": "Côco",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
+  },
+  {
+   "id": "v_725bbf8b",
+   "squad_id": "esporte",
+   "name": "Carlinhos",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
+  },
+  {
+   "id": "v_dc1d67d1",
+   "squad_id": "esporte",
+   "name": "Sergio",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
+  },
+  {
+   "id": "v_a5d80dd8",
+   "squad_id": "esporte",
+   "name": "Bato",
+   "created_at": "2026-07-10T22:46:13.282876+00:00"
   }
  ],
  "matches": [
@@ -233,7 +427,22 @@
    "goals_for": 1,
    "goals_against": 3,
    "lineup": [
-    "a20"
+    "a13",
+    "a6",
+    "a20",
+    "a28",
+    "a29",
+    "a5",
+    "a24",
+    "a10",
+    "a12",
+    "a3",
+    "a11",
+    "a30",
+    "a51",
+    "a7",
+    "a9",
+    "a18"
    ],
    "scorers": [
     {
@@ -242,9 +451,11 @@
     }
    ],
    "assists": [],
-   "lineup_complete": false,
+   "lineup_complete": true,
    "notes": "",
-   "started_at": null
+   "started_at": null,
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "m2",
@@ -255,11 +466,22 @@
    "goals_for": 5,
    "goals_against": 3,
    "lineup": [
-    "a11",
-    "a2",
+    "a13",
+    "a3",
+    "a20",
+    "a18",
+    "a6",
+    "a1",
     "a10",
-    "a7",
-    "a3"
+    "a14",
+    "a2",
+    "a11",
+    "a8",
+    "a4",
+    "a16",
+    "a5",
+    "a9",
+    "a7"
    ],
    "scorers": [
     {
@@ -285,9 +507,11 @@
      "n": 1
     }
    ],
-   "lineup_complete": false,
+   "lineup_complete": true,
    "notes": "",
-   "started_at": null
+   "started_at": null,
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "m3",
@@ -298,7 +522,25 @@
    "goals_for": 1,
    "goals_against": 4,
    "lineup": [
-    "a7"
+    "a13",
+    "a12",
+    "a28",
+    "a4",
+    "a6",
+    "a1",
+    "a18",
+    "a14",
+    "a2",
+    "a3",
+    "a11",
+    "a20",
+    "a5",
+    "a10",
+    "a7",
+    "a9",
+    "a35",
+    "a41",
+    "a30"
    ],
    "scorers": [
     {
@@ -307,9 +549,11 @@
     }
    ],
    "assists": [],
-   "lineup_complete": false,
+   "lineup_complete": true,
    "notes": "",
-   "started_at": null
+   "started_at": null,
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "m4",
@@ -320,7 +564,22 @@
    "goals_for": 2,
    "goals_against": 1,
    "lineup": [
-    "a8"
+    "a13",
+    "a3",
+    "a20",
+    "a36",
+    "a6",
+    "a1",
+    "a4",
+    "a24",
+    "a7",
+    "a2",
+    "a8",
+    "a29",
+    "a31",
+    "a9",
+    "a17",
+    "a30"
    ],
    "scorers": [
     {
@@ -329,9 +588,11 @@
     }
    ],
    "assists": [],
-   "lineup_complete": false,
+   "lineup_complete": true,
    "notes": "",
-   "started_at": null
+   "started_at": null,
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "m5",
@@ -342,8 +603,22 @@
    "goals_for": 1,
    "goals_against": 2,
    "lineup": [
+    "a13",
+    "a12",
+    "a20",
+    "a29",
+    "a6",
+    "a1",
+    "a4",
+    "a10",
+    "a7",
     "a3",
-    "a1"
+    "a8",
+    "a16",
+    "a18",
+    "a5",
+    "a9",
+    "a2"
    ],
    "scorers": [
     {
@@ -357,9 +632,11 @@
      "n": 1
     }
    ],
-   "lineup_complete": false,
+   "lineup_complete": true,
    "notes": "",
-   "started_at": null
+   "started_at": null,
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "m6",
@@ -370,8 +647,24 @@
    "goals_for": 1,
    "goals_against": 4,
    "lineup": [
+    "a13",
+    "a12",
+    "a29",
+    "a28",
+    "a6",
+    "a1",
+    "a10",
+    "a4",
+    "a7",
+    "a3",
+    "a8",
     "a16",
-    "a12"
+    "a18",
+    "a5",
+    "a9",
+    "a11",
+    "a2",
+    "a30"
    ],
    "scorers": [
     {
@@ -385,9 +678,11 @@
      "n": 1
     }
    ],
-   "lineup_complete": false,
+   "lineup_complete": true,
    "notes": "",
-   "started_at": null
+   "started_at": null,
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "m7",
@@ -398,9 +693,20 @@
    "goals_for": 2,
    "goals_against": 3,
    "lineup": [
+    "a13",
+    "a49",
+    "a5",
+    "a4",
+    "a6",
+    "a1",
+    "a19",
+    "a7",
     "a3",
     "a8",
-    "a1"
+    "a17",
+    "a50",
+    "a9",
+    "a10"
    ],
    "scorers": [
     {
@@ -422,9 +728,11 @@
      "n": 1
     }
    ],
-   "lineup_complete": false,
+   "lineup_complete": true,
    "notes": "",
-   "started_at": null
+   "started_at": null,
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "m8",
@@ -435,10 +743,20 @@
    "goals_for": 3,
    "goals_against": 2,
    "lineup": [
+    "a13",
     "a12",
-    "a11",
+    "a28",
+    "a16",
+    "a6",
+    "a1",
+    "a7",
+    "a5",
+    "a3",
     "a2",
-    "a8"
+    "a8",
+    "a9",
+    "a17",
+    "a11"
    ],
    "scorers": [
     {
@@ -464,9 +782,11 @@
      "n": 1
     }
    ],
-   "lineup_complete": false,
+   "lineup_complete": true,
    "notes": "",
-   "started_at": null
+   "started_at": null,
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "m9",
@@ -477,8 +797,21 @@
    "goals_for": 1,
    "goals_against": 4,
    "lineup": [
+    "a13",
+    "a12",
+    "a5",
+    "a4",
+    "a6",
+    "a1",
     "a19",
-    "a12"
+    "a7",
+    "a3",
+    "a11",
+    "a14",
+    "a20",
+    "a9",
+    "a17",
+    "a2"
    ],
    "scorers": [
     {
@@ -492,9 +825,11 @@
      "n": 1
     }
    ],
-   "lineup_complete": false,
+   "lineup_complete": true,
    "notes": "",
-   "started_at": null
+   "started_at": null,
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "m10",
@@ -505,7 +840,24 @@
    "goals_for": 1,
    "goals_against": 1,
    "lineup": [
-    "a14"
+    "a13",
+    "a12",
+    "a4",
+    "a5",
+    "a6",
+    "a1",
+    "a19",
+    "a7",
+    "a3",
+    "a2",
+    "a11",
+    "a15",
+    "a20",
+    "a16",
+    "a18",
+    "a9",
+    "a14",
+    "a17"
    ],
    "scorers": [
     {
@@ -514,9 +866,11 @@
     }
    ],
    "assists": [],
-   "lineup_complete": false,
+   "lineup_complete": true,
    "notes": "",
-   "started_at": null
+   "started_at": null,
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "m11",
@@ -527,7 +881,18 @@
    "goals_for": 1,
    "goals_against": 2,
    "lineup": [
-    "a2"
+    "a32",
+    "a3",
+    "a1",
+    "a15",
+    "a46",
+    "a23",
+    "a31",
+    "a19",
+    "a47",
+    "a2",
+    "a17",
+    "a48"
    ],
    "scorers": [
     {
@@ -536,9 +901,11 @@
     }
    ],
    "assists": [],
-   "lineup_complete": false,
+   "lineup_complete": true,
    "notes": "",
-   "started_at": null
+   "started_at": null,
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "m12",
@@ -549,11 +916,22 @@
    "goals_for": 3,
    "goals_against": 3,
    "lineup": [
-    "a8",
-    "a27",
-    "a11",
+    "a32",
+    "a3",
+    "a5",
+    "a4",
+    "a6",
+    "a1",
     "a10",
-    "a4"
+    "a7",
+    "a14",
+    "a11",
+    "a8",
+    "a15",
+    "a20",
+    "a23",
+    "a27",
+    "a2"
    ],
    "scorers": [
     {
@@ -579,9 +957,11 @@
      "n": 1
     }
    ],
-   "lineup_complete": false,
+   "lineup_complete": true,
    "notes": "",
-   "started_at": null
+   "started_at": null,
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "m13",
@@ -592,10 +972,21 @@
    "goals_for": 3,
    "goals_against": 3,
    "lineup": [
+    "a13",
+    "a3",
+    "a15",
+    "a16",
+    "a6",
+    "a1",
     "a10",
+    "a7",
+    "a14",
+    "a2",
     "a8",
+    "a34",
     "a23",
-    "a2"
+    "a9",
+    "a26"
    ],
    "scorers": [
     {
@@ -621,9 +1012,11 @@
      "n": 1
     }
    ],
-   "lineup_complete": false,
+   "lineup_complete": true,
    "notes": "",
-   "started_at": null
+   "started_at": null,
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "m14",
@@ -634,12 +1027,21 @@
    "goals_for": 5,
    "goals_against": 4,
    "lineup": [
+    "a14",
+    "a12",
+    "a15",
+    "a5",
+    "a27",
     "a1",
-    "a8",
-    "a2",
     "a4",
     "a7",
+    "a2",
+    "a8",
     "a33",
+    "a20",
+    "a3",
+    "a40",
+    "a23",
     "a17"
    ],
    "scorers": [
@@ -674,9 +1076,11 @@
      "n": 1
     }
    ],
-   "lineup_complete": false,
+   "lineup_complete": true,
    "notes": "",
-   "started_at": null
+   "started_at": null,
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "m15",
@@ -687,14 +1091,25 @@
    "goals_for": 7,
    "goals_against": 0,
    "lineup": [
+    "a14",
+    "a3",
+    "a5",
+    "a4",
+    "a6",
+    "a1",
+    "a10",
+    "a19",
+    "a12",
     "a11",
     "a8",
+    "a15",
     "a16",
-    "a4",
-    "a26",
-    "a3",
-    "a12",
-    "a24"
+    "a18",
+    "a22",
+    "a24",
+    "a9",
+    "a17",
+    "a26"
    ],
    "scorers": [
     {
@@ -740,9 +1155,11 @@
      "n": 1
     }
    ],
-   "lineup_complete": false,
+   "lineup_complete": true,
    "notes": "",
-   "started_at": null
+   "started_at": null,
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "m16",
@@ -752,12 +1169,29 @@
    "status": "encerrada",
    "goals_for": 0,
    "goals_against": 1,
-   "lineup": [],
+   "lineup": [
+    "a14",
+    "a3",
+    "a15",
+    "a4",
+    "a6",
+    "a1",
+    "a22",
+    "a7",
+    "a12",
+    "a2",
+    "a11",
+    "a16",
+    "a23",
+    "a17"
+   ],
    "scorers": [],
    "assists": [],
-   "lineup_complete": false,
+   "lineup_complete": true,
    "notes": "",
-   "started_at": null
+   "started_at": null,
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "m17",
@@ -767,12 +1201,32 @@
    "status": "encerrada",
    "goals_for": 0,
    "goals_against": 2,
-   "lineup": [],
+   "lineup": [
+    "a14",
+    "a37",
+    "a15",
+    "a5",
+    "a18",
+    "a24",
+    "a19",
+    "a9",
+    "a2",
+    "a26",
+    "a8",
+    "a22",
+    "a6",
+    "a1",
+    "a23",
+    "a34",
+    "a27"
+   ],
    "scorers": [],
    "assists": [],
-   "lineup_complete": false,
+   "lineup_complete": true,
    "notes": "",
-   "started_at": null
+   "started_at": null,
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "m18",
@@ -783,9 +1237,24 @@
    "goals_for": 3,
    "goals_against": 6,
    "lineup": [
+    "a23",
+    "a17",
+    "a12",
+    "a22",
     "a11",
-    "a8",
-    "a10"
+    "a14",
+    "a2",
+    "a7",
+    "a32",
+    "a3",
+    "a5",
+    "a10",
+    "a15",
+    "a4",
+    "a9",
+    "a16",
+    "a1",
+    "a8"
    ],
    "scorers": [
     {
@@ -807,9 +1276,11 @@
      "n": 1
     }
    ],
-   "lineup_complete": false,
+   "lineup_complete": true,
    "notes": "",
-   "started_at": null
+   "started_at": null,
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "m19",
@@ -824,7 +1295,9 @@
    "assists": [],
    "lineup_complete": false,
    "notes": "",
-   "started_at": null
+   "started_at": null,
+   "created_at": "2026-07-10T22:46:26.31661+00:00",
+   "updated_at": "2026-07-10T22:46:26.31661+00:00"
   },
   {
    "id": "m20",
@@ -835,11 +1308,23 @@
    "goals_for": 3,
    "goals_against": 1,
    "lineup": [
-    "a8",
-    "a11",
-    "a2",
+    "a14",
     "a3",
-    "a25"
+    "a5",
+    "a16",
+    "a6",
+    "a1",
+    "a10",
+    "a19",
+    "a2",
+    "a11",
+    "a8",
+    "a22",
+    "a18",
+    "a9",
+    "a21",
+    "a25",
+    "a26"
    ],
    "scorers": [
     {
@@ -865,9 +1350,11 @@
      "n": 1
     }
    ],
-   "lineup_complete": false,
+   "lineup_complete": true,
    "notes": "",
-   "started_at": null
+   "started_at": null,
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "m21",
@@ -877,12 +1364,34 @@
    "status": "encerrada",
    "goals_for": 0,
    "goals_against": 0,
-   "lineup": [],
+   "lineup": [
+    "a13",
+    "a3",
+    "a5",
+    "a16",
+    "a12",
+    "a1",
+    "a10",
+    "a19",
+    "a2",
+    "a11",
+    "a8",
+    "a4",
+    "a22",
+    "a7",
+    "a21",
+    "a26",
+    "a25",
+    "a44",
+    "a9"
+   ],
    "scorers": [],
    "assists": [],
-   "lineup_complete": false,
+   "lineup_complete": true,
    "notes": "",
-   "started_at": null
+   "started_at": null,
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "m22",
@@ -893,10 +1402,22 @@
    "goals_for": 2,
    "goals_against": 4,
    "lineup": [
+    "a14",
+    "a15",
+    "a20",
+    "a4",
+    "a3",
+    "a1",
     "a10",
     "a7",
+    "a9",
     "a2",
-    "a3"
+    "a25",
+    "a32",
+    "a31",
+    "a21",
+    "a34",
+    "a35"
    ],
    "scorers": [
     {
@@ -918,9 +1439,11 @@
      "n": 1
     }
    ],
-   "lineup_complete": false,
+   "lineup_complete": true,
    "notes": "",
-   "started_at": null
+   "started_at": null,
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "m23",
@@ -930,12 +1453,29 @@
    "status": "encerrada",
    "goals_for": 1,
    "goals_against": 3,
-   "lineup": [],
+   "lineup": [
+    "a45",
+    "a15",
+    "a28",
+    "a5",
+    "a3",
+    "a4",
+    "a1",
+    "a19",
+    "a12",
+    "a2",
+    "a8",
+    "a21",
+    "a33",
+    "a25"
+   ],
    "scorers": [],
    "assists": [],
-   "lineup_complete": false,
+   "lineup_complete": true,
    "notes": "",
-   "started_at": null
+   "started_at": null,
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "m24",
@@ -945,12 +1485,31 @@
    "status": "encerrada",
    "goals_for": 0,
    "goals_against": 1,
-   "lineup": [],
+   "lineup": [
+    "a13",
+    "a15",
+    "a5",
+    "a4",
+    "a1",
+    "a16",
+    "a10",
+    "a19",
+    "a11",
+    "a7",
+    "a8",
+    "a6",
+    "a3",
+    "a18",
+    "a14",
+    "a12"
+   ],
    "scorers": [],
    "assists": [],
-   "lineup_complete": false,
+   "lineup_complete": true,
    "notes": "",
-   "started_at": null
+   "started_at": null,
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "m25",
@@ -961,7 +1520,22 @@
    "goals_for": 1,
    "goals_against": 1,
    "lineup": [
-    "a8"
+    "a13",
+    "a15",
+    "a5",
+    "a4",
+    "a16",
+    "a1",
+    "a24",
+    "a10",
+    "a2",
+    "a8",
+    "a3",
+    "a6",
+    "a21",
+    "a9",
+    "a27",
+    "a25"
    ],
    "scorers": [
     {
@@ -970,9 +1544,11 @@
     }
    ],
    "assists": [],
-   "lineup_complete": false,
+   "lineup_complete": true,
    "notes": "",
-   "started_at": null
+   "started_at": null,
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "m26",
@@ -983,8 +1559,25 @@
    "goals_for": 1,
    "goals_against": 1,
    "lineup": [
+    "a14",
+    "a3",
+    "a4",
+    "a16",
+    "a6",
+    "a1",
+    "a10",
+    "a7",
+    "a12",
+    "a11",
+    "a8",
+    "a13",
+    "a18",
+    "a24",
+    "a22",
+    "a21",
     "a2",
-    "a11"
+    "a27",
+    "a25"
    ],
    "scorers": [
     {
@@ -998,9 +1591,11 @@
      "n": 1
     }
    ],
-   "lineup_complete": false,
+   "lineup_complete": true,
    "notes": "",
-   "started_at": null
+   "started_at": null,
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "m27",
@@ -1011,8 +1606,23 @@
    "goals_for": 3,
    "goals_against": 0,
    "lineup": [
+    "a13",
+    "a15",
+    "a5",
+    "a4",
+    "a6",
+    "a1",
+    "a21",
+    "a7",
     "a2",
-    "a11"
+    "a8",
+    "a11",
+    "a20",
+    "a3",
+    "a9",
+    "a12",
+    "a17",
+    "a22"
    ],
    "scorers": [
     {
@@ -1030,9 +1640,11 @@
      "n": 1
     }
    ],
-   "lineup_complete": false,
+   "lineup_complete": true,
    "notes": "",
-   "started_at": null
+   "started_at": null,
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-10T22:46:13.282876+00:00"
   },
   {
    "id": "m28",
@@ -1043,8 +1655,23 @@
    "goals_for": 1,
    "goals_against": 0,
    "lineup": [
+    "a13",
+    "a3",
+    "a5",
+    "a4",
+    "a16",
+    "a1",
+    "a7",
+    "a21",
+    "a2",
+    "a10",
     "a12",
-    "a2"
+    "a20",
+    "a6",
+    "a24",
+    "a22",
+    "a17",
+    "a25"
    ],
    "scorers": [
     {
@@ -1058,9 +1685,56 @@
      "n": 1
     }
    ],
-   "lineup_complete": false,
+   "lineup_complete": true,
    "notes": "",
-   "started_at": null
+   "started_at": null,
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-10T22:46:13.282876+00:00"
+  },
+  {
+   "id": "mmrdsea473y4",
+   "squad_id": "esporte",
+   "date": "2026-07-09",
+   "opponent": "Real Cope",
+   "status": "encerrada",
+   "goals_for": 1,
+   "goals_against": 2,
+   "lineup": [
+    "amrdsdpcn4zq",
+    "amrdsdsen3su",
+    "amrdse11a2t5",
+    "amrdse3fj5ff",
+    "amrdse5592tl",
+    "amrdse7fn687",
+    "amrdsgr6o4dy",
+    "amrdsgtqi45k",
+    "amrdsgvsu2dx",
+    "amrdsh60j124",
+    "v_144e9d3b",
+    "v_22494c72",
+    "v_5a681924",
+    "v_725bbf8b",
+    "v_78a39788",
+    "v_a5d80dd8",
+    "v_dc1d67d1"
+   ],
+   "scorers": [
+    {
+     "a": "v_144e9d3b",
+     "g": 1
+    }
+   ],
+   "assists": [
+    {
+     "a": "amrdsgtqi45k",
+     "n": 1
+    }
+   ],
+   "lineup_complete": true,
+   "notes": "",
+   "started_at": null,
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-10T22:46:13.282876+00:00"
   }
  ],
  "match_events": []

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useStore } from "../state/store";
 import { VAPID_PUBLIC_KEY } from "../config";
 import { pushSupported, subscribePush, unsubscribePush, getSubscription } from "../lib/push";
@@ -18,12 +18,40 @@ const stamp = () => new Date().toISOString().slice(0, 10);
 export default function More() {
   const {
     squad, squads, roster, matches, stats, session, isAdmin,
-    signOut, addSquad, toast,
+    signOut, addSquad, importBackup, wipeMatches, toast,
   } = useStore();
   const [login, setLogin] = useState(false);
   const [newSquad, setNewSquad] = useState("");
   const [pushOn, setPushOn] = useState(false);
   const [pushBusy, setPushBusy] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  async function handleImportFile(file: File) {
+    let raw: unknown;
+    try {
+      raw = JSON.parse(await file.text());
+    } catch {
+      alert("Arquivo inválido. Selecione um backup .json exportado por este app (v1 ou v2).");
+      return;
+    }
+    if (!confirm(
+      `Importar este backup para o elenco ${squad?.name}?\n\n` +
+      "ATENÇÃO: os atletas e partidas atuais DESTE elenco serão substituídos pelos do arquivo."
+    )) return;
+    setImporting(true);
+    try {
+      const res = await importBackup(raw);
+      toast(`Backup importado ✓ (${res.athletes} atletas, ${res.matches} partidas)`);
+    } catch (e: any) {
+      console.error(e);
+      alert(e?.message === "formato"
+        ? "Arquivo inválido. Selecione um backup .json exportado por este app (v1 ou v2)."
+        : "Erro ao importar. Verifique a conexão e tente de novo.");
+    } finally {
+      setImporting(false);
+    }
+  }
 
   useEffect(() => { getSubscription().then((s) => setPushOn(!!s)); }, []);
 
@@ -120,6 +148,30 @@ export default function More() {
 
         {isAdmin && (
           <div className="data-card">
+            <h3>Restaurar / importar</h3>
+            <p>
+              Carrega um backup .json (deste app ou do app antigo) e substitui os atletas e
+              partidas do elenco <b>{squad?.name}</b>.
+            </p>
+            <button className="btn block" disabled={importing} onClick={() => fileRef.current?.click()}>
+              {importing ? "Importando…" : "↑ Importar backup (JSON)"}
+            </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="application/json,.json"
+              style={{ display: "none" }}
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleImportFile(f);
+                e.target.value = "";
+              }}
+            />
+          </div>
+        )}
+
+        {isAdmin && (
+          <div className="data-card">
             <h3>Elencos</h3>
             <p>Cada elenco tem atletas, partidas e estatísticas próprias. Atual: <b>{squad?.name}</b> ({squads.length} no total).</p>
             <div className="add-athlete">
@@ -159,6 +211,23 @@ export default function More() {
             com ícone e tela cheia.
           </p>
         </div>
+
+        {isAdmin && (
+          <div className="data-card">
+            <h3>⚠️ Zona de perigo</h3>
+            <p>Apaga todas as partidas do elenco <b>{squad?.name}</b> (os atletas ficam). Baixe um backup antes.</p>
+            <button
+              className="btn danger block"
+              onClick={() => {
+                if (!confirm(`Apagar TODAS as partidas do elenco ${squad?.name}? Essa ação não pode ser desfeita.`)) return;
+                if (!confirm("Tem certeza mesmo? Última chance — os dados somem para todo mundo.")) return;
+                wipeMatches();
+              }}
+            >
+              Apagar todas as partidas
+            </button>
+          </div>
+        )}
       </div>
 
       {login && <LoginModal onClose={() => setLogin(false)} />}

@@ -2,7 +2,7 @@ import { useStore } from "../state/store";
 import { navigate } from "../lib/router";
 import { TEAM } from "../config";
 import { dec, fmtDate, fmtDateShort, pct, result, sortMatches } from "../lib/format";
-import { EmptyState, FormDots, ResultBadge } from "../components/ui";
+import { EmptyState, ResultBadge } from "../components/ui";
 
 export default function Home() {
   const { stats, matches, isAdmin } = useStore();
@@ -14,42 +14,27 @@ export default function Home() {
         title="Nenhuma partida ainda"
         sub="Cadastre o primeiro jogo para ver as estatísticas."
         action={isAdmin
-          ? <button className="btn primary" onClick={() => navigate("#/partidas")}>+ Nova partida</button>
-          : <button className="btn" onClick={() => navigate("#/partidas")}>Ver partidas</button>}
+          ? <button className="btn primary" onClick={() => navigate("#/partidas/nova")}>+ Nova partida</button>
+          : <button className="btn ghost-light" onClick={() => navigate("#/partidas")}>Ver partidas</button>}
       />
     );
   }
 
-  const streak = t.streak
-    ? `${t.streak.n} ${t.streak.r === "V" ? "vitória" : t.streak.r === "E" ? "empate" : "derrota"}${t.streak.n > 1 ? "s" : ""} seguida${t.streak.n > 1 ? "s" : ""}`
-    : "—";
   const recent = sortMatches(matches).filter((m) => m.status === "encerrada").slice(-5).reverse();
   const next = sortMatches(matches).find((m) => m.status === "agendada");
   const top = [...stats.players].filter((p) => p.part > 0)
     .sort((a, b) => b.part - a.part || b.gols - a.gols).slice(0, 5);
+  const mg = t.maiorGoleada, pd = t.piorDerrota;
 
   return (
     <>
-      <div className="hero">
-        <div className="hero-main">
-          <div className="hero-aprov">
-            <div className="n num">{pct(t.aprov)}</div>
-            <div className="l">Aproveitamento</div>
-          </div>
-          <div className="hero-form">
-            <span className="l">Forma</span>
-            <FormDots form={t.form} />
-            <span className="hero-streak">{streak}</span>
-          </div>
-        </div>
-        <div className="kpis">
-          <div className="kpi"><div className="n num">{t.J}</div><div className="l">Jogos</div></div>
-          <div className="kpi v"><div className="n num">{t.V}</div><div className="l">Vit</div></div>
-          <div className="kpi e"><div className="n num">{t.E}</div><div className="l">Emp</div></div>
-          <div className="kpi d"><div className="n num">{t.D}</div><div className="l">Der</div></div>
-          <div className="kpi"><div className="n num">{t.GP}:{t.GC}</div><div className="l">Gols</div></div>
-          <div className="kpi"><div className="n num">{t.SG > 0 ? "+" : ""}{t.SG}</div><div className="l">Saldo</div></div>
-        </div>
+      <div className="section-title">
+        <h2>Visão geral da temporada</h2>
+        {isAdmin && (
+          <button className="btn primary sm" onClick={() => navigate("#/partidas/nova")}>
+            + Nova partida
+          </button>
+        )}
       </div>
 
       {next && (
@@ -59,6 +44,31 @@ export default function Home() {
           <span className="muted">{fmtDate(next.date)}</span>
         </button>
       )}
+
+      <div className="grid">
+        <div className="card dark">
+          <div className="stat-num num">{pct(t.aprov)}</div>
+          <div className="stat-label">Aproveitamento</div>
+          <div className="stat-sub">{t.pts} de {t.J * 3} pts possíveis</div>
+        </div>
+        <div className="card">
+          <div className="stat-num num">{t.GP}<span className="sep"> : </span>{t.GC}</div>
+          <div className="stat-label">Gols pró : contra</div>
+          <div className="stat-sub">{dec(t.mgp)} feitos · {dec(t.mgc)} sofridos / jogo</div>
+        </div>
+        <div className="card">
+          <div className={`stat-num num ${t.SG > 0 ? "pos" : t.SG < 0 ? "neg" : ""}`}>
+            {t.SG > 0 ? "+" : ""}{t.SG}
+          </div>
+          <div className="stat-label">Saldo de gols</div>
+          <div className="stat-sub">{t.V}V · {t.E}E · {t.D}D em {t.J} jogos</div>
+        </div>
+        <div className="card">
+          <div className="stat-num num">{dec(t.J ? (t.GP + t.GC) / t.J : 0, 1)}</div>
+          <div className="stat-label">Gols por jogo</div>
+          <div className="stat-sub">soma das duas equipes</div>
+        </div>
+      </div>
 
       <div className="highlight-row">
         {stats.artilheiro && (
@@ -83,27 +93,28 @@ export default function Home() {
         )}
       </div>
 
-      <div className="grid">
-        <div className="card">
-          <div className="stat-num num">{t.GP}<span className="sep">:</span>{t.GC}</div>
-          <div className="stat-label">Gols pró : contra</div>
-          <div className="stat-sub">{dec(t.mgp)} feitos · {dec(t.mgc)} sofridos / jogo</div>
+      {(mg || pd) && (
+        <div className="grid">
+          {mg && (
+            <div className="card">
+              <div className="stat-label">Maior goleada</div>
+              <div className="stat-num num pos" style={{ fontSize: 26, marginTop: 6 }}>
+                {mg.m.goals_for}–{mg.m.goals_against}
+              </div>
+              <div className="stat-sub">vs {mg.m.opponent} · {fmtDate(mg.m.date)}</div>
+            </div>
+          )}
+          {pd && (
+            <div className="card">
+              <div className="stat-label">Pior derrota</div>
+              <div className="stat-num num neg" style={{ fontSize: 26, marginTop: 6 }}>
+                {pd.m.goals_for}–{pd.m.goals_against}
+              </div>
+              <div className="stat-sub">vs {pd.m.opponent} · {fmtDate(pd.m.date)}</div>
+            </div>
+          )}
         </div>
-        {t.maiorGoleada && (
-          <div className="card">
-            <div className="stat-num num pos">{t.maiorGoleada.m.goals_for}–{t.maiorGoleada.m.goals_against}</div>
-            <div className="stat-label">Maior goleada</div>
-            <div className="stat-sub">vs {t.maiorGoleada.m.opponent} · {fmtDate(t.maiorGoleada.m.date)}</div>
-          </div>
-        )}
-        {t.piorDerrota && (
-          <div className="card">
-            <div className="stat-num num neg">{t.piorDerrota.m.goals_for}–{t.piorDerrota.m.goals_against}</div>
-            <div className="stat-label">Pior derrota</div>
-            <div className="stat-sub">vs {t.piorDerrota.m.opponent} · {fmtDate(t.piorDerrota.m.date)}</div>
-          </div>
-        )}
-      </div>
+      )}
 
       {recent.length > 0 && (
         <div className="panel">

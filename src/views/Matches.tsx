@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useStore } from "../state/store";
 import { navigate } from "../lib/router";
 import { fmtDate, isLive, result, sortMatches, statusLabel } from "../lib/format";
@@ -6,14 +6,22 @@ import { EmptyState } from "../components/ui";
 import MatchForm from "./MatchForm";
 import type { Match } from "../lib/types";
 
-export default function Matches() {
-  const { matches, roster, isAdmin } = useStore();
+export default function Matches({ openNew }: { openNew?: boolean }) {
+  const { matches, roster, isAdmin, deleteMatch } = useStore();
   const [form, setForm] = useState<null | { match?: Match; schedule?: boolean }>(null);
+
+  // rota #/partidas/nova (atalho do Início) abre o formulário direto
+  useEffect(() => {
+    if (openNew) {
+      if (isAdmin) setForm({});
+      navigate("#/partidas");
+    }
+  }, [openNew, isAdmin]);
 
   const nameOf = (id: string) => roster.find((a) => a.id === id)?.name || "?";
   const list = sortMatches(matches).reverse();
   const upcoming = list.filter((m) => m.status === "agendada");
-  const liveOrDone = list.filter((m) => m.status !== "agendada");
+  const played = list.filter((m) => m.status !== "agendada");
 
   const header = (
     <div className="section-title">
@@ -48,8 +56,19 @@ export default function Matches() {
     const rl = scheduled ? "" : live ? "live" : r.toLowerCase();
     const sc = (m.scorers || []).slice().sort((a, b) => b.g - a.g)
       .map((x) => `${nameOf(x.a)}${x.g > 1 ? ` (${x.g})` : ""}`).join(", ");
+    const as = (m.assists || []).slice().sort((a, b) => b.n - a.n)
+      .map((x) => `${nameOf(x.a)}${x.n > 1 ? ` (${x.n})` : ""}`).join(", ");
+    const nRel = (m.lineup || []).length;
+    const open = () => navigate(`#/partida/${m.id}`);
     return (
-      <button key={m.id} className={`match-card ${rl}`} onClick={() => navigate(`#/partida/${m.id}`)}>
+      <div
+        key={m.id}
+        className={`match-card ${rl}`}
+        role="button"
+        tabIndex={0}
+        onClick={open}
+        onKeyDown={(e) => { if (e.key === "Enter") open(); }}
+      >
         <div className="mc-top">
           <div className="mc-date">{fmtDate(m.date)}</div>
           <div className="mc-main">
@@ -58,7 +77,6 @@ export default function Matches() {
                 ? <span className="opp">vs {m.opponent}</span>
                 : <><span className="sc">{m.goals_for} – {m.goals_against}</span> <span className="opp">{m.opponent}</span></>}
             </div>
-            {sc && <div className="mc-scorers">⚽ {sc}</div>}
           </div>
           {scheduled
             ? <span className="mc-badge sched">Agendada</span>
@@ -66,7 +84,36 @@ export default function Matches() {
               ? <span className="mc-badge live"><span className="pulse sm" />{statusLabel(m.status)}</span>
               : <span className={`mc-badge ${r.toLowerCase()}`}>{r}</span>}
         </div>
-      </button>
+        {!scheduled && (
+          <div className="mc-detail">
+            {sc
+              ? <div><span className="k">⚽ Gols:</span> {sc}</div>
+              : <div className="muted">Sem gols registrados</div>}
+            {as && <div><span className="k">🅰️ Assist.:</span> {as}</div>}
+            <div className="mc-tags">
+              <span className="tag n">{nRel} relacionado{nRel !== 1 ? "s" : ""}</span>
+              {m.lineup_complete === false && <span className="tag">escalação parcial</span>}
+              {live && <span className="tag live">ao vivo — toque para acompanhar</span>}
+            </div>
+          </div>
+        )}
+        {isAdmin && (
+          <div className="mc-actions" onClick={(e) => e.stopPropagation()}>
+            <button className="btn sm ghost" onClick={() => setForm({ match: m })}>Editar</button>
+            <button
+              className="btn sm danger"
+              onClick={() => {
+                if (confirm(`Excluir a partida contra ${m.opponent} (${fmtDate(m.date)})?\n\nEssa ação não pode ser desfeita.`)) {
+                  deleteMatch(m.id);
+                }
+              }}
+            >
+              Excluir
+            </button>
+            {scheduled && <button className="btn sm primary" onClick={open}>Abrir / iniciar ao vivo →</button>}
+          </div>
+        )}
+      </div>
     );
   }
 
@@ -77,10 +124,10 @@ export default function Matches() {
         <>
           <div className="list-label">Agendadas</div>
           <div className="match-list">{upcoming.map(card)}</div>
+          <div className="list-label">Realizadas</div>
         </>
       )}
-      {upcoming.length > 0 && <div className="list-label">Realizadas</div>}
-      <div className="match-list">{liveOrDone.map(card)}</div>
+      <div className="match-list">{played.map(card)}</div>
       {form && <MatchForm match={form.match} schedule={form.schedule} onClose={() => setForm(null)} />}
     </>
   );

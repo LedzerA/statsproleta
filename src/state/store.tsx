@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { sb } from "../lib/supabase";
 import { TEAM } from "../config";
-import type { Athlete, EventPayload, EventType, Match, MatchEvent, Squad } from "../lib/types";
+import type { Assist, Athlete, EventPayload, EventType, Match, MatchEvent, Scorer, Squad } from "../lib/types";
 import { compute, type SquadStats } from "../lib/stats";
 import { result, uid } from "../lib/format";
 
@@ -33,6 +33,8 @@ interface StoreValue {
   addAthlete: (name: string) => Promise<Athlete | null>;
   addSquad: (name: string) => Promise<void>;
   addEvent: (m: Match, type: EventType, opts?: { scorerId?: string; assistId?: string }) => Promise<void>;
+  importBackup: (raw: unknown) => Promise<{ athletes: number; matches: number }>;
+  wipeMatches: () => Promise<void>;
   toast: (msg: string) => void;
   toastMsg: string;
 }
@@ -296,6 +298,67 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [roster, upsertMatch, toast]
   );
 
+  /** Importa backup .json (formato v1 do arquivo único OU v2) substituindo
+      atletas e partidas do ELENCO ATUAL. IDs são remapeados para não colidir
+      com outros elencos. */
+  const importBackup = useCallback(async (raw: any) => {
+    const rosterIn: any[] | null = Array.isArray(raw?.roster) ? raw.roster
+      : Array.isArray(raw?.athletes) ? raw.athletes : null;
+    const matchesIn: any[] | null = Array.isArray(raw?.matches) ? raw.matches : null;
+    if (!rosterIn || !matchesIn) throw new Error("formato");
+
+    const idMap = new Map<string, string>();
+    const newAthletes: Athlete[] = rosterIn.map((a: any) => {
+      const nid = uid("a");
+      idMap.set(String(a.id), nid);
+      return { id: nid, squad_id: squadId, name: String(a.name || "?") };
+    });
+    const VALID = ["agendada", "ao_vivo_1t", "intervalo", "ao_vivo_2t", "encerrada"];
+    const newMatches: Match[] = matchesIn.map((m: any) => ({
+      id: uid("m"),
+      squad_id: squadId,
+      date: String(m.date || "").slice(0, 10),
+      opponent: String(m.opponent || "?"),
+      status: VALID.includes(m.status) ? m.status : "encerrada",
+      goals_for: Number(m.goals_for ?? m.goalsFor) || 0,
+      goals_against: Number(m.goals_against ?? m.goalsAgainst) || 0,
+      lineup: (Array.isArray(m.lineup) ? m.lineup : [])
+        .map((x: any) => idMap.get(String(x))).filter(Boolean) as string[],
+      scorers: (Array.isArray(m.scorers) ? m.scorers : [])
+        .map((s: any) => ({ a: idMap.get(String(s.a)) as string, g: Number(s.g) || 0 }))
+        .filter((s: Scorer) => !!s.a && s.g > 0),
+      assists: (Array.isArray(m.assists) ? m.assists : [])
+        .map((s: any) => ({ a: idMap.get(String(s.a)) as string, n: Number(s.n) || 0 }))
+        .filter((s: Assist) => !!s.a && s.n > 0),
+      lineup_complete: (m.lineup_complete ?? m.lineupComplete) !== false,
+      notes: String(m.notes || ""),
+      started_at: null,
+    }));
+
+    let r = await sb.from("matches").delete().eq("squad_id", squadId);
+    if (r.error) throw r.error;
+    r = await sb.from("athletes").delete().eq("squad_id", squadId);
+    if (r.error) throw r.error;
+    if (newAthletes.length) {
+      r = await sb.from("athletes").insert(newAthletes);
+      if (r.error) throw r.error;
+    }
+    if (newMatches.length) {
+      r = await sb.from("matches").insert(newMatches);
+      if (r.error) throw r.error;
+    }
+    await refetch();
+    return { athletes: newAthletes.length, matches: newMatches.length };
+  }, [squadId, refetch]);
+
+  /** Apaga todas as partidas do elenco atual (mantém os atletas). */
+  const wipeMatches = useCallback(async () => {
+    const { error } = await sb.from("matches").delete().eq("squad_id", squadId);
+    if (error) { console.error(error); toast("Erro ao apagar."); return; }
+    await refetch();
+    toast("Partidas apagadas");
+  }, [squadId, refetch, toast]);
+
   const signIn = useCallback(async (email: string, pass: string) => {
     const { error } = await sb.auth.signInWithPassword({ email, password: pass });
     if (error) throw error;
@@ -306,7 +369,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const value: StoreValue = {
     loading, fatal, squads, squadId, setSquadId, squad, roster, matches, stats,
     liveMatch, events, loadEvents, session, isAdmin, signIn, signOut,
-    upsertMatch, deleteMatch, addAthlete, addSquad, addEvent, toast, toastMsg,
+    upsertMatch, deleteMatch, addAthlete, addSquad, addEvent,
+    importBackup, wipeMatches, toast, toastMsg,
   };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
