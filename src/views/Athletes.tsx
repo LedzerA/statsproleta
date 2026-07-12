@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useStore } from "../state/store";
 import { navigate } from "../lib/router";
 import { dec, pct } from "../lib/format";
-import { compute, type PlayerStats } from "../lib/stats";
+import { type PlayerStats } from "../lib/stats";
 
 const COLS: { k: keyof PlayerStats; l: string; t: "txt" | "n" | "d" | "p"; tip?: string }[] = [
   { k: "name", l: "Atleta", t: "txt" },
@@ -20,24 +20,15 @@ const COLS: { k: keyof PlayerStats; l: string; t: "txt" | "n" | "d" | "p"; tip?:
 ];
 
 export default function Athletes() {
-  const { stats: seasonStats, matches, roster, isAdmin, addAthlete } = useStore();
+  const { stats, dateFrom, dateTo, isAdmin, addAthlete } = useStore();
   const [sortKey, setSortKey] = useState<keyof PlayerStats>("part");
   const [sortDir, setSortDir] = useState(-1);
   const [newName, setNewName] = useState("");
-  const [pFrom, setPFrom] = useState("");
-  const [pTo, setPTo] = useState("");
   const [minJogos, setMinJogos] = useState(0);
   const [minGols, setMinGols] = useState(0);
 
-  const periodFiltering = !!(pFrom || pTo);
-  const filtering = periodFiltering || minJogos > 0 || minGols > 0;
-  const stats = useMemo(() => {
-    if (!periodFiltering) return seasonStats;
-    return compute(
-      roster,
-      matches.filter((m) => (!pFrom || m.date >= pFrom) && (!pTo || m.date <= pTo))
-    );
-  }, [seasonStats, periodFiltering, roster, matches, pFrom, pTo]);
+  const periodFiltering = !!(dateFrom || dateTo);
+  const filtering = minJogos > 0 || minGols > 0;
 
   const list = useMemo(() => {
     const cp = stats.players.filter((p) => p.jogos >= minJogos && p.gols >= minGols);
@@ -67,9 +58,6 @@ export default function Athletes() {
       </div>
 
       <div className="filter-bar">
-        <label>De <input type="date" value={pFrom} onChange={(e) => setPFrom(e.target.value)} /></label>
-        <label>Até <input type="date" value={pTo} onChange={(e) => setPTo(e.target.value)} /></label>
-        <span className="fb-sep" />
         <label>Mín. jogos
           <input
             type="number" className="fb-num" min={0} placeholder="0"
@@ -84,16 +72,14 @@ export default function Athletes() {
             onChange={(e) => setMinGols(Math.max(0, parseInt(e.target.value) || 0))}
           />
         </label>
+        {periodFiltering && <span className="fb-note">estatísticas só do período selecionado</span>}
         {filtering && (
-          <>
-            {periodFiltering && <span className="fb-note">estatísticas só do período</span>}
-            <button
-              className="linklike light"
-              onClick={() => { setPFrom(""); setPTo(""); setMinJogos(0); setMinGols(0); }}
-            >
-              Limpar
-            </button>
-          </>
+          <button
+            className="linklike light"
+            onClick={() => { setMinJogos(0); setMinGols(0); }}
+          >
+            Limpar
+          </button>
         )}
       </div>
 

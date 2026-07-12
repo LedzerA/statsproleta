@@ -19,6 +19,26 @@ const NAV = [
   { path: "#/mais", view: "mais", label: "Mais", icon: "☰" },
 ] as const;
 
+const DATE_FILTER_VIEWS = new Set(["inicio", "partidas", "atletas", "atleta", "adversarios"]);
+
+function GlobalDateFilter() {
+  const { dateFrom, dateTo, setDateRange, matches } = useStore();
+  const active = !!(dateFrom || dateTo);
+  return (
+    <div className="filter-bar global-date">
+      <span className="gd-label">📅 Período</span>
+      <label>De <input type="date" value={dateFrom} onChange={(e) => setDateRange(e.target.value, dateTo)} /></label>
+      <label>Até <input type="date" value={dateTo} onChange={(e) => setDateRange(dateFrom, e.target.value)} /></label>
+      {active && (
+        <>
+          <span className="fb-note">{matches.length} jogo{matches.length !== 1 ? "s" : ""} no período</span>
+          <button className="linklike light" onClick={() => setDateRange("", "")}>Limpar</button>
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function App() {
   const {
     loading, fatal, schemaLegacy, squads, squadId, setSquadId, squad, stats,
@@ -130,6 +150,7 @@ export default function App() {
               </div>
             </div>
           )}
+          {DATE_FILTER_VIEWS.has(route.view) && <GlobalDateFilter />}
           {route.view === "inicio" && <Home />}
           {route.view === "partidas" && <Matches openNew={route.nova} />}
           {route.view === "partida" && <MatchDetail id={route.id} />}

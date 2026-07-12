@@ -5,10 +5,21 @@ import { dec, fmtDate, fmtDateShort, pct, result, sortMatches } from "../lib/for
 import { EmptyState, ResultBadge } from "../components/ui";
 
 export default function Home() {
-  const { stats, matches, isAdmin } = useStore();
+  const { stats, matches, isAdmin, dateFrom, dateTo, setDateRange } = useStore();
   const t = stats.team;
+  const dateFilter = !!(dateFrom || dateTo);
 
   if (t.J === 0 && !matches.length) {
+    if (dateFilter) {
+      return (
+        <EmptyState
+          icon="🔍"
+          title="Nenhuma partida no período"
+          sub="Ajuste ou limpe o filtro de datas acima para ver as estatísticas."
+          action={<button className="btn ghost-light" onClick={() => setDateRange("", "")}>Limpar filtro de datas</button>}
+        />
+      );
+    }
     return (
       <EmptyState
         title="Nenhuma partida ainda"

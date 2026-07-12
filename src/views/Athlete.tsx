@@ -6,13 +6,16 @@ import { dec, fmtDate, pct, result, sortMatches } from "../lib/format";
 import { ResultBadge } from "../components/ui";
 
 export default function Athlete({ id }: { id: string }) {
-  const { athletes, allMatches, squads } = useStore();
+  const { athletes, allMatches, squads, dateFrom, dateTo } = useStore();
   const athlete = athletes.find((a) => a.id === id);
 
   const data = useMemo(() => {
     if (!athlete) return null;
     const squadRoster = athletes.filter((a) => a.squad_id === athlete.squad_id);
-    const squadMatches = allMatches.filter((m) => m.squad_id === athlete.squad_id);
+    const squadMatches = allMatches.filter((m) =>
+      m.squad_id === athlete.squad_id &&
+      (!dateFrom || m.date >= dateFrom) && (!dateTo || m.date <= dateTo)
+    );
     const stats = compute(squadRoster, squadMatches);
     const p = stats.players.find((x) => x.id === id) || null;
     const played = sortMatches(squadMatches)
@@ -27,7 +30,7 @@ export default function Athlete({ id }: { id: string }) {
       if (m.positions?.[id]) { position = m.positions[id]; break; }
     }
     return { p, played, position };
-  }, [athlete, athletes, allMatches, id]);
+  }, [athlete, athletes, allMatches, id, dateFrom, dateTo]);
 
   if (!athlete || !data) {
     return (

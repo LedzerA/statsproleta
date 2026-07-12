@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useStore } from "../state/store";
 import { navigate } from "../lib/router";
 import { TEAM } from "../config";
@@ -41,16 +41,34 @@ function LiveClock({ m }: { m: Match }) {
 export default function MatchDetail({ id }: { id: string }) {
   const {
     findMatch, roster, athleteName, isAdmin, schemaLegacy,
-    events, loadEvents, addEvent, toggleClock, resetToScheduled,
+    events, loadEvents, addEvent, updateEvent, deleteEvent, toggleClock, resetToScheduled,
     deleteMatch, upsertMatch, toast,
   } = useStore();
   const [editing, setEditing] = useState(false);
   const [goalPicker, setGoalPicker] = useState(false);
   const [subPicker, setSubPicker] = useState(false);
+  const [editEv, setEditEv] = useState<MatchEvent | null>(null);
   const [busy, setBusy] = useState(false);
 
   const m = findMatch(id);
   useEffect(() => { if (m) loadEvents(m.id); }, [id]);
+
+  const evList = m ? (events[m.id] || []) : [];
+  /* quem está em campo AGORA: titulares + entradas − saídas (na ordem em que
+     as substituições foram registradas). Atualiza em tempo real a cada sub. */
+  const onField = useMemo(() => {
+    const base = (m?.starters?.length ? m.starters : m?.lineup) || [];
+    const set = new Set(base);
+    const subs = evList.filter((e) => e.type === "sub")
+      .slice().sort((a, b) => (a.created_at < b.created_at ? -1 : a.created_at > b.created_at ? 1 : 0));
+    for (const ev of subs) {
+      const outId = ev.payload?.out || ev.assist_id;
+      const inId = ev.payload?.in || ev.athlete_id;
+      if (outId) set.delete(outId);
+      if (inId) set.add(inId);
+    }
+    return set;
+  }, [evList, m?.starters, m?.lineup]);
 
   if (!m) {
     return (
@@ -62,7 +80,9 @@ export default function MatchDetail({ id }: { id: string }) {
   }
 
   const live = isLive(m.status);
-  const timeline = (events[m.id] || []).slice().reverse();
+  // ordena por período e minuto (com a ordem de registro como desempate) para
+  // que um lance com o tempo corrigido apareça no lugar certo da linha do tempo
+  const timeline = evList.slice().sort(cmpChrono).reverse();
   const starters = m.starters || [];
   const bench = (m.lineup || []).filter((aid) => !starters.includes(aid));
   const pos = (aid: string) => (m.positions?.[aid] ? ` · ${m.positions[aid]}` : "");
@@ -180,7 +200,14 @@ export default function MatchDetail({ id }: { id: string }) {
             <div className="ga-empty" style={{ padding: "14px 18px" }}>Nenhum lance registrado ainda.</div>
           ) : (
             <ul className="timeline">
-              {timeline.map((ev) => <TimelineItem key={ev.id} ev={ev} athleteName={athleteName} />)}
+              {timeline.map((ev) => (
+                <TimelineItem
+                  key={ev.id}
+                  ev={ev}
+                  athleteName={athleteName}
+                  onEdit={isAdmin ? () => setEditEv(ev) : undefined}
+                />
+              ))}
             </ul>
           )}
         </div>
@@ -269,15 +296,39 @@ export default function MatchDetail({ id }: { id: string }) {
       {subPicker && (
         <SubPicker
           match={m}
+          onField={onField}
           onCancel={() => setSubPicker(false)}
           onConfirm={(inId, outId) => { setSubPicker(false); fire("sub", { inId, outId }); }}
+        />
+      )}
+      {editEv && (
+        <EventEditModal
+          ev={editEv}
+          onClose={() => setEditEv(null)}
+          onSave={(patch) => { updateEvent(editEv, patch); setEditEv(null); }}
+          onDelete={() => {
+            if (confirm("Excluir este lance da linha do tempo?\n\nO placar não muda — se for um gol, ajuste o resultado em \"Editar partida\".")) {
+              deleteEvent(editEv); setEditEv(null);
+            }
+          }}
         />
       )}
     </>
   );
 }
 
-function TimelineItem({ ev, athleteName }: { ev: MatchEvent; athleteName: (id: string) => string }) {
+/** Ordena lances por período → minuto → instante de registro (crescente). */
+function cmpChrono(a: MatchEvent, b: MatchEvent): number {
+  const pa = a.payload?.period ?? 1, pb = b.payload?.period ?? 1;
+  if (pa !== pb) return pa - pb;
+  const ma = a.minute ?? Number.POSITIVE_INFINITY, mb = b.minute ?? Number.POSITIVE_INFINITY;
+  if (ma !== mb) return ma - mb;
+  return a.created_at < b.created_at ? -1 : a.created_at > b.created_at ? 1 : 0;
+}
+
+function TimelineItem({ ev, athleteName, onEdit }: {
+  ev: MatchEvent; athleteName: (id: string) => string; onEdit?: () => void;
+}) {
   let title = ev.payload?.title || EVENT_LABEL[ev.type] || ev.type;
   let body = ev.payload?.body || "";
   // lances migrados do app antigo não têm texto pronto — monta na hora
@@ -298,7 +349,54 @@ function TimelineItem({ ev, athleteName }: { ev: MatchEvent; athleteName: (id: s
         <b>{title}</b>
         {body && <span className="tl-body">{body}</span>}
       </span>
+      {onEdit && (
+        <button className="tl-edit" onClick={onEdit} aria-label="Editar lance" title="Editar tempo do lance">✎</button>
+      )}
     </li>
+  );
+}
+
+/** Corrige o tempo (período + minuto) de um lance já registrado. */
+function EventEditModal({ ev, onClose, onSave, onDelete }: {
+  ev: MatchEvent;
+  onClose: () => void;
+  onSave: (patch: { minute: number | null; period: number }) => void;
+  onDelete: () => void;
+}) {
+  const [period, setPeriod] = useState<number>(ev.payload?.period ?? 1);
+  const [minute, setMinute] = useState<string>(ev.minute != null ? String(ev.minute) : "");
+  const label = ev.payload?.title || EVENT_LABEL[ev.type] || ev.type;
+  return (
+    <Modal
+      title="✎ Editar lance"
+      onClose={onClose}
+      footer={
+        <>
+          <button className="btn danger" style={{ flex: 1 }} onClick={onDelete}>Excluir</button>
+          <button className="btn primary" style={{ flex: 2 }}
+            onClick={() => onSave({ minute: minute === "" ? null : Math.max(0, parseInt(minute) || 0), period })}>
+            Salvar
+          </button>
+        </>
+      }
+    >
+      <div className="subhead"><div className="t">{label}</div></div>
+      <div className="subhead"><div className="t">Período</div></div>
+      <div className="chips">
+        <button className={`chip ${period === 1 ? "on" : ""}`} onClick={() => setPeriod(1)}>1º tempo</button>
+        <button className={`chip ${period === 2 ? "on" : ""}`} onClick={() => setPeriod(2)}>2º tempo</button>
+      </div>
+      <div className="subhead"><div className="t">Minuto</div></div>
+      <input
+        type="number" className="fb-num" min={0} placeholder="min" autoFocus
+        value={minute}
+        onChange={(e) => setMinute(e.target.value)}
+        style={{ width: 120 }}
+      />
+      <p className="muted" style={{ fontSize: 13, marginTop: 12 }}>
+        Só o tempo do lance é ajustado — o placar não muda. Para trocar o autor de um gol, use “Editar partida”.
+      </p>
+    </Modal>
   );
 }
 
@@ -353,21 +451,22 @@ function GoalPicker({ match, onCancel, onConfirm }: {
   );
 }
 
-function SubPicker({ match, onCancel, onConfirm }: {
+function SubPicker({ match, onField, onCancel, onConfirm }: {
   match: Match;
+  onField: Set<string>;
   onCancel: () => void;
   onConfirm: (inId: string, outId: string) => void;
 }) {
   const { roster } = useStore();
   const [inId, setInId] = useState<string | undefined>();
   const [outId, setOutId] = useState<string | undefined>();
+  const [showAll, setShowAll] = useState(false);
   const related = roster.filter((a) => match.lineup.includes(a.id));
-  const starters = match.starters || [];
-  // sugestões: sai quem é titular, entra quem está no banco — mas ambos livres
-  const inFirst = [...related].sort((a, b) =>
-    Number(starters.includes(a.id)) - Number(starters.includes(b.id)));
-  const outFirst = [...related].sort((a, b) =>
-    Number(starters.includes(b.id)) - Number(starters.includes(a.id)));
+  // "sai" = quem está em campo agora; "entra" = relacionados que estão fora
+  // (banco). Atualiza a cada substituição feita durante o jogo.
+  const outOptions = related.filter((a) => onField.has(a.id));
+  const benchOptions = related.filter((a) => !onField.has(a.id));
+  const inOptions = showAll ? roster.filter((a) => !onField.has(a.id)) : benchOptions;
   return (
     <Modal
       title="🔁 Substituição"
@@ -382,20 +481,31 @@ function SubPicker({ match, onCancel, onConfirm }: {
         </>
       }
     >
-      <div className="subhead"><div className="t">Quem entra?</div></div>
+      <div className="subhead"><div className="t">Quem sai? <span className="muted">(em campo)</span></div></div>
       <div className="chips">
-        {inFirst.filter((a) => a.id !== outId).map((a) => (
-          <button key={a.id} className={`chip ${inId === a.id ? "on" : ""}`}
-            onClick={() => setInId(inId === a.id ? undefined : a.id)}>{a.name}</button>
-        ))}
+        {outOptions.length === 0
+          ? <span className="muted" style={{ fontSize: 13 }}>Ninguém em campo registrado — escale os titulares na partida.</span>
+          : outOptions.filter((a) => a.id !== inId).map((a) => (
+              <button key={a.id} className={`chip ${outId === a.id ? "on" : ""}`}
+                onClick={() => setOutId(outId === a.id ? undefined : a.id)}>{a.name}</button>
+            ))}
       </div>
-      <div className="subhead"><div className="t">Quem sai?</div></div>
+      <div className="subhead"><div className="t">Quem entra? <span className="muted">(banco)</span></div></div>
       <div className="chips">
-        {outFirst.filter((a) => a.id !== inId).map((a) => (
-          <button key={a.id} className={`chip ${outId === a.id ? "on" : ""}`}
-            onClick={() => setOutId(outId === a.id ? undefined : a.id)}>{a.name}</button>
-        ))}
+        {inOptions.length === 0
+          ? <span className="muted" style={{ fontSize: 13 }}>Sem jogadores no banco.</span>
+          : inOptions.filter((a) => a.id !== outId).map((a) => (
+              <button key={a.id} className={`chip ${inId === a.id ? "on" : ""}`}
+                onClick={() => setInId(inId === a.id ? undefined : a.id)}>{a.name}</button>
+            ))}
       </div>
+      {!showAll && (
+        <p style={{ marginTop: 14 }}>
+          <button className="linklike" onClick={() => setShowAll(true)}>
+            Vai entrar quem não está relacionado? Mostrar o elenco completo
+          </button>
+        </p>
+      )}
     </Modal>
   );
 }

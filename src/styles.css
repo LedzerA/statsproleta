@@ -163,6 +163,11 @@ code { background: rgba(0, 0, 0, .25); padding: 1px 5px; border-radius: 5px; fon
 .filter-bar .fb-num:focus { outline: none; border-color: var(--verde-400); }
 .fb-sep { width: 1px; height: 22px; background: var(--linha-forte); }
 .fb-note { font-size: 11px; color: var(--gold); font-weight: 600; }
+.filter-bar.global-date { margin-bottom: 16px; }
+.filter-bar.global-date .gd-label {
+  font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--verde-300); font-weight: 700;
+}
 .f-chip {
   background: rgba(0, 0, 0, .18); border: 1px solid var(--linha); color: var(--verde-300);
   border-radius: 20px; padding: 5px 12px; font-weight: 600; font-size: 12.5px; transition: all .12s;
@@ -384,8 +389,15 @@ table.stats .muted { color: rgba(50, 75, 64, .55); }
 .tl-item:last-child { border-bottom: none; }
 .tl-min { width: 30px; flex-shrink: 0; text-align: right; color: var(--carvao-2); font-weight: 700; }
 .tl-ic { flex-shrink: 0; }
+.tl-txt { flex: 1; min-width: 0; }
 .tl-txt b { display: block; }
 .tl-body { color: var(--carvao-2); font-size: 12.5px; }
+.tl-edit {
+  flex-shrink: 0; background: none; border: 1px solid var(--linha); color: var(--carvao-2);
+  border-radius: 8px; padding: 3px 8px; font-size: 13px; line-height: 1; cursor: pointer;
+  align-self: center; transition: all .12s;
+}
+.tl-edit:hover { background: var(--verde-700); color: var(--creme); border-color: var(--verde-700); }
 .tl-item.gol_pro { background: rgba(47, 191, 107, .10); }
 .tl-item.gol_contra { background: rgba(224, 112, 95, .08); }
 

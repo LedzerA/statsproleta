@@ -10,6 +10,8 @@ import { compute, type SquadStats } from "../lib/stats";
 import { clockSeconds, result, uid } from "../lib/format";
 
 const SQUAD_KEY = "proleta_squad_v2";
+const DATE_FROM_KEY = "proleta_date_from_v2";
+const DATE_TO_KEY = "proleta_date_to_v2";
 
 /* colunas que só existem depois do supabase/atualizacao-1.sql; enquanto o
    banco não tiver sido atualizado, elas são removidas das escritas */
@@ -45,6 +47,9 @@ interface StoreValue {
   athleteName: (id: string) => string;
   matches: Match[];
   allMatches: Match[];
+  dateFrom: string;
+  dateTo: string;
+  setDateRange: (from: string, to: string) => void;
   findMatch: (id: string) => Match | undefined;
   stats: SquadStats;
   liveMatch: Match | null;
@@ -63,6 +68,8 @@ interface StoreValue {
     type: EventType,
     opts?: { scorerId?: string; assistId?: string; inId?: string; outId?: string }
   ) => Promise<void>;
+  updateEvent: (ev: MatchEvent, patch: { minute?: number | null; period?: number }) => Promise<void>;
+  deleteEvent: (ev: MatchEvent) => Promise<void>;
   toggleClock: (m: Match) => Promise<void>;
   resetToScheduled: (m: Match) => Promise<void>;
   importBackup: (raw: unknown) => Promise<{ athletes: number; matches: number }>;
@@ -124,6 +131,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [allMatches, setAllMatches] = useState<Match[]>([]);
   const [events, setEvents] = useState<Record<string, MatchEvent[]>>({});
   const [squadId, setSquadIdState] = useState<string>(() => localStorage.getItem(SQUAD_KEY) || "");
+  const [dateFrom, setDateFrom] = useState<string>(() => localStorage.getItem(DATE_FROM_KEY) || "");
+  const [dateTo, setDateTo] = useState<string>(() => localStorage.getItem(DATE_TO_KEY) || "");
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
@@ -227,6 +236,27 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           }
         }
       })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "match_events" }, (p) => {
+        const ev = p.new as MatchEvent;
+        setEvents((old) => {
+          const list = old[ev.match_id];
+          if (!list) return old;
+          return { ...old, [ev.match_id]: list.map((x) => (x.id === ev.id ? ev : x)) };
+        });
+      })
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "match_events" }, (p) => {
+        const id = (p.old as { id?: string })?.id;
+        if (!id) return;
+        setEvents((old) => {
+          let changed = false;
+          const cp: Record<string, MatchEvent[]> = {};
+          for (const k in old) {
+            if (old[k].some((x) => x.id === id)) { cp[k] = old[k].filter((x) => x.id !== id); changed = true; }
+            else cp[k] = old[k];
+          }
+          return changed ? cp : old;
+        });
+      })
       .subscribe();
     return () => { sb.removeChannel(ch); };
   }, [refetch, toast]);
@@ -237,9 +267,27 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(SQUAD_KEY, id);
   }, []);
 
+  const setDateRange = useCallback((from: string, to: string) => {
+    setDateFrom(from);
+    setDateTo(to);
+    if (from) localStorage.setItem(DATE_FROM_KEY, from); else localStorage.removeItem(DATE_FROM_KEY);
+    if (to) localStorage.setItem(DATE_TO_KEY, to); else localStorage.removeItem(DATE_TO_KEY);
+  }, []);
+
   const squad = squads.find((s) => s.id === squadId) || null;
   const roster = useMemo(() => athletes.filter((a) => a.squad_id === squadId), [athletes, squadId]);
-  const matches = useMemo(() => allMatches.filter((m) => m.squad_id === squadId), [allMatches, squadId]);
+  /* partidas do elenco (sem filtro de data) — base para o jogo ao vivo */
+  const squadMatches = useMemo(
+    () => allMatches.filter((m) => m.squad_id === squadId),
+    [allMatches, squadId]
+  );
+  /* partidas visíveis: recorte global de datas aplicado a todo o site */
+  const matches = useMemo(
+    () => squadMatches.filter(
+      (m) => (!dateFrom || m.date >= dateFrom) && (!dateTo || m.date <= dateTo)
+    ),
+    [squadMatches, dateFrom, dateTo]
+  );
   const stats = useMemo(() => compute(roster, matches), [roster, matches]);
   const athleteName = useCallback(
     (id: string) => athletes.find((a) => a.id === id)?.name || "?",
@@ -250,8 +298,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [allMatches]
   );
   const liveMatch = useMemo(
-    () => matches.find((m) => m.status === "ao_vivo_1t" || m.status === "intervalo" || m.status === "ao_vivo_2t") || null,
-    [matches]
+    () => squadMatches.find((m) => m.status === "ao_vivo_1t" || m.status === "intervalo" || m.status === "ao_vivo_2t") || null,
+    [squadMatches]
   );
 
   /* ---- ações ---- */
@@ -261,6 +309,37 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (error) { console.error(error); return; }
     setEvents((old) => ({ ...old, [matchId]: (data as MatchEvent[]) || [] }));
   }, []);
+
+  /** Corrige um lance já registrado: tempo (minuto) e período. Não altera o
+      placar — para trocar autor/gol use "Editar partida". */
+  const updateEvent = useCallback(async (ev: MatchEvent, patch: { minute?: number | null; period?: number }) => {
+    const minute = patch.minute !== undefined ? patch.minute : ev.minute;
+    const period = patch.period ?? ev.payload?.period;
+    const payload: EventPayload = {
+      ...ev.payload,
+      period,
+      seconds: minute != null ? minute * 60 : ev.payload?.seconds,
+    };
+    const upd: MatchEvent = { ...ev, minute, payload };
+    setEvents((old) => ({
+      ...old,
+      [ev.match_id]: (old[ev.match_id] || []).map((x) => (x.id === ev.id ? upd : x)),
+    }));
+    const { error } = await sb.from("match_events").update({ minute, payload }).eq("id", ev.id);
+    if (error) { console.error(error); toast("Erro ao editar o lance."); }
+    else toast("Lance atualizado ✓");
+  }, [toast]);
+
+  /** Remove um lance da linha do tempo. Não mexe no placar. */
+  const deleteEvent = useCallback(async (ev: MatchEvent) => {
+    setEvents((old) => ({
+      ...old,
+      [ev.match_id]: (old[ev.match_id] || []).filter((x) => x.id !== ev.id),
+    }));
+    const { error } = await sb.from("match_events").delete().eq("id", ev.id);
+    if (error) { console.error(error); toast("Erro ao excluir o lance."); }
+    else toast("Lance excluído");
+  }, [toast]);
 
   const upsertMatch = useCallback(async (m: Match) => {
     setAllMatches((old) => {
@@ -500,9 +579,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const value: StoreValue = {
     loading, fatal, schemaLegacy, squads, squadId, setSquadId, squad,
-    roster, athletes, athleteName, matches, allMatches, findMatch, stats,
+    roster, athletes, athleteName, matches, allMatches,
+    dateFrom, dateTo, setDateRange, findMatch, stats,
     liveMatch, events, loadEvents, session, isAdmin, signIn, signOut,
-    upsertMatch, deleteMatch, addAthlete, addSquad, addEvent, toggleClock,
+    upsertMatch, deleteMatch, addAthlete, addSquad, addEvent,
+    updateEvent, deleteEvent, toggleClock,
     resetToScheduled, importBackup, wipeMatches, toast, toastMsg,
   };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

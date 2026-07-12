@@ -9,8 +9,6 @@ import type { Match, Result } from "../lib/types";
 export default function Matches({ openNew }: { openNew?: boolean }) {
   const { matches, roster, isAdmin, deleteMatch } = useStore();
   const [form, setForm] = useState<null | { match?: Match; schedule?: boolean }>(null);
-  const [fFrom, setFFrom] = useState("");
-  const [fTo, setFTo] = useState("");
   const [fRes, setFRes] = useState<Set<Result>>(new Set());
 
   // rota #/partidas/nova (atalho do Início) abre o formulário direto
@@ -23,20 +21,19 @@ export default function Matches({ openNew }: { openNew?: boolean }) {
 
   const nameOf = (id: string) => roster.find((a) => a.id === id)?.name || "?";
   const list = sortMatches(matches).reverse();
-  const hasFilters = !!(fFrom || fTo || fRes.size);
+  const hasFilters = fRes.size > 0;
 
-  const inRange = (m: Match) => (!fFrom || m.date >= fFrom) && (!fTo || m.date <= fTo);
   const upcoming = useMemo(
-    () => list.filter((m) => m.status === "agendada" && inRange(m)),
-    [list, fFrom, fTo]
+    () => list.filter((m) => m.status === "agendada"),
+    [list]
   );
   const played = useMemo(
     () => list.filter((m) =>
-      m.status !== "agendada" && inRange(m) &&
+      m.status !== "agendada" &&
       // condições (V/E/D) valem para jogos encerrados; ao vivo sempre aparece
       (fRes.size === 0 || isLive(m.status) || fRes.has(result(m)))
     ),
-    [list, fFrom, fTo, fRes]
+    [list, fRes]
   );
 
   function toggleRes(r: Result) {
@@ -46,7 +43,7 @@ export default function Matches({ openNew }: { openNew?: boolean }) {
       return cp;
     });
   }
-  function clearFilters() { setFFrom(""); setFTo(""); setFRes(new Set()); }
+  function clearFilters() { setFRes(new Set()); }
 
   const shown = upcoming.length + played.length;
   const header = (
@@ -69,9 +66,6 @@ export default function Matches({ openNew }: { openNew?: boolean }) {
       </div>
       {list.length > 0 && (
         <div className="filter-bar">
-          <label>De <input type="date" value={fFrom} onChange={(e) => setFFrom(e.target.value)} /></label>
-          <label>Até <input type="date" value={fTo} onChange={(e) => setFTo(e.target.value)} /></label>
-          <span className="fb-sep" />
           <button className={`f-chip v ${fRes.has("V") ? "on" : ""}`} onClick={() => toggleRes("V")}>Vitórias</button>
           <button className={`f-chip e ${fRes.has("E") ? "on" : ""}`} onClick={() => toggleRes("E")}>Empates</button>
           <button className={`f-chip d ${fRes.has("D") ? "on" : ""}`} onClick={() => toggleRes("D")}>Derrotas</button>
