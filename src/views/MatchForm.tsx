@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useStore } from "../state/store";
 import { Modal, Stepper } from "../components/ui";
 import { todayISO, uid } from "../lib/format";
-import { POS_GROUPS, athletePositions, posRank } from "../lib/positions";
+import { POSITIONS, POS_GROUPS, athletePositions, posRank } from "../lib/positions";
 import type { Match } from "../lib/types";
 
 const TITULARES = 11;
@@ -14,7 +14,7 @@ interface Props {
 }
 
 export default function MatchForm({ match, schedule, onClose }: Props) {
-  const { roster, squadMatches, squadId, schemaLegacy, upsertMatch, addAthlete, toast } = useStore();
+  const { roster, squadMatches, squadId, schemaLegacy, upsertMatch, addAthlete, updateAthletePositions, toast } = useStore();
   const isEdit = !!match;
   const scheduling = schedule || match?.status === "agendada";
 
@@ -278,7 +278,23 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
                   </span>
                   <div className="nm">
                     {nameOf(id)}
-                    {positions[id] && <span className="muted"> · {positions[id]}</span>}
+                    {positions[id]
+                      ? <span className="muted"> · {positions[id]}</span>
+                      : (
+                        <select
+                          className="pos-sel" value=""
+                          onChange={(e) => {
+                            const v = e.target.value;
+                            if (!v) return;
+                            setPosition(id, v);
+                            // registra no perfil de quem ainda não tem posição
+                            if (!profilePos[id]?.length) updateAthletePositions(id, [v]);
+                          }}
+                        >
+                          <option value="">posição…</option>
+                          {POSITIONS.map((p) => <option key={p} value={p}>{p}</option>)}
+                        </select>
+                      )}
                   </div>
                   <button type="button" className="ord-btn" disabled={i === 0} onClick={() => move(id, -1)} aria-label="Subir">↑</button>
                   <button type="button" className="ord-btn" disabled={i === lineup.length - 1} onClick={() => move(id, 1)} aria-label="Descer">↓</button>
