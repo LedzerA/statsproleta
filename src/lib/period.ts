@@ -21,9 +21,16 @@ export const PERIOD_PRESETS: { id: PeriodPreset; label: string }[] = [
   { id: "data", label: "Data específica" },
 ];
 
-function monthsAgoISO(n: number): string {
+export function monthsAgoISO(n: number): string {
   const d = new Date();
   d.setMonth(d.getMonth() - n);
+  const off = d.getTimezoneOffset();
+  return new Date(d.getTime() - off * 60000).toISOString().slice(0, 10);
+}
+
+export function addDaysISO(iso: string, days: number): string {
+  const d = new Date(iso + "T12:00:00"); // meio-dia evita surpresas de fuso
+  d.setDate(d.getDate() + days);
   const off = d.getTimezoneOffset();
   return new Date(d.getTime() - off * 60000).toISOString().slice(0, 10);
 }

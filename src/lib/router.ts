@@ -7,6 +7,7 @@ export type Route =
   | { view: "atletas" }
   | { view: "atleta"; id: string }
   | { view: "adversarios" }
+  | { view: "comparativo" }
   | { view: "mais" };
 
 function parse(hash: string): Route {
@@ -17,6 +18,7 @@ function parse(hash: string): Route {
     case "atletas": return { view: "atletas" };
     case "atleta": return parts[1] ? { view: "atleta", id: parts[1] } : { view: "atletas" };
     case "adversarios": return { view: "adversarios" };
+    case "comparativo": return { view: "comparativo" };
     case "mais": return { view: "mais" };
     default: return { view: "inicio" };
   }

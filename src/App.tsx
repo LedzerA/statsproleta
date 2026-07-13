@@ -10,6 +10,7 @@ import MatchDetail from "./views/MatchDetail";
 import Athletes from "./views/Athletes";
 import Athlete from "./views/Athlete";
 import Opponents from "./views/Opponents";
+import Compare from "./views/Compare";
 import More from "./views/More";
 
 const NAV = [
@@ -17,6 +18,7 @@ const NAV = [
   { path: "#/partidas", view: "partidas", label: "Partidas", icon: "📅" },
   { path: "#/atletas", view: "atletas", label: "Atletas", icon: "👟" },
   { path: "#/adversarios", view: "adversarios", label: "Rivais", icon: "🛡️" },
+  { path: "#/comparativo", view: "comparativo", label: "Comparar", icon: "⚖️" },
   { path: "#/mais", view: "mais", label: "Mais", icon: "☰" },
 ] as const;
 
@@ -186,6 +188,7 @@ export default function App() {
           {route.view === "atletas" && <Athletes />}
           {route.view === "atleta" && <Athlete id={route.id} />}
           {route.view === "adversarios" && <Opponents />}
+          {route.view === "comparativo" && <Compare />}
           {route.view === "mais" && <More />}
         </div>
       </main>
