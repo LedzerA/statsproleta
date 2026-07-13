@@ -282,10 +282,8 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
                       className="pos-sel"
                       value={positions[id] || ""}
                       onChange={(e) => {
-                        const v = e.target.value;
-                        setPosition(id, v);
-                        // registra no perfil só de quem ainda não tem posição nenhuma
-                        if (v && !profilePos[id]?.length) updateAthletePositions(id, [v]);
+                        // a posição da partida entra sozinha no perfil (janela de 3 meses)
+                        setPosition(id, e.target.value);
                       }}
                     >
                       <option value="">posição…</option>

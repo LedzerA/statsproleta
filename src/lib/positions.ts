@@ -1,3 +1,5 @@
+import { monthsAgoISO } from "./period";
+
 /* Ordem convencional de escalação: goleiro → defesa (LD, ZG, LE) →
    meio-campo (VOL, MC, MEI) → ataque (PE, PD, SA, CA).
    Posições são texto livre gravado por partida; variações comuns são
@@ -33,13 +35,18 @@ export function derivedPositions(athleteId: string, matches: { positions?: Recor
   return [...set].sort((a, b) => posRank(a) - posRank(b));
 }
 
-/** Posições exibidas do atleta: as do perfil (curadas pelo admin) ou,
-    na falta delas, as derivadas do histórico. */
+/** Posições exibidas do atleta: onde ele atuou nos ÚLTIMOS 3 MESES
+    (posição antiga expira sozinha) + as curadas pelo admin no perfil.
+    Sem nada recente nem curado, cai no histórico completo. */
 export function athletePositions(
   a: { id: string; positions?: string[] },
-  matches: { positions?: Record<string, string> }[]
+  matches: { date?: string; positions?: Record<string, string> }[]
 ): string[] {
-  if (a.positions && a.positions.length) return a.positions;
+  const since = monthsAgoISO(3);
+  const recentes = derivedPositions(a.id, matches.filter((m) => (m.date || "") >= since));
+  const merged = [...new Set([...(a.positions || []), ...recentes])]
+    .sort((x, y) => posRank(x) - posRank(y));
+  if (merged.length) return merged;
   return derivedPositions(a.id, matches);
 }
 
