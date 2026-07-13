@@ -246,7 +246,11 @@ code { background: rgba(0, 0, 0, .25); padding: 1px 5px; border-radius: 5px; fon
 
 /* ---------- cards ---------- */
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 14px; }
-.card { background: var(--creme-2); color: var(--carvao); border-radius: var(--r); padding: 15px 17px; box-shadow: var(--sombra); }
+.card { background: var(--creme-2); color: var(--carvao); border-radius: var(--r); padding: 15px 17px; box-shadow: var(--sombra); display: flex; flex-direction: column; }
+/* barras dos cards ancoradas na base — numa linha de cards de mesma altura, todas se alinham */
+.card > .meter, .card > .duo-bar, .card > .ved-bar { margin-top: auto; margin-bottom: 0; }
+.card > .stat-sub { margin-bottom: 11px; }
+.card > .stat-sub:last-child { margin-bottom: 0; }
 .card.dark {
   background: linear-gradient(165deg, var(--verde-700), var(--verde-800));
   color: var(--creme); border: 1px solid var(--linha);
@@ -408,7 +412,7 @@ table.stats .muted { color: rgba(50, 75, 64, .55); }
   color: var(--carvao); font-size: 13.5px; border-bottom: 1px solid rgba(15, 32, 25, .06);
 }
 .tl-item:last-child { border-bottom: none; }
-.tl-min { width: 30px; flex-shrink: 0; text-align: right; color: var(--carvao-2); font-weight: 700; }
+.tl-min { width: 44px; flex-shrink: 0; text-align: right; color: var(--carvao-2); font-weight: 700; white-space: nowrap; }
 .tl-ic { flex-shrink: 0; }
 .tl-txt { flex: 1; min-width: 0; }
 .tl-txt b { display: block; }
@@ -630,10 +634,25 @@ button.chip:hover { border-color: var(--verde-500); }
 .cmp-head.dark .ch-ved .v { color: var(--v); }
 .cmp-head.dark .ch-ved .e { color: var(--e); }
 .cmp-head.dark .ch-ved .d { color: var(--d); }
-.ved-bar { display: flex; height: 8px; border-radius: 6px; overflow: hidden; background: rgba(15, 32, 25, .10); margin-bottom: 9px; }
-.cmp-head.dark .ved-bar { background: rgba(0, 0, 0, .30); }
-.ved-bar i { display: block; height: 100%; }
-.ved-bar .sv { background: var(--v); } .ved-bar .se { background: var(--e); } .ved-bar .sd { background: var(--d); }
+/* barra empilhada V/E/D — 2px de respiro entre segmentos; tons mais firmes
+   sobre fundo claro (os vivos --v/--e/--d ficam para os fundos escuros) */
+.ved-bar { display: flex; gap: 2px; height: 8px; border-radius: 6px; overflow: hidden; background: rgba(15, 32, 25, .10); margin-bottom: 9px; }
+.cmp-head.dark .ved-bar, .card.dark .ved-bar { background: rgba(0, 0, 0, .30); }
+.ved-bar i { display: block; height: 100%; border-radius: 2px; }
+.ved-bar .sv { background: #1aa04a; } .ved-bar .se { background: #cf9d2b; } .ved-bar .sd { background: #d05a47; }
+.cmp-head.dark .ved-bar .sv, .card.dark .ved-bar .sv { background: var(--v); }
+.cmp-head.dark .ved-bar .se, .card.dark .ved-bar .se { background: var(--e); }
+.cmp-head.dark .ved-bar .sd, .card.dark .ved-bar .sd { background: var(--d); }
+
+/* medidor 0–100% e barra dupla (pró × contra) dos cards de estatística */
+.meter { height: 7px; border-radius: 5px; background: rgba(15, 32, 25, .10); overflow: hidden; margin-top: 11px; }
+.meter i { display: block; height: 100%; background: var(--verde-500); border-radius: 5px; }
+.card.dark .meter { background: rgba(0, 0, 0, .30); }
+.card.dark .meter i { background: var(--creme); }
+.duo-bar { display: flex; gap: 2px; height: 7px; border-radius: 5px; overflow: hidden; margin-top: 11px; background: rgba(15, 32, 25, .06); }
+.duo-bar i { display: block; height: 100%; border-radius: 2px; }
+.duo-bar .gp { background: #1aa04a; }
+.duo-bar .gc { background: #d05a47; }
 .ch-line { font-size: 12px; color: var(--carvao-2); }
 .cmp-head.dark .ch-line { color: var(--creme); opacity: .75; }
 

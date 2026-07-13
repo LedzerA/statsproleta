@@ -1,5 +1,5 @@
 import { useStore } from "../state/store";
-import { pct } from "../lib/format";
+import { fmtDate, pct } from "../lib/format";
 import { EmptyState } from "../components/ui";
 
 export default function Opponents() {
@@ -24,7 +24,7 @@ export default function Opponents() {
             <thead>
               <tr>
                 <th>Adversário</th><th>J</th><th>V</th><th>E</th><th>D</th>
-                <th>GP</th><th>GC</th><th>SG</th><th>Aprov.</th>
+                <th>GP</th><th>GC</th><th>SG</th><th>Aprov.</th><th>Último jogo</th>
               </tr>
             </thead>
             <tbody>
@@ -43,6 +43,7 @@ export default function Opponents() {
                       {o.SG > 0 ? "+" : ""}{o.SG}
                     </td>
                     <td><span className={`pill ${rl}`}>{pct(o.aprov)}</span></td>
+                    <td className="cell-num muted">{fmtDate(o.last)}</td>
                   </tr>
                 );
               })}

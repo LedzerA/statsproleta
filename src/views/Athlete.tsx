@@ -67,11 +67,21 @@ export default function Athlete({ id }: { id: string }) {
             <div className="stat-num num">{p.jogos}</div>
             <div className="stat-label">Presenças</div>
             <div className="stat-sub">{p.v}V · {p.e}E · {p.d}D com ele em campo</div>
+            {p.jogos > 0 && (
+              <div className="ved-bar" title={`${p.v} vitórias, ${p.e} empates, ${p.d} derrotas com ele`}>
+                <i className="sv" style={{ width: `${(p.v / p.jogos) * 100}%` }} />
+                <i className="se" style={{ width: `${(p.e / p.jogos) * 100}%` }} />
+                <i className="sd" style={{ width: `${(p.d / p.jogos) * 100}%` }} />
+              </div>
+            )}
           </div>
           <div className="card">
             <div className="stat-num num">{p.jogos ? pct(p.aprov) : "–"}</div>
             <div className="stat-label">Aprov. do time</div>
             <div className="stat-sub">quando ele joga</div>
+            {p.jogos > 0 && (
+              <div className="meter"><i style={{ width: `${Math.min(100, p.aprov * 100)}%` }} /></div>
+            )}
           </div>
           <div className="card">
             <div className="stat-num num">{p.jogos ? dec(p.ppj) : "–"}</div>

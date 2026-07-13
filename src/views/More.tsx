@@ -143,7 +143,7 @@ export default function More() {
         </div>
 
         <div className="data-card">
-          <h3>Resumo · {squad?.name}</h3>
+          <h3>📊 Resumo · {squad?.name}</h3>
           <p>
             {matches.length} partidas · {roster.length} atletas no elenco<br />
             Período: {per}<br />
@@ -153,7 +153,7 @@ export default function More() {
 
         {isAdmin && (
           <div className="data-card">
-            <h3>Exportar dados</h3>
+            <h3>📤 Exportar dados</h3>
             <p>Planilhas CSV (Excel / Google Sheets) seguem o período filtrado; o backup JSON é sempre completo.</p>
             <button className="btn ghost block" style={{ marginBottom: 8 }} onClick={exportPlayersCSV}>Atletas (CSV)</button>
             <button className="btn ghost block" style={{ marginBottom: 8 }} onClick={exportMatchesCSV}>Partidas (CSV)</button>
@@ -163,7 +163,7 @@ export default function More() {
 
         {isAdmin && (
           <div className="data-card">
-            <h3>Restaurar / importar</h3>
+            <h3>📥 Restaurar / importar</h3>
             <p>
               Carrega um backup .json (deste app ou do app antigo) e substitui os atletas e
               partidas do elenco <b>{squad?.name}</b>.
@@ -187,7 +187,7 @@ export default function More() {
 
         {isAdmin && (
           <div className="data-card">
-            <h3>Elencos</h3>
+            <h3>👥 Elencos</h3>
             <p>Cada elenco tem atletas, partidas e estatísticas próprias. Atual: <b>{squad?.name}</b> ({squads.length} no total).</p>
             <div className="add-athlete">
               <input

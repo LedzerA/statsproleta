@@ -69,11 +69,18 @@ export default function Home() {
           <div className="stat-num num">{pct(t.aprov)}</div>
           <div className="stat-label">Aproveitamento</div>
           <div className="stat-sub">{t.pts} de {t.J * 3} pts possíveis</div>
+          <div className="meter"><i style={{ width: `${Math.min(100, t.aprov * 100)}%` }} /></div>
         </div>
         <div className="card">
           <div className="stat-num num">{t.GP}<span className="sep"> : </span>{t.GC}</div>
           <div className="stat-label">Gols pró : contra</div>
           <div className="stat-sub">{dec(t.mgp)} feitos · {dec(t.mgc)} sofridos / jogo</div>
+          {t.GP + t.GC > 0 && (
+            <div className="duo-bar" title={`${t.GP} pró × ${t.GC} contra`}>
+              <i className="gp" style={{ width: `${(t.GP / (t.GP + t.GC)) * 100}%` }} />
+              <i className="gc" style={{ width: `${(t.GC / (t.GP + t.GC)) * 100}%` }} />
+            </div>
+          )}
         </div>
         <div className="card">
           <div className={`stat-num num ${t.SG > 0 ? "pos" : t.SG < 0 ? "neg" : ""}`}>
@@ -81,6 +88,13 @@ export default function Home() {
           </div>
           <div className="stat-label">Saldo de gols</div>
           <div className="stat-sub">{t.V}V · {t.E}E · {t.D}D em {t.J} jogos</div>
+          {t.J > 0 && (
+            <div className="ved-bar" title={`${t.V} vitórias, ${t.E} empates, ${t.D} derrotas`}>
+              <i className="sv" style={{ width: `${(t.V / t.J) * 100}%` }} />
+              <i className="se" style={{ width: `${(t.E / t.J) * 100}%` }} />
+              <i className="sd" style={{ width: `${(t.D / t.J) * 100}%` }} />
+            </div>
+          )}
         </div>
         <div className="card">
           <div className="stat-num num">{dec(t.J ? (t.GP + t.GC) / t.J : 0, 1)}</div>
