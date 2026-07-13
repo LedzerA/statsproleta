@@ -274,14 +274,12 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
                 {i === TITULARES && <div className="bench-divider">— banco a partir daqui —</div>}
                 <div className="st-row">
                   <span className={`st-ord num ${i < TITULARES ? "tit" : ""}`}>
-                    {i < TITULARES ? "★" : ""} {i + 1}
+                    {i < TITULARES ? "★" : ""}{i + 1}
                   </span>
-                  <div className="nm">{nameOf(id)}</div>
-                  <input
-                    type="text" className="st-pos" placeholder="pos." autoComplete="off"
-                    value={positions[id] || ""}
-                    onChange={(e) => setPosition(id, e.target.value.toUpperCase())}
-                  />
+                  <div className="nm">
+                    {nameOf(id)}
+                    {positions[id] && <span className="muted"> · {positions[id]}</span>}
+                  </div>
                   <button type="button" className="ord-btn" disabled={i === 0} onClick={() => move(id, -1)} aria-label="Subir">↑</button>
                   <button type="button" className="ord-btn" disabled={i === lineup.length - 1} onClick={() => move(id, 1)} aria-label="Descer">↓</button>
                   <button type="button" className="ord-btn rm" onClick={() => toggle(id)} aria-label="Remover">×</button>
@@ -289,7 +287,7 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
               </div>
             ))}
           </div>
-          <div className="tot-line">★ = titular (11 primeiros) · use ↑ ↓ para ajustar a ordem · posição livre (GOL, ZG, MEI…)</div>
+          <div className="tot-line">★ 11 primeiros = titulares · ↑ ↓ ajustam a ordem · posição vem do perfil do atleta</div>
         </>
       )}
 

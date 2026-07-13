@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   --verde-900: #062a1c; --verde-850: #08351f; --verde-800: #0b4529; --verde-700: #0e5836;
   --verde-500: #1aa04a; --verde-400: #2fbf6b; --verde-300: #5fd48f;
   --creme: #f2ebd6; --creme-2: #fbf7ec; --creme-3: #fffdf6;
@@ -545,7 +545,7 @@ button.chip:hover { border-color: var(--verde-500); }
 
 /* titulares & posições (formulário) */
 .st-list { display: flex; flex-direction: column; gap: 2px; margin-top: 4px; }
-.st-row { display: grid; grid-template-columns: 34px 1fr 88px; gap: 8px; align-items: center; padding: 4px 6px; border-radius: 8px; }
+.st-row { display: grid; grid-template-columns: 40px 1fr 28px 28px 28px; gap: 6px; align-items: center; padding: 3px 6px; border-radius: 8px; }
 .st-row:nth-child(even) { background: rgba(15, 32, 25, .03); }
 .st-row .nm { font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .st-toggle {
@@ -749,7 +749,7 @@ button.chip:hover { border-color: var(--verde-500); }
   border-radius: 50%; background: var(--verde-800); color: var(--creme-3);
   font-size: 11px; font-weight: 700; margin-right: 6px; padding: 0 3px;
 }
-.st-ord { width: 44px; flex-shrink: 0; text-align: right; font-weight: 700; color: var(--carvao-2); font-size: 13.5px; }
+.st-ord { text-align: right; font-weight: 700; color: var(--carvao-2); font-size: 13.5px; }
 .st-ord.tit { color: #137a3c; }
 .bench-divider {
   text-align: center; font-size: 10.5px; letter-spacing: 1.5px; text-transform: uppercase;
@@ -757,7 +757,7 @@ button.chip:hover { border-color: var(--verde-500); }
   border-top: 1px dashed rgba(15, 32, 25, .25); margin-top: 6px;
 }
 .ord-btn {
-  width: 30px; height: 30px; border-radius: 8px; border: 1px solid rgba(15, 32, 25, .18);
+  width: 28px; height: 28px; border-radius: 7px; border: none;
   background: none; color: var(--carvao-2); font-size: 14px; line-height: 1; flex-shrink: 0;
 }
 .ord-btn:hover:not(:disabled) { background: rgba(15, 32, 25, .06); color: var(--carvao); }
