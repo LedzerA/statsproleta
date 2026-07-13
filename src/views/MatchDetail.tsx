@@ -6,6 +6,7 @@ import {
   clockSeconds, fmtClock, fmtDate, fmtEventMinute, isLive, result, resWord, statusLabel,
 } from "../lib/format";
 import { Modal } from "../components/ui";
+import { renderResultArt } from "../lib/art";
 import MatchForm from "./MatchForm";
 import type { EventType, Match, MatchEvent } from "../lib/types";
 
@@ -40,7 +41,7 @@ function LiveClock({ m }: { m: Match }) {
 
 export default function MatchDetail({ id }: { id: string }) {
   const {
-    findMatch, roster, athleteName, isAdmin, schemaLegacy,
+    findMatch, roster, squads, athleteName, isAdmin, schemaLegacy,
     events, loadEvents, addEvent, updateEvent, deleteEvent, toggleClock, resetToScheduled,
     deleteMatch, upsertMatch, toast,
   } = useStore();
@@ -49,6 +50,8 @@ export default function MatchDetail({ id }: { id: string }) {
   const [subPicker, setSubPicker] = useState(false);
   const [editEv, setEditEv] = useState<MatchEvent | null>(null);
   const [busy, setBusy] = useState(false);
+  const [art, setArt] = useState<string | null>(null);
+  const [artBusy, setArtBusy] = useState(false);
 
   const m = findMatch(id);
   useEffect(() => { if (m) loadEvents(m.id); }, [id]);
@@ -97,6 +100,43 @@ export default function MatchDetail({ id }: { id: string }) {
     if (confirm(msg)) fire(type);
   }
 
+  async function makeArt() {
+    if (artBusy || !m) return;
+    setArtBusy(true);
+    try {
+      const squadName = squads.find((s) => s.id === m.squad_id)?.name || null;
+      const canvas = await renderResultArt(m, athleteName, squadName);
+      setArt(canvas.toDataURL("image/png"));
+    } catch (e) {
+      console.error(e);
+      toast("Não foi possível gerar a arte.");
+    } finally { setArtBusy(false); }
+  }
+
+  function downloadArt() {
+    if (!art || !m) return;
+    const a = document.createElement("a");
+    a.href = art;
+    a.download = `proleta-resultado-${m.date}.png`;
+    a.click();
+  }
+
+  async function shareArt() {
+    if (!art || !m) return;
+    try {
+      const blob = await (await fetch(art)).blob();
+      const file = new File([blob], `proleta-resultado-${m.date}.png`, { type: "image/png" });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: `${TEAM.short} ${m.goals_for} × ${m.goals_against} ${m.opponent}`,
+        });
+        return;
+      }
+    } catch { /* cancelado ou sem suporte — cai para o download */ }
+    downloadArt();
+  }
+
   const infoBits = [
     m.venue && `📍 ${m.venue}`,
     m.kickoff && `🕒 ${m.kickoff}`,
@@ -124,6 +164,12 @@ export default function MatchDetail({ id }: { id: string }) {
         {live && <LiveClock m={m} />}
         {infoBits.length > 0 && <div className="sh-info">{infoBits.join("   ·   ")}</div>}
       </div>
+
+      {m.status === "encerrada" && (
+        <button className="btn ghost-light block" style={{ marginBottom: 14 }} disabled={artBusy} onClick={makeArt}>
+          {artBusy ? "Gerando arte…" : "🖼️ Gerar arte do resultado"}
+        </button>
+      )}
 
       {isAdmin && m.status === "agendada" && (
         <div className="live-controls">
@@ -300,6 +346,24 @@ export default function MatchDetail({ id }: { id: string }) {
           onCancel={() => setSubPicker(false)}
           onConfirm={(inId, outId) => { setSubPicker(false); fire("sub", { inId, outId }); }}
         />
+      )}
+      {art && (
+        <Modal
+          title="🖼️ Arte do resultado"
+          onClose={() => setArt(null)}
+          footer={
+            <>
+              <button className="btn ghost" style={{ flex: 1 }} onClick={downloadArt}>↓ Baixar</button>
+              <button className="btn primary" style={{ flex: 2 }} onClick={shareArt}>Compartilhar</button>
+            </>
+          }
+        >
+          <img src={art} alt="Arte do resultado" style={{ width: "100%", borderRadius: 10, display: "block" }} />
+          <p className="muted" style={{ fontSize: 13, marginTop: 10 }}>
+            No celular, “Compartilhar” abre direto o WhatsApp / Instagram.
+            Se o aparelho não suportar, o botão baixa o PNG.
+          </p>
+        </Modal>
       )}
       {editEv && (
         <EventEditModal
