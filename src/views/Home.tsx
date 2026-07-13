@@ -2,21 +2,21 @@ import { useStore } from "../state/store";
 import { navigate } from "../lib/router";
 import { TEAM } from "../config";
 import { dec, fmtDate, fmtDateShort, pct, result, sortMatches } from "../lib/format";
+import { PERIOD_ALL, periodLabel } from "../lib/period";
 import { EmptyState, ResultBadge } from "../components/ui";
 
 export default function Home() {
-  const { stats, matches, isAdmin, dateFrom, dateTo, setDateRange } = useStore();
+  const { stats, matches, squadMatches, period, periodOn, setPeriod, isAdmin } = useStore();
   const t = stats.team;
-  const dateFilter = !!(dateFrom || dateTo);
 
   if (t.J === 0 && !matches.length) {
-    if (dateFilter) {
+    if (periodOn && squadMatches.length > 0) {
       return (
         <EmptyState
           icon="🔍"
           title="Nenhuma partida no período"
-          sub="Ajuste ou limpe o filtro de datas acima para ver as estatísticas."
-          action={<button className="btn ghost-light" onClick={() => setDateRange("", "")}>Limpar filtro de datas</button>}
+          sub="O filtro de período no topo está escondendo os jogos deste elenco."
+          action={<button className="btn ghost-light" onClick={() => setPeriod(PERIOD_ALL)}>Mostrar tudo</button>}
         />
       );
     }
@@ -40,7 +40,11 @@ export default function Home() {
   return (
     <>
       <div className="section-title">
-        <h2>Visão geral da temporada</h2>
+        <h2>
+          {periodOn
+            ? <>Visão geral <span className="hint">· {periodLabel(period)}</span></>
+            : "Visão geral da temporada"}
+        </h2>
         {isAdmin && (
           <button className="btn primary sm" onClick={() => navigate("#/partidas/nova")}>
             + Nova partida

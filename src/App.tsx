@@ -1,7 +1,8 @@
 import { useStore } from "./state/store";
 import { useRoute, navigate } from "./lib/router";
 import { TEAM } from "./config";
-import { pct } from "./lib/format";
+import { fmtDate, fmtDateShort, pct } from "./lib/format";
+import { PERIOD_PRESETS, periodRange } from "./lib/period";
 import { FormDots, Spinner } from "./components/ui";
 import Home from "./views/Home";
 import Matches from "./views/Matches";
@@ -19,30 +20,10 @@ const NAV = [
   { path: "#/mais", view: "mais", label: "Mais", icon: "☰" },
 ] as const;
 
-const DATE_FILTER_VIEWS = new Set(["inicio", "partidas", "atletas", "atleta", "adversarios"]);
-
-function GlobalDateFilter() {
-  const { dateFrom, dateTo, setDateRange, matches } = useStore();
-  const active = !!(dateFrom || dateTo);
-  return (
-    <div className="filter-bar global-date">
-      <span className="gd-label">📅 Período</span>
-      <label>De <input type="date" value={dateFrom} onChange={(e) => setDateRange(e.target.value, dateTo)} /></label>
-      <label>Até <input type="date" value={dateTo} onChange={(e) => setDateRange(dateFrom, e.target.value)} /></label>
-      {active && (
-        <>
-          <span className="fb-note">{matches.length} jogo{matches.length !== 1 ? "s" : ""} no período</span>
-          <button className="linklike light" onClick={() => setDateRange("", "")}>Limpar</button>
-        </>
-      )}
-    </div>
-  );
-}
-
 export default function App() {
   const {
     loading, fatal, schemaLegacy, squads, squadId, setSquadId, squad, stats,
-    liveMatch, isAdmin, toastMsg,
+    liveMatch, isAdmin, toastMsg, period, setPeriod,
   } = useStore();
   const route = useRoute();
 
@@ -62,6 +43,12 @@ export default function App() {
   const activeView =
     route.view === "partida" ? "partidas" : route.view === "atleta" ? "atletas" : route.view;
   const t = stats.team;
+  const range = periodRange(period);
+  const periodNote =
+    period.preset === "3m" || period.preset === "6m" ? `desde ${fmtDate(range.from)}`
+    : period.preset === "sem1" || period.preset === "sem2"
+      ? `${fmtDateShort(range.from)} — ${fmtDate(range.to)}`
+      : "";
   const streak = t.streak
     ? `${t.streak.n} ${t.streak.r === "V" ? "vitória" : t.streak.r === "E" ? "empate" : "derrota"}${t.streak.n > 1 ? "s" : ""}`
     : "—";
@@ -110,6 +97,49 @@ export default function App() {
               ))}
             </div>
           )}
+          <div className="period-row" role="tablist" aria-label="Período das estatísticas">
+            <span className="period-lb">Período</span>
+            {PERIOD_PRESETS.map((p) => (
+              <button
+                key={p.id}
+                role="tab"
+                aria-selected={period.preset === p.id}
+                className={`p-chip ${period.preset === p.id ? "on" : ""}`}
+                onClick={() => setPeriod(p.id === "data"
+                  ? { ...period, preset: "data" }
+                  : { preset: p.id, from: "", to: "" })}
+              >
+                {p.label}
+              </button>
+            ))}
+            {periodNote && <span className="period-note">{periodNote}</span>}
+          </div>
+          {period.preset === "data" && (
+            <div className="period-dates">
+              <label>De{" "}
+                <input
+                  type="date"
+                  value={period.from}
+                  onChange={(e) => setPeriod({ ...period, from: e.target.value })}
+                />
+              </label>
+              <label>Até{" "}
+                <input
+                  type="date"
+                  value={period.to}
+                  onChange={(e) => setPeriod({ ...period, to: e.target.value })}
+                />
+              </label>
+              {(period.from || period.to) && (
+                <button
+                  className="linklike light"
+                  onClick={() => setPeriod({ ...period, from: "", to: "" })}
+                >
+                  Limpar datas
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </header>
 
@@ -150,7 +180,6 @@ export default function App() {
               </div>
             </div>
           )}
-          {DATE_FILTER_VIEWS.has(route.view) && <GlobalDateFilter />}
           {route.view === "inicio" && <Home />}
           {route.view === "partidas" && <Matches openNew={route.nova} />}
           {route.view === "partida" && <MatchDetail id={route.id} />}

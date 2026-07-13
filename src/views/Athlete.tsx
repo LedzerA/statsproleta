@@ -3,19 +3,19 @@ import { useStore } from "../state/store";
 import { navigate } from "../lib/router";
 import { compute } from "../lib/stats";
 import { dec, fmtDate, pct, result, sortMatches } from "../lib/format";
+import { inPeriod, periodRange } from "../lib/period";
 import { ResultBadge } from "../components/ui";
 
 export default function Athlete({ id }: { id: string }) {
-  const { athletes, allMatches, squads, dateFrom, dateTo } = useStore();
+  const { athletes, allMatches, squads, period, periodOn } = useStore();
   const athlete = athletes.find((a) => a.id === id);
 
   const data = useMemo(() => {
     if (!athlete) return null;
     const squadRoster = athletes.filter((a) => a.squad_id === athlete.squad_id);
-    const squadMatches = allMatches.filter((m) =>
-      m.squad_id === athlete.squad_id &&
-      (!dateFrom || m.date >= dateFrom) && (!dateTo || m.date <= dateTo)
-    );
+    const all = allMatches.filter((m) => m.squad_id === athlete.squad_id);
+    const range = periodRange(period);
+    const squadMatches = all.filter((m) => inPeriod(m.date, range));
     const stats = compute(squadRoster, squadMatches);
     const p = stats.players.find((x) => x.id === id) || null;
     const played = sortMatches(squadMatches)
@@ -24,13 +24,14 @@ export default function Athlete({ id }: { id: string }) {
          (m.scorers || []).some((s) => s.a === id) ||
          (m.assists || []).some((s) => s.a === id)))
       .reverse();
-    // posição mais recente registrada
+    // posição mais recente registrada (independe do período)
     let position = "";
-    for (const m of played) {
+    const allPlayed = sortMatches(all).reverse();
+    for (const m of allPlayed) {
       if (m.positions?.[id]) { position = m.positions[id]; break; }
     }
     return { p, played, position };
-  }, [athlete, athletes, allMatches, id, dateFrom, dateTo]);
+  }, [athlete, athletes, allMatches, period, id]);
 
   if (!athlete || !data) {
     return (
@@ -82,10 +83,19 @@ export default function Athlete({ id }: { id: string }) {
 
       <div className="panel">
         <div className="panel-head">
-          <h3>Partidas <span className="sub" style={{ display: "inline" }}>· {data.played.length}</span></h3>
+          <h3>
+            Partidas{" "}
+            <span className="sub" style={{ display: "inline" }}>
+              · {data.played.length}{periodOn ? " no período" : ""}
+            </span>
+          </h3>
         </div>
         {data.played.length === 0 ? (
-          <div className="ga-empty" style={{ padding: "14px 18px" }}>Nenhuma partida registrada com este atleta.</div>
+          <div className="ga-empty" style={{ padding: "14px 18px" }}>
+            {periodOn
+              ? "Nenhuma partida deste atleta no período selecionado no topo."
+              : "Nenhuma partida registrada com este atleta."}
+          </div>
         ) : (
           <div className="mini-matches">
             {data.played.map((m) => {

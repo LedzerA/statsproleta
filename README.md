@@ -35,6 +35,8 @@ No painel do Supabase → **SQL Editor**:
    cronômetro e converte os lances antigos para a linha do tempo. Idempotente.
 3. Rode **`supabase/seed.sql`** — só completa o que faltar (elenco Esporte + os 28 jogos
    históricos); não sobrescreve dados migrados nem edições feitas depois.
+4. Rode **`supabase/atualizacao-2.sql`** — cria os elencos **Diverso** e **Feminino**.
+   Idempotente: pode rodar de novo sem duplicar.
 
 As credenciais do projeto (URL + anon key) ficam em **`src/config.ts`**. A anon key é pública
 por design — quem protege a escrita são as políticas RLS do schema.

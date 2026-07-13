@@ -317,19 +317,31 @@ export default function MatchDetail({ id }: { id: string }) {
   );
 }
 
-/** Ordena lances por período → minuto → instante de registro (crescente). */
+/** Ordena lances por período → minuto → instante de registro (crescente).
+    Lance sem minuto (ex.: "Bola rolando", registrado antes do relógio existir)
+    fica no começo do período, não no fim. */
 function cmpChrono(a: MatchEvent, b: MatchEvent): number {
   const pa = a.payload?.period ?? 1, pb = b.payload?.period ?? 1;
   if (pa !== pb) return pa - pb;
-  const ma = a.minute ?? Number.POSITIVE_INFINITY, mb = b.minute ?? Number.POSITIVE_INFINITY;
+  const ma = a.minute ?? Number.NEGATIVE_INFINITY, mb = b.minute ?? Number.NEGATIVE_INFINITY;
   if (ma !== mb) return ma - mb;
   return a.created_at < b.created_at ? -1 : a.created_at > b.created_at ? 1 : 0;
+}
+
+/* payload.title chega com emoji embutido (bom para as notificações); na linha
+   do tempo o emoji vira o ícone da linha e sai do texto, senão aparece dobrado */
+function iconAndText(raw: string, fallback: string): { icon: string; text: string } {
+  const lead = raw.match(/^[\p{Extended_Pictographic}\u{FE0F}\u{200D}]+/u);
+  if (lead) return { icon: lead[0], text: raw.slice(lead[0].length).trim() || raw };
+  const trail = raw.match(/[\p{Extended_Pictographic}\u{FE0F}\u{200D}]+$/u);
+  if (trail) return { icon: trail[0], text: raw.slice(0, raw.length - trail[0].length).trim() || raw };
+  return { icon: fallback, text: raw };
 }
 
 function TimelineItem({ ev, athleteName, onEdit }: {
   ev: MatchEvent; athleteName: (id: string) => string; onEdit?: () => void;
 }) {
-  let title = ev.payload?.title || EVENT_LABEL[ev.type] || ev.type;
+  const title = ev.payload?.title || EVENT_LABEL[ev.type] || ev.type;
   let body = ev.payload?.body || "";
   // lances migrados do app antigo não têm texto pronto — monta na hora
   if (!ev.payload?.title) {
@@ -341,12 +353,13 @@ function TimelineItem({ ev, athleteName, onEdit }: {
       body = `Entra ${inId ? athleteName(inId) : "?"}, sai ${outId ? athleteName(outId) : "?"}`;
     }
   }
+  const { icon, text } = iconAndText(title, EVENT_ICON[ev.type] || "•");
   return (
     <li className={`tl-item ${ev.type}`}>
       <span className="tl-min num">{fmtEventMinute(ev.minute, ev.payload?.period)}</span>
-      <span className="tl-ic">{EVENT_ICON[ev.type] || "•"}</span>
+      <span className="tl-ic">{icon}</span>
       <span className="tl-txt">
-        <b>{title}</b>
+        <b>{text}</b>
         {body && <span className="tl-body">{body}</span>}
       </span>
       {onEdit && (

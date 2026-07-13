@@ -2,12 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 import { useStore } from "../state/store";
 import { navigate } from "../lib/router";
 import { fmtDate, isLive, result, sortMatches, statusLabel } from "../lib/format";
+import { PERIOD_ALL } from "../lib/period";
 import { EmptyState } from "../components/ui";
 import MatchForm from "./MatchForm";
 import type { Match, Result } from "../lib/types";
 
 export default function Matches({ openNew }: { openNew?: boolean }) {
-  const { matches, roster, isAdmin, deleteMatch } = useStore();
+  const { matches, squadMatches, periodOn, setPeriod, roster, isAdmin, deleteMatch } = useStore();
   const [form, setForm] = useState<null | { match?: Match; schedule?: boolean }>(null);
   const [fRes, setFRes] = useState<Set<Result>>(new Set());
 
@@ -20,6 +21,7 @@ export default function Matches({ openNew }: { openNew?: boolean }) {
   }, [openNew, isAdmin]);
 
   const nameOf = (id: string) => roster.find((a) => a.id === id)?.name || "?";
+  // o período (De/Até e pré-definidos) é global — fica no topo da página
   const list = sortMatches(matches).reverse();
   const hasFilters = fRes.size > 0;
 
@@ -43,7 +45,6 @@ export default function Matches({ openNew }: { openNew?: boolean }) {
       return cp;
     });
   }
-  function clearFilters() { setFRes(new Set()); }
 
   const shown = upcoming.length + played.length;
   const header = (
@@ -54,6 +55,7 @@ export default function Matches({ openNew }: { openNew?: boolean }) {
           {list.length > 0 && (
             <span className="hint">
               · {hasFilters ? `${shown} de ${list.length}` : list.length} jogos
+              {periodOn ? " no período" : ""}
             </span>
           )}
         </h2>
@@ -70,7 +72,7 @@ export default function Matches({ openNew }: { openNew?: boolean }) {
           <button className={`f-chip e ${fRes.has("E") ? "on" : ""}`} onClick={() => toggleRes("E")}>Empates</button>
           <button className={`f-chip d ${fRes.has("D") ? "on" : ""}`} onClick={() => toggleRes("D")}>Derrotas</button>
           {hasFilters && (
-            <button className="linklike light" onClick={clearFilters}>Limpar filtros</button>
+            <button className="linklike light" onClick={() => setFRes(new Set())}>Limpar filtros</button>
           )}
         </div>
       )}
@@ -81,11 +83,20 @@ export default function Matches({ openNew }: { openNew?: boolean }) {
     return (
       <>
         {header}
-        <EmptyState
-          title="Nenhuma partida"
-          sub={isAdmin ? "Cadastre o primeiro jogo do Proleta." : "Ainda não há jogos registrados neste elenco."}
-          action={isAdmin && <button className="btn primary" onClick={() => setForm({})}>+ Nova partida</button>}
-        />
+        {periodOn && squadMatches.length > 0 ? (
+          <EmptyState
+            icon="🔍"
+            title="Nenhum jogo no período selecionado"
+            sub="Ajuste o período no topo da página para ver outras partidas."
+            action={<button className="btn ghost-light" onClick={() => setPeriod(PERIOD_ALL)}>Mostrar tudo</button>}
+          />
+        ) : (
+          <EmptyState
+            title="Nenhuma partida"
+            sub={isAdmin ? "Cadastre o primeiro jogo do Proleta." : "Ainda não há jogos registrados neste elenco."}
+            action={isAdmin && <button className="btn primary" onClick={() => setForm({})}>+ Nova partida</button>}
+          />
+        )}
         {form && <MatchForm match={form.match} schedule={form.schedule} onClose={() => setForm(null)} />}
       </>
     );
@@ -194,8 +205,8 @@ export default function Matches({ openNew }: { openNew?: boolean }) {
         <EmptyState
           icon="🔍"
           title="Nenhum jogo com esses filtros"
-          sub="Ajuste o período ou as condições acima."
-          action={<button className="btn ghost-light" onClick={clearFilters}>Limpar filtros</button>}
+          sub="Ajuste as condições acima ou o período no topo da página."
+          action={<button className="btn ghost-light" onClick={() => setFRes(new Set())}>Limpar filtros</button>}
         />
       ) : (
         <div className="match-list">{played.map(card)}</div>

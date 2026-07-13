@@ -17,7 +17,7 @@ const stamp = () => new Date().toISOString().slice(0, 10);
 
 export default function More() {
   const {
-    squad, squads, roster, matches, stats, session, isAdmin,
+    squad, squads, roster, matches, squadMatches, stats, session, isAdmin,
     signOut, addSquad, importBackup, wipeMatches, toast,
   } = useStore();
   const [login, setLogin] = useState(false);
@@ -84,8 +84,9 @@ export default function More() {
   }
 
   function exportJSON() {
+    // backup é sempre completo — ignora o filtro de período
     download(`proleta-${squad?.name || "backup"}-${stamp()}.json`,
-      JSON.stringify({ version: 2, squad, roster, matches }, null, 2));
+      JSON.stringify({ version: 2, squad, roster, matches: squadMatches }, null, 2));
     toast("Backup baixado ✓");
   }
 
@@ -150,13 +151,15 @@ export default function More() {
           </p>
         </div>
 
-        <div className="data-card">
-          <h3>Exportar dados</h3>
-          <p>Planilhas CSV (Excel / Google Sheets) e backup completo em JSON.</p>
-          <button className="btn ghost block" style={{ marginBottom: 8 }} onClick={exportPlayersCSV}>Atletas (CSV)</button>
-          <button className="btn ghost block" style={{ marginBottom: 8 }} onClick={exportMatchesCSV}>Partidas (CSV)</button>
-          <button className="btn block" onClick={exportJSON}>↓ Backup (JSON)</button>
-        </div>
+        {isAdmin && (
+          <div className="data-card">
+            <h3>Exportar dados</h3>
+            <p>Planilhas CSV (Excel / Google Sheets) seguem o período filtrado; o backup JSON é sempre completo.</p>
+            <button className="btn ghost block" style={{ marginBottom: 8 }} onClick={exportPlayersCSV}>Atletas (CSV)</button>
+            <button className="btn ghost block" style={{ marginBottom: 8 }} onClick={exportMatchesCSV}>Partidas (CSV)</button>
+            <button className="btn block" onClick={exportJSON}>↓ Backup (JSON)</button>
+          </div>
+        )}
 
         {isAdmin && (
           <div className="data-card">

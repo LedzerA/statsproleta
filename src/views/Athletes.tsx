@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useStore } from "../state/store";
 import { navigate } from "../lib/router";
 import { dec, pct } from "../lib/format";
-import { type PlayerStats } from "../lib/stats";
+import type { PlayerStats } from "../lib/stats";
 
 const COLS: { k: keyof PlayerStats; l: string; t: "txt" | "n" | "d" | "p"; tip?: string }[] = [
   { k: "name", l: "Atleta", t: "txt" },
@@ -20,14 +20,14 @@ const COLS: { k: keyof PlayerStats; l: string; t: "txt" | "n" | "d" | "p"; tip?:
 ];
 
 export default function Athletes() {
-  const { stats, dateFrom, dateTo, isAdmin, addAthlete } = useStore();
+  // stats já vêm filtradas pelo período global (chips no topo da página)
+  const { stats, periodOn, isAdmin, addAthlete } = useStore();
   const [sortKey, setSortKey] = useState<keyof PlayerStats>("part");
   const [sortDir, setSortDir] = useState(-1);
   const [newName, setNewName] = useState("");
   const [minJogos, setMinJogos] = useState(0);
   const [minGols, setMinGols] = useState(0);
 
-  const periodFiltering = !!(dateFrom || dateTo);
   const filtering = minJogos > 0 || minGols > 0;
 
   const list = useMemo(() => {
@@ -53,7 +53,7 @@ export default function Athletes() {
           {filtering
             ? `${list.length} de ${stats.players.length} atletas`
             : `${stats.totalJogadores} atletas com registro`}
-          {periodFiltering && ` · ${stats.team.J} jogo${stats.team.J !== 1 ? "s" : ""} no período`}
+          {periodOn && ` · ${stats.team.J} jogo${stats.team.J !== 1 ? "s" : ""} no período`}
         </span>
       </div>
 
@@ -72,7 +72,7 @@ export default function Athletes() {
             onChange={(e) => setMinGols(Math.max(0, parseInt(e.target.value) || 0))}
           />
         </label>
-        {periodFiltering && <span className="fb-note">estatísticas só do período selecionado</span>}
+        {periodOn && <span className="fb-note">estatísticas do período selecionado no topo</span>}
         {filtering && (
           <button
             className="linklike light"

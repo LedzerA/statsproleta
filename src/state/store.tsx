@@ -8,10 +8,24 @@ import { TEAM } from "../config";
 import type { Assist, Athlete, EventPayload, EventType, Match, MatchEvent, Scorer, Squad } from "../lib/types";
 import { compute, type SquadStats } from "../lib/stats";
 import { clockSeconds, result, uid } from "../lib/format";
+import { PERIOD_ALL, PERIOD_PRESETS, inPeriod, periodRange, type Period } from "../lib/period";
 
 const SQUAD_KEY = "proleta_squad_v2";
-const DATE_FROM_KEY = "proleta_date_from_v2";
-const DATE_TO_KEY = "proleta_date_to_v2";
+const PERIOD_KEY = "proleta_period_v2";
+
+function loadPeriod(): Period {
+  try {
+    const p = JSON.parse(localStorage.getItem(PERIOD_KEY) || "");
+    if (p && PERIOD_PRESETS.some((x) => x.id === p.preset)) {
+      return {
+        preset: p.preset,
+        from: typeof p.from === "string" ? p.from : "",
+        to: typeof p.to === "string" ? p.to : "",
+      };
+    }
+  } catch { /* primeiro acesso ou valor inválido */ }
+  return PERIOD_ALL;
+}
 
 /* colunas que só existem depois do supabase/atualizacao-1.sql; enquanto o
    banco não tiver sido atualizado, elas são removidas das escritas */
@@ -45,11 +59,15 @@ interface StoreValue {
   roster: Athlete[];
   athletes: Athlete[];
   athleteName: (id: string) => string;
+  /** Partidas do elenco atual DENTRO do período global (usar nas telas/estatísticas). */
   matches: Match[];
+  /** Todas as partidas do elenco atual, ignorando o período (backup, ao vivo). */
+  squadMatches: Match[];
   allMatches: Match[];
-  dateFrom: string;
-  dateTo: string;
-  setDateRange: (from: string, to: string) => void;
+  period: Period;
+  setPeriod: (p: Period) => void;
+  /** true quando o período global está restringindo alguma coisa. */
+  periodOn: boolean;
   findMatch: (id: string) => Match | undefined;
   stats: SquadStats;
   liveMatch: Match | null;
@@ -131,8 +149,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [allMatches, setAllMatches] = useState<Match[]>([]);
   const [events, setEvents] = useState<Record<string, MatchEvent[]>>({});
   const [squadId, setSquadIdState] = useState<string>(() => localStorage.getItem(SQUAD_KEY) || "");
-  const [dateFrom, setDateFrom] = useState<string>(() => localStorage.getItem(DATE_FROM_KEY) || "");
-  const [dateTo, setDateTo] = useState<string>(() => localStorage.getItem(DATE_TO_KEY) || "");
+  const [period, setPeriodState] = useState<Period>(loadPeriod);
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
@@ -267,26 +284,24 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(SQUAD_KEY, id);
   }, []);
 
-  const setDateRange = useCallback((from: string, to: string) => {
-    setDateFrom(from);
-    setDateTo(to);
-    if (from) localStorage.setItem(DATE_FROM_KEY, from); else localStorage.removeItem(DATE_FROM_KEY);
-    if (to) localStorage.setItem(DATE_TO_KEY, to); else localStorage.removeItem(DATE_TO_KEY);
+  const setPeriod = useCallback((p: Period) => {
+    setPeriodState(p);
+    try { localStorage.setItem(PERIOD_KEY, JSON.stringify(p)); } catch { /* sem storage */ }
   }, []);
 
   const squad = squads.find((s) => s.id === squadId) || null;
   const roster = useMemo(() => athletes.filter((a) => a.squad_id === squadId), [athletes, squadId]);
-  /* partidas do elenco (sem filtro de data) — base para o jogo ao vivo */
+  /* partidas do elenco (sem filtro de período) — base para o ao vivo e backup */
   const squadMatches = useMemo(
     () => allMatches.filter((m) => m.squad_id === squadId),
     [allMatches, squadId]
   );
-  /* partidas visíveis: recorte global de datas aplicado a todo o site */
+  /* partidas visíveis: período global aplicado a todo o site */
+  const range = useMemo(() => periodRange(period), [period]);
+  const periodOn = !!(range.from || range.to);
   const matches = useMemo(
-    () => squadMatches.filter(
-      (m) => (!dateFrom || m.date >= dateFrom) && (!dateTo || m.date <= dateTo)
-    ),
-    [squadMatches, dateFrom, dateTo]
+    () => (periodOn ? squadMatches.filter((m) => inPeriod(m.date, range)) : squadMatches),
+    [squadMatches, range, periodOn]
   );
   const stats = useMemo(() => compute(roster, matches), [roster, matches]);
   const athleteName = useCallback(
@@ -297,6 +312,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     (id: string) => allMatches.find((m) => m.id === id),
     [allMatches]
   );
+  // ao vivo ignora o período — o banner precisa aparecer sempre
   const liveMatch = useMemo(
     () => squadMatches.find((m) => m.status === "ao_vivo_1t" || m.status === "intervalo" || m.status === "ao_vivo_2t") || null,
     [squadMatches]
@@ -579,8 +595,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const value: StoreValue = {
     loading, fatal, schemaLegacy, squads, squadId, setSquadId, squad,
-    roster, athletes, athleteName, matches, allMatches,
-    dateFrom, dateTo, setDateRange, findMatch, stats,
+    roster, athletes, athleteName, matches, squadMatches, allMatches,
+    period, setPeriod, periodOn, findMatch, stats,
     liveMatch, events, loadEvents, session, isAdmin, signIn, signOut,
     upsertMatch, deleteMatch, addAthlete, addSquad, addEvent,
     updateEvent, deleteEvent, toggleClock,
