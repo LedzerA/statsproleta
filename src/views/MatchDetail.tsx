@@ -6,7 +6,8 @@ import {
   clockSeconds, fmtClock, fmtDate, fmtEventMinute, isLive, result, resWord, statusLabel,
 } from "../lib/format";
 import { Modal } from "../components/ui";
-import { renderResultArt } from "../lib/art";
+import { renderLineupArt, renderResultArt } from "../lib/art";
+import { posRank, sortLineup } from "../lib/positions";
 import MatchForm from "./MatchForm";
 import type { EventType, Match, MatchEvent } from "../lib/types";
 
@@ -86,8 +87,12 @@ export default function MatchDetail({ id }: { id: string }) {
   // ordena por período e minuto (com a ordem de registro como desempate) para
   // que um lance com o tempo corrigido apareça no lugar certo da linha do tempo
   const timeline = evList.slice().sort(cmpChrono).reverse();
-  const starters = m.starters || [];
-  const bench = (m.lineup || []).filter((aid) => !starters.includes(aid));
+  // escalação sempre na ordem convencional: GOL → LD/ZG/LE → VOL/MC/MEI → PE/PD/SA/CA
+  const starters = sortLineup(m.starters || [], m.positions, athleteName);
+  const bench = sortLineup(
+    (m.lineup || []).filter((aid) => !(m.starters || []).includes(aid)),
+    m.positions, athleteName
+  );
   const pos = (aid: string) => (m.positions?.[aid] ? ` · ${m.positions[aid]}` : "");
 
   async function fire(type: EventType, opts?: { scorerId?: string; assistId?: string; inId?: string; outId?: string }) {
@@ -100,12 +105,16 @@ export default function MatchDetail({ id }: { id: string }) {
     if (confirm(msg)) fire(type);
   }
 
+  const artKind = m?.status === "agendada" ? "convocacao" : "resultado";
+
   async function makeArt() {
     if (artBusy || !m) return;
     setArtBusy(true);
     try {
       const squadName = squads.find((s) => s.id === m.squad_id)?.name || null;
-      const canvas = await renderResultArt(m, athleteName, squadName);
+      const canvas = m.status === "agendada"
+        ? await renderLineupArt(m, athleteName, squadName)
+        : await renderResultArt(m, athleteName, squadName);
       setArt(canvas.toDataURL("image/png"));
     } catch (e) {
       console.error(e);
@@ -117,7 +126,7 @@ export default function MatchDetail({ id }: { id: string }) {
     if (!art || !m) return;
     const a = document.createElement("a");
     a.href = art;
-    a.download = `proleta-resultado-${m.date}.png`;
+    a.download = `proleta-${artKind}-${m.date}.png`;
     a.click();
   }
 
@@ -125,11 +134,13 @@ export default function MatchDetail({ id }: { id: string }) {
     if (!art || !m) return;
     try {
       const blob = await (await fetch(art)).blob();
-      const file = new File([blob], `proleta-resultado-${m.date}.png`, { type: "image/png" });
+      const file = new File([blob], `proleta-${artKind}-${m.date}.png`, { type: "image/png" });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
           files: [file],
-          title: `${TEAM.short} ${m.goals_for} × ${m.goals_against} ${m.opponent}`,
+          title: m.status === "agendada"
+            ? `${TEAM.short} × ${m.opponent} — ${fmtDate(m.date)}`
+            : `${TEAM.short} ${m.goals_for} × ${m.goals_against} ${m.opponent}`,
         });
         return;
       }
@@ -165,9 +176,11 @@ export default function MatchDetail({ id }: { id: string }) {
         {infoBits.length > 0 && <div className="sh-info">{infoBits.join("   ·   ")}</div>}
       </div>
 
-      {m.status === "encerrada" && (
+      {(m.status === "encerrada" || m.status === "agendada") && (
         <button className="btn ghost-light block" style={{ marginBottom: 14 }} disabled={artBusy} onClick={makeArt}>
-          {artBusy ? "Gerando arte…" : "🖼️ Gerar arte do resultado"}
+          {artBusy
+            ? "Gerando arte…"
+            : m.status === "agendada" ? "🖼️ Gerar arte da convocação" : "🖼️ Gerar arte do resultado"}
         </button>
       )}
 
@@ -349,7 +362,7 @@ export default function MatchDetail({ id }: { id: string }) {
       )}
       {art && (
         <Modal
-          title="🖼️ Arte do resultado"
+          title={artKind === "convocacao" ? "🖼️ Arte da convocação" : "🖼️ Arte do resultado"}
           onClose={() => setArt(null)}
           footer={
             <>
@@ -486,7 +499,10 @@ function GoalPicker({ match, onCancel, onConfirm }: {
   const [scorer, setScorer] = useState<string | undefined>();
   const [assist, setAssist] = useState<string | undefined>();
   const [showAll, setShowAll] = useState(match.lineup.length === 0);
-  const options = showAll ? roster : roster.filter((a) => match.lineup.includes(a.id));
+  const options = (showAll ? roster : roster.filter((a) => match.lineup.includes(a.id)))
+    .slice().sort((a, b) =>
+      posRank(match.positions?.[a.id]) - posRank(match.positions?.[b.id]) ||
+      a.name.localeCompare(b.name, "pt"));
   return (
     <Modal
       title="⚽ Gol do Proleta!"
@@ -538,12 +554,16 @@ function SubPicker({ match, onField, onCancel, onConfirm }: {
   const [inId, setInId] = useState<string | undefined>();
   const [outId, setOutId] = useState<string | undefined>();
   const [showAll, setShowAll] = useState(false);
+  const byPos = (a: { id: string; name: string }, b: { id: string; name: string }) =>
+    posRank(match.positions?.[a.id]) - posRank(match.positions?.[b.id]) ||
+    a.name.localeCompare(b.name, "pt");
   const related = roster.filter((a) => match.lineup.includes(a.id));
   // "sai" = quem está em campo agora; "entra" = relacionados que estão fora
   // (banco). Atualiza a cada substituição feita durante o jogo.
-  const outOptions = related.filter((a) => onField.has(a.id));
+  const outOptions = related.filter((a) => onField.has(a.id)).sort(byPos);
   const benchOptions = related.filter((a) => !onField.has(a.id));
-  const inOptions = showAll ? roster.filter((a) => !onField.has(a.id)) : benchOptions;
+  const inOptions = (showAll ? roster.filter((a) => !onField.has(a.id)) : benchOptions)
+    .slice().sort(byPos);
   return (
     <Modal
       title="🔁 Substituição"

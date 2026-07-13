@@ -1,5 +1,6 @@
 import { TEAM } from "../config";
 import { fmtDate, resWord, result } from "./format";
+import { sortLineup } from "./positions";
 import type { Match } from "./types";
 
 /* Gera a arte do resultado (1080×1350, formato de post) no navegador.
@@ -200,6 +201,169 @@ export async function renderResultArt(
   ctx.font = inter(600, 23);
   const site = `${location.host}${location.pathname}`.replace(/\/$/, "");
   ctx.fillText(`📊  estatísticas e jogos ao vivo:  ${site}`, W / 2, 1290);
+
+  return canvas;
+}
+
+/** Arte de convocação do próximo jogo: data, horário, local, uniforme,
+    titulares (na ordem convencional das posições) e banco. */
+export async function renderLineupArt(
+  m: Match,
+  nameOf: (id: string) => string,
+  squadName: string | null
+): Promise<HTMLCanvasElement> {
+  try {
+    await Promise.all([
+      document.fonts.load(zilla(700, 90), "0"),
+      document.fonts.load(zilla(600, 60), "A"),
+      document.fonts.load(inter(600, 40), "A"),
+      document.fonts.load(inter(700, 40), "A"),
+    ]);
+  } catch { /* segue com a fonte substituta */ }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext("2d")!;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+
+  const bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, "#0b4529");
+  bg.addColorStop(1, "#062a1c");
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.strokeStyle = "rgba(242, 235, 214, .07)";
+  ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(W / 2, 620, 330, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0, 620); ctx.lineTo(W, 620); ctx.stroke();
+
+  /* escudo + cabeçalho */
+  ctx.beginPath(); ctx.arc(W / 2, 148, 56, 0, Math.PI * 2);
+  ctx.fillStyle = CREME; ctx.fill();
+  ctx.lineWidth = 6; ctx.strokeStyle = "#0b4529"; ctx.beginPath();
+  ctx.arc(W / 2, 148, 47, 0, Math.PI * 2); ctx.stroke();
+  ctx.fillStyle = "#0b4529";
+  ctx.font = zilla(700, 44);
+  ctx.fillText("PA", W / 2, 151);
+
+  ctx.fillStyle = CREME_3;
+  ctx.font = zilla(700, 46);
+  ctx.fillText(TEAM.name.toUpperCase(), W / 2, 254);
+  if (squadName) {
+    ctx.fillStyle = VERDE_300;
+    ctx.font = inter(600, 26);
+    ctx.fillText(squadName.toUpperCase(), W / 2, 300);
+  }
+
+  /* selo */
+  ctx.font = inter(700, 30);
+  const word = "PRÓXIMO JOGO";
+  const pw = ctx.measureText(word).width + 76;
+  ctx.fillStyle = "#e6b94b";
+  roundedRect(ctx, (W - pw) / 2, 344, pw, 62, 31);
+  ctx.fill();
+  ctx.fillStyle = "#3d2f05";
+  ctx.fillText(word, W / 2, 377);
+
+  /* confronto */
+  const colL = W * 0.27, colR = W * 0.73, colW = W * 0.42;
+  ctx.fillStyle = CREME_3;
+  const sizeL = fitFont(ctx, TEAM.short.toUpperCase(), 62, colW, (px) => zilla(700, px));
+  ctx.font = zilla(700, sizeL);
+  ctx.fillText(TEAM.short.toUpperCase(), colL, 496);
+  const opp = m.opponent.toUpperCase();
+  const sizeR = fitFont(ctx, opp, 62, colW, (px) => zilla(700, px));
+  ctx.font = zilla(700, sizeR);
+  ctx.fillText(opp, colR, 496);
+  ctx.fillStyle = "rgba(242, 235, 214, .55)";
+  ctx.font = zilla(500, 56);
+  ctx.fillText("×", W / 2, 494);
+
+  /* data, hora, local, uniforme */
+  let y = 578;
+  const info = (txt: string) => {
+    ctx.fillStyle = CREME;
+    ctx.font = inter(600, 30);
+    ctx.fillText(txt, W / 2, y);
+    y += 48;
+  };
+  info(`📅 ${fmtDate(m.date)}${m.kickoff ? `   ·   🕒 ${m.kickoff}` : ""}`);
+  if (m.venue) info(`📍 ${m.venue}`);
+  if (m.kit) info(`👕 ${m.kit}`);
+  y += 26;
+
+  /* escalação */
+  const starters = sortLineup(m.starters || [], m.positions, nameOf);
+  const bench = sortLineup(
+    (m.lineup || []).filter((id) => !(m.starters || []).includes(id)),
+    m.positions, nameOf
+  );
+
+  const label = (txt: string) => {
+    ctx.fillStyle = VERDE_300;
+    ctx.font = inter(700, 25);
+    ctx.fillText(txt, W / 2, y);
+    y += 50;
+  };
+
+  if (starters.length > 0) {
+    label(`★  TITULARES (${starters.length})`);
+    const shown = starters.slice(0, 12);
+    const rows = Math.ceil(shown.length / 2);
+    const rowH = 46;
+    const x1 = 150, x2 = W / 2 + 60;
+    ctx.textAlign = "left";
+    shown.forEach((id, i) => {
+      const col = i < rows ? x1 : x2;
+      const yy = y + (i % rows) * rowH;
+      // posição composta ("LE/ZG") mostra só a primeira — cartaz limpo
+      const p = (m.positions?.[id] || "").split("/")[0].trim().toUpperCase();
+      if (p) {
+        ctx.fillStyle = VERDE_300;
+        ctx.font = inter(700, 21);
+        ctx.fillText(p, col, yy);
+      }
+      ctx.fillStyle = CREME;
+      ctx.font = zilla(600, 33);
+      let name = nameOf(id);
+      const maxW = W / 2 - 210;
+      while (ctx.measureText(name).width > maxW && name.length > 3) name = name.slice(0, -2) + "…";
+      ctx.fillText(name, col + 78, yy);
+    });
+    ctx.textAlign = "center";
+    y += rows * rowH + 26;
+
+    if (bench.length > 0) {
+      label(`BANCO (${bench.length})`);
+      ctx.fillStyle = "rgba(242, 235, 214, .85)";
+      ctx.font = zilla(600, 29);
+      for (const line of wrapText(ctx, bench.map(nameOf).join(", "), 900, 3)) {
+        ctx.fillText(line, W / 2, y);
+        y += 42;
+      }
+    }
+  } else if ((m.lineup || []).length > 0) {
+    label(`RELACIONADOS (${m.lineup.length})`);
+    ctx.fillStyle = CREME;
+    ctx.font = zilla(600, 31);
+    const nomes = sortLineup(m.lineup, m.positions, nameOf).map(nameOf).join(", ");
+    for (const line of wrapText(ctx, nomes, 900, 5)) {
+      ctx.fillText(line, W / 2, y);
+      y += 46;
+    }
+  } else {
+    ctx.fillStyle = "rgba(242, 235, 214, .6)";
+    ctx.font = inter(600, 27);
+    ctx.fillText("Escalação a definir — bora, Proleta! 💪", W / 2, y + 20);
+  }
+
+  /* rodapé */
+  ctx.fillStyle = "rgba(95, 212, 143, .8)";
+  ctx.font = inter(600, 23);
+  const site = `${location.host}${location.pathname}`.replace(/\/$/, "");
+  ctx.fillText(`📊  acompanhe ao vivo:  ${site}`, W / 2, 1290);
 
   return canvas;
 }

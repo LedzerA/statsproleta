@@ -31,14 +31,18 @@ export default function Athletes() {
   const filtering = minJogos > 0 || minGols > 0;
 
   const list = useMemo(() => {
-    const cp = stats.players.filter((p) => p.jogos >= minJogos && p.gols >= minGols);
+    // com período ativo, quem não tem registro no recorte sai da lista
+    const base = periodOn
+      ? stats.players.filter((p) => p.jogos > 0 || p.gols > 0 || p.assist > 0)
+      : stats.players;
+    const cp = base.filter((p) => p.jogos >= minJogos && p.gols >= minGols);
     cp.sort((a, b) => {
       if (sortKey === "name") return sortDir * a.name.localeCompare(b.name, "pt");
       const va = a[sortKey] as number, vb = b[sortKey] as number;
       return va === vb ? a.name.localeCompare(b.name, "pt") : sortDir * (va - vb);
     });
     return cp;
-  }, [stats.players, sortKey, sortDir, minJogos, minGols]);
+  }, [stats.players, periodOn, sortKey, sortDir, minJogos, minGols]);
 
   function clickSort(k: keyof PlayerStats) {
     if (sortKey === k) setSortDir((d) => -d);
