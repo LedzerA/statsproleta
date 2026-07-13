@@ -8,6 +8,8 @@ export interface Athlete {
   id: string;
   squad_id: string;
   name: string;
+  /** posições do perfil (["VOL","MC"]) — vazio = derivar do histórico */
+  positions?: string[];
 }
 
 export type MatchStatus =

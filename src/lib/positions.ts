@@ -9,6 +9,40 @@ const RANK: Record<string, number> = {
   PE: 30, PD: 31, SA: 32, CA: 33, ATA: 34, ATACANTE: 34,
 };
 
+/** Posições canônicas, na ordem convencional. */
+export const POSITIONS = ["GOL", "LD", "ZG", "LE", "VOL", "MC", "MEI", "PE", "PD", "SA", "CA"] as const;
+
+export const POS_GROUPS: { label: string; positions: string[] }[] = [
+  { label: "Goleiros", positions: ["GOL"] },
+  { label: "Defesa", positions: ["LD", "ZG", "LE"] },
+  { label: "Meio-campo", positions: ["VOL", "MC", "MEI"] },
+  { label: "Ataque", positions: ["PE", "PD", "SA", "CA"] },
+];
+
+/** Posições já usadas pelo atleta nas partidas (normalizadas, ordem convencional). */
+export function derivedPositions(athleteId: string, matches: { positions?: Record<string, string> }[]): string[] {
+  const set = new Set<string>();
+  for (const m of matches) {
+    const raw = m.positions?.[athleteId];
+    if (!raw) continue;
+    for (const part of raw.split("/")) {
+      const p = part.trim().toUpperCase();
+      if (p) set.add(p);
+    }
+  }
+  return [...set].sort((a, b) => posRank(a) - posRank(b));
+}
+
+/** Posições exibidas do atleta: as do perfil (curadas pelo admin) ou,
+    na falta delas, as derivadas do histórico. */
+export function athletePositions(
+  a: { id: string; positions?: string[] },
+  matches: { positions?: Record<string, string> }[]
+): string[] {
+  if (a.positions && a.positions.length) return a.positions;
+  return derivedPositions(a.id, matches);
+}
+
 export function posRank(pos: string | null | undefined): number {
   if (!pos) return 99;
   // posição composta ("LE/ZG", "MEI/MC") conta pela primeira

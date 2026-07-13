@@ -2,7 +2,10 @@ import { useMemo, useState } from "react";
 import { useStore } from "../state/store";
 import { Modal, Stepper } from "../components/ui";
 import { todayISO, uid } from "../lib/format";
+import { POS_GROUPS, athletePositions, posRank } from "../lib/positions";
 import type { Match } from "../lib/types";
+
+const TITULARES = 11;
 
 interface Props {
   match?: Match | null;       // editar existente
@@ -11,7 +14,7 @@ interface Props {
 }
 
 export default function MatchForm({ match, schedule, onClose }: Props) {
-  const { roster, squadId, schemaLegacy, upsertMatch, addAthlete, toast } = useStore();
+  const { roster, squadMatches, squadId, schemaLegacy, upsertMatch, addAthlete, toast } = useStore();
   const isEdit = !!match;
   const scheduling = schedule || match?.status === "agendada";
 
@@ -22,9 +25,20 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
   const [kit, setKit] = useState(match?.kit || "");
   const [gf, setGf] = useState(match?.goals_for ?? 0);
   const [ga, setGa] = useState(match?.goals_against ?? 0);
-  const [lineup, setLineup] = useState<Set<string>>(new Set(match?.lineup || []));
-  const [starters, setStarters] = useState<Set<string>>(new Set(match?.starters || []));
+  // lista ORDENADA: os 11 primeiros são os titulares, o resto é banco
+  const [lineup, setLineup] = useState<string[]>(() => {
+    if (!match) return [];
+    const st = match.starters || [];
+    return [...st, ...(match.lineup || []).filter((id) => !st.includes(id))];
+  });
   const [positions, setPositions] = useState<Record<string, string>>({ ...(match?.positions || {}) });
+
+  // posições do perfil (curadas ou derivadas do histórico), para agrupar e sugerir
+  const profilePos = useMemo(() => {
+    const map: Record<string, string[]> = {};
+    for (const a of roster) map[a.id] = athletePositions(a, squadMatches);
+    return map;
+  }, [roster, squadMatches]);
   const [scorers, setScorers] = useState<Record<string, number>>(
     Object.fromEntries((match?.scorers || []).map((x) => [x.a, x.g]))
   );
@@ -37,7 +51,33 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
   const gSum = useMemo(() => Object.values(scorers).reduce((a, b) => a + b, 0), [scorers]);
   const aSum = useMemo(() => Object.values(assists).reduce((a, b) => a + b, 0), [assists]);
 
-  const related = useMemo(() => roster.filter((a) => lineup.has(a.id)), [roster, lineup]);
+  const nameOf = useMemo(() => {
+    const m = Object.fromEntries(roster.map((a) => [a.id, a.name]));
+    return (id: string) => m[id] || "?";
+  }, [roster]);
+
+  // elenco agrupado por posição principal do perfil, na ordem convencional
+  const grouped = useMemo(() => {
+    // agrupa pela faixa do posRank (normaliza apelidos: GK→GOL, ZAG→ZG…)
+    const bucket = (a: { id: string }) => {
+      const r = posRank(profilePos[a.id]?.[0]);
+      if (r < 10) return "Goleiros";
+      if (r < 20) return "Defesa";
+      if (r < 30) return "Meio-campo";
+      if (r < 40) return "Ataque";
+      return "Sem posição definida";
+    };
+    const sorted = [...roster].sort((a, b) =>
+      posRank(profilePos[a.id]?.[0]) - posRank(profilePos[b.id]?.[0]) ||
+      a.name.localeCompare(b.name, "pt"));
+    const out: { label: string; athletes: typeof roster }[] = [];
+    for (const g of [...POS_GROUPS.map((g) => g.label), "Sem posição definida"]) {
+      const list = sorted.filter((a) => bucket(a) === g);
+      if (list.length) out.push({ label: g, athletes: list });
+    }
+    return out;
+  }, [roster, profilePos]);
+
   const listed = useMemo(() => {
     const ids = new Set([...lineup, ...Object.keys(scorers), ...Object.keys(assists)]);
     return roster.filter((a) => ids.has(a.id));
@@ -45,19 +85,21 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
 
   function toggle(id: string) {
     setLineup((old) => {
-      const cp = new Set(old);
-      if (cp.has(id)) {
-        cp.delete(id);
-        setStarters((st) => { const s2 = new Set(st); s2.delete(id); return s2; });
-      } else cp.add(id);
-      return cp;
+      if (old.includes(id)) return old.filter((x) => x !== id);
+      // ao entrar na lista, sugere a posição do perfil se a partida ainda não tiver
+      const sug = profilePos[id]?.[0];
+      if (sug) setPositions((p) => (p[id] ? p : { ...p, [id]: sug }));
+      return [...old, id];
     });
   }
 
-  function toggleStarter(id: string) {
-    setStarters((old) => {
-      const cp = new Set(old);
-      if (cp.has(id)) cp.delete(id); else cp.add(id);
+  function move(id: string, dir: -1 | 1) {
+    setLineup((old) => {
+      const i = old.indexOf(id);
+      const j = i + dir;
+      if (i < 0 || j < 0 || j >= old.length) return old;
+      const cp = [...old];
+      [cp[i], cp[j]] = [cp[j], cp[i]];
       return cp;
     });
   }
@@ -77,18 +119,18 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
       if (v <= 0) delete cp[id]; else cp[id] = v;
       return cp;
     });
-    if (v > 0) setLineup((old) => new Set(old).add(id));
+    if (v > 0) setLineup((old) => (old.includes(id) ? old : [...old, id]));
   }
 
   async function handleAddAthlete() {
     const a = await addAthlete(newName);
-    if (a) { setLineup((old) => new Set(old).add(a.id)); setNewName(""); }
+    if (a) { setLineup((old) => [...old, a.id]); setNewName(""); }
   }
 
   async function save() {
     if (!opponent.trim()) { toast("Informe o adversário"); return; }
     const cleanPositions = Object.fromEntries(
-      Object.entries(positions).filter(([id, v]) => lineup.has(id) && v.trim())
+      Object.entries(positions).filter(([id, v]) => lineup.includes(id) && v.trim())
     );
     const rec: Match = {
       id: match?.id || uid("m"),
@@ -99,7 +141,7 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
       goals_for: scheduling ? 0 : gf,
       goals_against: scheduling ? 0 : ga,
       lineup: [...lineup],
-      starters: [...starters].filter((id) => lineup.has(id)),
+      starters: lineup.slice(0, TITULARES),
       positions: cleanPositions,
       scorers: Object.entries(scorers).map(([a, g]) => ({ a, g })),
       assists: Object.entries(assists).map(([a, n]) => ({ a, n })),
@@ -183,19 +225,28 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
       )}
 
       <div className="subhead">
-        <div className="t">Relacionados</div>
+        <div className="t">Relacionados <span className="muted" style={{ fontWeight: 400, fontSize: 12 }}>· toque na ordem: 1º ao 11º viram titulares</span></div>
         <div className="mini">
-          <button className="btn sm ghost" onClick={() => setLineup(new Set(roster.map((a) => a.id)))}>Todos</button>
-          <button className="btn sm ghost" onClick={() => { setLineup(new Set()); setStarters(new Set()); }}>Limpar</button>
+          <button className="btn sm ghost" onClick={() => { setLineup([]); }}>Limpar</button>
         </div>
       </div>
-      <div className="chips">
-        {roster.map((a) => (
-          <button key={a.id} className={`chip ${lineup.has(a.id) ? "on" : ""}`} onClick={() => toggle(a.id)}>
-            {a.name}
-          </button>
-        ))}
-      </div>
+      {grouped.map((g) => (
+        <div key={g.label} className="pos-group">
+          <div className="pg-label">{g.label}</div>
+          <div className="chips">
+            {g.athletes.map((a) => {
+              const i = lineup.indexOf(a.id);
+              const p = profilePos[a.id]?.[0];
+              return (
+                <button key={a.id} className={`chip ${i >= 0 ? "on" : ""}`} onClick={() => toggle(a.id)}>
+                  {i >= 0 && <span className="chip-ord num">{i + 1}</span>}
+                  {a.name}{p ? ` · ${p}` : ""}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ))}
       <div className="add-athlete">
         <input
           type="text" placeholder="+ Adicionar atleta ao elenco" autoComplete="off"
@@ -206,32 +257,39 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
         <button className="btn sm" onClick={handleAddAthlete}>Adicionar</button>
       </div>
 
-      {!schemaLegacy && related.length > 0 && (
+      {!schemaLegacy && lineup.length > 0 && (
         <>
           <div className="subhead">
-            <div className="t">Titulares &amp; posições <span className="muted" style={{ fontWeight: 400, fontSize: 12 }}>· {starters.size} titular{starters.size !== 1 ? "es" : ""}</span></div>
+            <div className="t">
+              Escalação na ordem{" "}
+              <span className="muted" style={{ fontWeight: 400, fontSize: 12 }}>
+                · {Math.min(lineup.length, TITULARES)} titular{Math.min(lineup.length, TITULARES) !== 1 ? "es" : ""}
+                {lineup.length > TITULARES ? ` + ${lineup.length - TITULARES} no banco` : ""}
+              </span>
+            </div>
           </div>
           <div className="st-list">
-            {related.map((a) => (
-              <div key={a.id} className="st-row">
-                <button
-                  type="button"
-                  className={`st-toggle ${starters.has(a.id) ? "on" : ""}`}
-                  title={starters.has(a.id) ? "Titular (toque para mandar ao banco)" : "Banco (toque para promover a titular)"}
-                  onClick={() => toggleStarter(a.id)}
-                >
-                  {starters.has(a.id) ? "★" : "☆"}
-                </button>
-                <div className="nm">{a.name}</div>
-                <input
-                  type="text" className="st-pos" placeholder="pos." autoComplete="off"
-                  value={positions[a.id] || ""}
-                  onChange={(e) => setPosition(a.id, e.target.value.toUpperCase())}
-                />
+            {lineup.map((id, i) => (
+              <div key={id}>
+                {i === TITULARES && <div className="bench-divider">— banco a partir daqui —</div>}
+                <div className="st-row">
+                  <span className={`st-ord num ${i < TITULARES ? "tit" : ""}`}>
+                    {i < TITULARES ? "★" : ""} {i + 1}
+                  </span>
+                  <div className="nm">{nameOf(id)}</div>
+                  <input
+                    type="text" className="st-pos" placeholder="pos." autoComplete="off"
+                    value={positions[id] || ""}
+                    onChange={(e) => setPosition(id, e.target.value.toUpperCase())}
+                  />
+                  <button type="button" className="ord-btn" disabled={i === 0} onClick={() => move(id, -1)} aria-label="Subir">↑</button>
+                  <button type="button" className="ord-btn" disabled={i === lineup.length - 1} onClick={() => move(id, 1)} aria-label="Descer">↓</button>
+                  <button type="button" className="ord-btn rm" onClick={() => toggle(id)} aria-label="Remover">×</button>
+                </div>
               </div>
             ))}
           </div>
-          <div className="tot-line">★ titular · ☆ banco · posição livre (GL, ZG, LD, MEI, CA…)</div>
+          <div className="tot-line">★ = titular (11 primeiros) · use ↑ ↓ para ajustar a ordem · posição livre (GOL, ZG, MEI…)</div>
         </>
       )}
 
@@ -253,7 +311,7 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
             </div>
           )}
           <div className="tot-line">
-            Marcadores: {gSum} gol(s) · {aSum} assistência(s) · {lineup.size} relacionado(s)
+            Marcadores: {gSum} gol(s) · {aSum} assistência(s) · {lineup.length} relacionado(s)
           </div>
           {gSum > 0 && gf > 0 && gSum !== gf && (
             <div className="warn show">

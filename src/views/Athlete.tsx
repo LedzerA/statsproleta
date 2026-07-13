@@ -1,15 +1,17 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useStore } from "../state/store";
 import { navigate } from "../lib/router";
 import { compute } from "../lib/stats";
 import { dec, fmtDate, fmtDateShort, pct, result, sortMatches } from "../lib/format";
 import { inPeriod, periodRange } from "../lib/period";
-import { ResultBadge } from "../components/ui";
+import { POSITIONS, athletePositions } from "../lib/positions";
+import { Modal, ResultBadge } from "../components/ui";
 import { LineChart } from "../components/LineChart";
 
 export default function Athlete({ id }: { id: string }) {
-  const { athletes, allMatches, squads, period, periodOn } = useStore();
+  const { athletes, allMatches, squads, period, periodOn, isAdmin, updateAthletePositions } = useStore();
   const athlete = athletes.find((a) => a.id === id);
+  const [editPos, setEditPos] = useState<string[] | null>(null);
 
   const data = useMemo(() => {
     if (!athlete) return null;
@@ -25,13 +27,9 @@ export default function Athlete({ id }: { id: string }) {
          (m.scorers || []).some((s) => s.a === id) ||
          (m.assists || []).some((s) => s.a === id)))
       .reverse();
-    // posição mais recente registrada (independe do período)
-    let position = "";
-    const allPlayed = sortMatches(all).reverse();
-    for (const m of allPlayed) {
-      if (m.positions?.[id]) { position = m.positions[id]; break; }
-    }
-    return { p, played, position };
+    // posições do perfil (curadas) ou derivadas do histórico completo
+    const posList = athletePositions(athlete, all);
+    return { p, played, posList };
   }, [athlete, athletes, allMatches, period, id]);
 
   const evo = useMemo(() => {
@@ -65,11 +63,59 @@ export default function Athlete({ id }: { id: string }) {
       <button className="back-link" onClick={() => navigate("#/atletas")}>← Atletas</button>
 
       <div className="score-hero">
-        <div className="sh-status">{squadName}{data.position ? ` · ${data.position}` : ""}</div>
+        <div className="sh-status">
+          {squadName}{data.posList.length ? ` · ${data.posList.join(" · ")}` : ""}
+        </div>
         <div className="sh-teams" style={{ gridTemplateColumns: "1fr" }}>
           <div className="sh-team" style={{ fontSize: 30 }}>{athlete.name}</div>
         </div>
+        {isAdmin && (
+          <button
+            className="btn sm ghost-light"
+            style={{ marginTop: 10 }}
+            onClick={() => setEditPos(athlete.positions?.length ? [...athlete.positions] : [...data.posList])}
+          >
+            ✎ Editar posições
+          </button>
+        )}
       </div>
+
+      {editPos && (
+        <Modal
+          title={`Posições · ${athlete.name}`}
+          onClose={() => setEditPos(null)}
+          footer={
+            <>
+              <button className="btn ghost" style={{ flex: 1 }} onClick={() => setEditPos(null)}>Cancelar</button>
+              <button
+                className="btn primary" style={{ flex: 2 }}
+                onClick={() => { updateAthletePositions(athlete.id, editPos); setEditPos(null); }}
+              >
+                Salvar posições
+              </button>
+            </>
+          }
+        >
+          <div className="subhead"><div className="t">Em que posições ele atua?</div></div>
+          <div className="chips">
+            {POSITIONS.map((p) => (
+              <button
+                key={p}
+                className={`chip ${editPos.includes(p) ? "on" : ""}`}
+                onClick={() => setEditPos((old) =>
+                  old!.includes(p) ? old!.filter((x) => x !== p) : [...POSITIONS.filter((x) => old!.includes(x) || x === p)]
+                )}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
+          <p className="muted" style={{ fontSize: 13, marginTop: 12 }}>
+            A primeira posição (na ordem GOL → CA) vira a principal — usada para agrupar
+            a escalação e sugerir a posição nas partidas. Sem seleção, o app usa o histórico.
+          </p>
+        </Modal>
+      )}
 
       {p && (
         <div className="grid">

@@ -37,6 +37,8 @@ No painel do Supabase → **SQL Editor**:
    históricos); não sobrescreve dados migrados nem edições feitas depois.
 4. Rode **`supabase/atualizacao-2.sql`** — cria os elencos **Diverso** e **Feminino**.
    Idempotente: pode rodar de novo sem duplicar.
+5. Rode **`supabase/atualizacao-3.sql`** — coluna `positions` no atleta (posições do
+   perfil, editáveis pelo admin). Idempotente.
 
 As credenciais do projeto (URL + anon key) ficam em **`src/config.ts`**. A anon key é pública
 por design — quem protege a escrita são as políticas RLS do schema.

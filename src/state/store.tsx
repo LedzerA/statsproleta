@@ -80,6 +80,8 @@ interface StoreValue {
   upsertMatch: (m: Match) => Promise<void>;
   deleteMatch: (id: string) => Promise<void>;
   addAthlete: (name: string) => Promise<Athlete | null>;
+  /** Salva as posições do perfil do atleta (precisa da atualização 3 no banco). */
+  updateAthletePositions: (id: string, positions: string[]) => Promise<void>;
   addSquad: (name: string) => Promise<void>;
   addEvent: (
     m: Match,
@@ -173,7 +175,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       throw sq.error || at.error || ma.error;
     }
     setSquads((sq.data as Squad[]) || []);
-    setAthletes((at.data as Athlete[]) || []);
+    setAthletes((((at.data as any[]) || []).map((a) => ({
+      ...a, positions: Array.isArray(a.positions) ? a.positions : [],
+    })) as Athlete[]));
     setAllMatches(((ma.data as any[]) || []).map(normalizeMatch));
     return (sq.data as Squad[]) || [];
   }, []);
@@ -391,6 +395,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return a;
   }, [roster, squadId, toast]);
 
+  const updateAthletePositions = useCallback(async (id: string, positions: string[]) => {
+    setAthletes((old) => old.map((a) => (a.id === id ? { ...a, positions } : a)));
+    const { error } = await sb.from("athletes").update({ positions }).eq("id", id);
+    if (error) {
+      console.error(error);
+      toast("Erro ao salvar — o banco tem a atualização 3 (coluna positions)?");
+    } else toast("Posições salvas ✓");
+  }, [toast]);
+
   const addSquad = useCallback(async (name: string) => {
     const s: Squad = { id: uid("s"), name: name.trim(), position: squads.length + 1 };
     if (!s.name) return;
@@ -598,7 +611,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     roster, athletes, athleteName, matches, squadMatches, allMatches,
     period, setPeriod, periodOn, findMatch, stats,
     liveMatch, events, loadEvents, session, isAdmin, signIn, signOut,
-    upsertMatch, deleteMatch, addAthlete, addSquad, addEvent,
+    upsertMatch, deleteMatch, addAthlete, updateAthletePositions, addSquad, addEvent,
     updateEvent, deleteEvent, toggleClock,
     resetToScheduled, importBackup, wipeMatches, toast, toastMsg,
   };
