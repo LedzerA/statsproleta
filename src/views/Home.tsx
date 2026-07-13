@@ -1,13 +1,44 @@
+import { useMemo, useState } from "react";
 import { useStore } from "../state/store";
 import { navigate } from "../lib/router";
 import { TEAM } from "../config";
-import { dec, fmtDate, fmtDateShort, pct, result, sortMatches } from "../lib/format";
+import { dec, fmtDate, fmtDateShort, pct, pts as ptsOf, result, sortMatches } from "../lib/format";
 import { PERIOD_ALL, periodLabel } from "../lib/period";
 import { EmptyState, ResultBadge } from "../components/ui";
+import { LineChart } from "../components/LineChart";
+
+type EvoMode = "aprov" | "forma" | "saldo";
+const EVO_INFO: Record<EvoMode, { chip: string; sub: string }> = {
+  aprov: { chip: "Aproveitamento", sub: "% dos pontos conquistados do primeiro jogo até cada partida" },
+  forma: { chip: "Forma (últ. 5)", sub: "aproveitamento considerando só os 5 jogos anteriores a cada ponto" },
+  saldo: { chip: "Saldo de gols", sub: "gols pró menos gols contra, acumulado jogo a jogo" },
+};
 
 export default function Home() {
   const { stats, matches, squadMatches, period, periodOn, setPeriod, isAdmin } = useStore();
   const t = stats.team;
+  const [evoMode, setEvoMode] = useState<EvoMode>("aprov");
+
+  const done = useMemo(
+    () => sortMatches(matches).filter((m) => m.status === "encerrada" && !m.archived),
+    [matches]
+  );
+  const evo = useMemo(() => {
+    let soma = 0, sg = 0;
+    const porJogo: number[] = [];
+    const aprov: number[] = [], forma: number[] = [], saldo: number[] = [];
+    for (const [i, m] of done.entries()) {
+      const p = ptsOf(m);
+      soma += p;
+      porJogo.push(p);
+      sg += m.goals_for - m.goals_against;
+      aprov.push(soma / ((i + 1) * 3));
+      const jan = porJogo.slice(-5);
+      forma.push(jan.reduce((a, b) => a + b, 0) / (jan.length * 3));
+      saldo.push(sg);
+    }
+    return { aprov, forma, saldo };
+  }, [done]);
 
   if (t.J === 0 && !matches.length) {
     if (periodOn && squadMatches.length > 0) {
@@ -102,6 +133,54 @@ export default function Home() {
           <div className="stat-sub">soma das duas equipes</div>
         </div>
       </div>
+
+      {done.length >= 3 && (
+        <div className="panel">
+          <div className="panel-head">
+            <div>
+              <h3>📈 Evolução {periodOn ? "no período" : "da temporada"}</h3>
+              <div className="sub">{EVO_INFO[evoMode].sub}</div>
+            </div>
+          </div>
+          <div className="chart-chips">
+            {(Object.keys(EVO_INFO) as EvoMode[]).map((k) => (
+              <button
+                key={k}
+                className={`f-chip ${evoMode === k ? "on" : ""}`}
+                onClick={() => setEvoMode(k)}
+              >
+                {EVO_INFO[k].chip}
+              </button>
+            ))}
+          </div>
+          <div className="chart-box">
+            <LineChart
+              series={[{
+                name: EVO_INFO[evoMode].chip,
+                color: "#1aa04a",
+                values: evo[evoMode],
+                fill: true,
+              }]}
+              tips={done.map((m, i) => ({
+                title: `${fmtDateShort(m.date)} · ${m.goals_for}×${m.goals_against} ${m.opponent}`,
+                lines: [
+                  evoMode === "saldo"
+                    ? `Saldo acumulado: ${evo.saldo[i] > 0 ? "+" : ""}${evo.saldo[i]}`
+                    : `${EVO_INFO[evoMode].chip}: ${pct(evo[evoMode][i])}`,
+                  `Jogo ${i + 1} de ${done.length}`,
+                ],
+              }))}
+              tickIdx={[...new Set([0, Math.round((done.length - 1) / 3), Math.round(((done.length - 1) * 2) / 3), done.length - 1])]}
+              tickLabel={(i) => fmtDateShort(done[i].date)}
+              yDomain={evoMode === "saldo" ? undefined : [0, 1]}
+              yFmt={(v) => evoMode === "saldo"
+                ? `${v > 0 ? "+" : ""}${Math.round(v)}`
+                : `${Math.round(v * 100)}%`}
+              zeroLine={evoMode === "saldo"}
+            />
+          </div>
+        </div>
+      )}
 
       <div className="highlight-row">
         {stats.artilheiro && (

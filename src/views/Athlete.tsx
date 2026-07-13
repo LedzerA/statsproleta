@@ -2,9 +2,10 @@ import { useMemo } from "react";
 import { useStore } from "../state/store";
 import { navigate } from "../lib/router";
 import { compute } from "../lib/stats";
-import { dec, fmtDate, pct, result, sortMatches } from "../lib/format";
+import { dec, fmtDate, fmtDateShort, pct, result, sortMatches } from "../lib/format";
 import { inPeriod, periodRange } from "../lib/period";
 import { ResultBadge } from "../components/ui";
+import { LineChart } from "../components/LineChart";
 
 export default function Athlete({ id }: { id: string }) {
   const { athletes, allMatches, squads, period, periodOn } = useStore();
@@ -32,6 +33,20 @@ export default function Athlete({ id }: { id: string }) {
     }
     return { p, played, position };
   }, [athlete, athletes, allMatches, period, id]);
+
+  const evo = useMemo(() => {
+    if (!data) return null;
+    const jogos = [...data.played].reverse(); // ordem cronológica
+    let g = 0, a = 0;
+    const gols: number[] = [], assist: number[] = [];
+    for (const m of jogos) {
+      g += (m.scorers || []).find((s) => s.a === id)?.g || 0;
+      a += (m.assists || []).find((s) => s.a === id)?.n || 0;
+      gols.push(g);
+      assist.push(a);
+    }
+    return { jogos, gols, assist };
+  }, [data, id]);
 
   if (!athlete || !data) {
     return (
@@ -87,6 +102,37 @@ export default function Athlete({ id }: { id: string }) {
             <div className="stat-num num">{p.jogos ? dec(p.ppj) : "–"}</div>
             <div className="stat-label">Part. por jogo</div>
             <div className="stat-sub">{p.jogos ? dec(p.gpj) : "–"} gol(s) por jogo</div>
+          </div>
+        </div>
+      )}
+
+      {p && p.part > 0 && evo && evo.jogos.length >= 2 && (
+        <div className="panel">
+          <div className="panel-head">
+            <div>
+              <h3>📈 Evolução do atleta</h3>
+              <div className="sub">gols e assistências acumulados, jogo a jogo{periodOn ? " (período filtrado)" : ""}</div>
+            </div>
+          </div>
+          <div className="chart-legend">
+            <span><span className="sw" style={{ background: "#1aa04a" }} />Gols</span>
+            <span><span className="sw" style={{ background: "#cf9d2b" }} />Assistências</span>
+          </div>
+          <div className="chart-box">
+            <LineChart
+              series={[
+                { name: "Gols", color: "#1aa04a", values: evo.gols },
+                { name: "Assist.", color: "#cf9d2b", values: evo.assist },
+              ]}
+              tips={evo.jogos.map((m, i) => ({
+                title: `${fmtDateShort(m.date)} · ${m.goals_for}×${m.goals_against} ${m.opponent}`,
+                lines: [`⚽ Gols: ${evo.gols[i]}`, `🅰️ Assistências: ${evo.assist[i]}`],
+              }))}
+              tickIdx={[...new Set([0, Math.round((evo.jogos.length - 1) / 3), Math.round(((evo.jogos.length - 1) * 2) / 3), evo.jogos.length - 1])]}
+              tickLabel={(i) => fmtDateShort(evo.jogos[i].date)}
+              yFmt={(v) => String(Math.round(v))}
+              endLabels
+            />
           </div>
         </div>
       )}
