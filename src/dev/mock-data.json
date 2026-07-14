@@ -27,13 +27,13 @@
  ],
  "athletes": [
   {
-   "id": "a21",
+   "id": "a16",
    "squad_id": "esporte",
-   "name": "Wez",
+   "name": "Belaz",
    "created_at": "2026-07-10T22:46:13.282876+00:00",
    "positions": [
-    "MC",
-    "MEI"
+    "ZG",
+    "LE"
    ]
   },
   {
@@ -427,14 +427,11 @@
    ]
   },
   {
-   "id": "a16",
+   "id": "a4",
    "squad_id": "esporte",
-   "name": "Belaz",
+   "name": "Vini França",
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "positions": [
-    "ZG",
-    "LE"
-   ]
+   "positions": []
   },
   {
    "id": "a19",
@@ -464,11 +461,38 @@
    ]
   },
   {
-   "id": "a4",
+   "id": "a25",
    "squad_id": "esporte",
-   "name": "Vini França",
+   "name": "Detona",
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "positions": []
+   "positions": [
+    "PD",
+    "SA",
+    "CA"
+   ]
+  },
+  {
+   "id": "a12",
+   "squad_id": "esporte",
+   "name": "Meloni",
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": [
+    "LD",
+    "PE",
+    "PD",
+    "SA",
+    "CA"
+   ]
+  },
+  {
+   "id": "a21",
+   "squad_id": "esporte",
+   "name": "Wez",
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": [
+    "MC",
+    "MEI"
+   ]
   },
   {
    "id": "a44",
@@ -546,34 +570,24 @@
    ]
   },
   {
-   "id": "a25",
-   "squad_id": "esporte",
-   "name": "Detona",
-   "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "positions": [
-    "PD",
-    "SA",
-    "CA"
-   ]
-  },
-  {
-   "id": "a12",
-   "squad_id": "esporte",
-   "name": "Meloni",
-   "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "positions": [
-    "LD",
-    "PE",
-    "PD",
-    "SA",
-    "CA"
-   ]
-  },
-  {
    "id": "amrk3l61f578",
    "squad_id": "diverso",
    "name": "Led",
    "created_at": "2026-07-14T03:34:42.826229+00:00",
+   "positions": []
+  },
+  {
+   "id": "amrkp4y1z5pl",
+   "squad_id": "diverso",
+   "name": "Rafinha",
+   "created_at": "2026-07-14T13:37:58.237596+00:00",
+   "positions": []
+  },
+  {
+   "id": "amrkp510b47c",
+   "squad_id": "diverso",
+   "name": "Macapá",
+   "created_at": "2026-07-14T13:38:01.890048+00:00",
    "positions": []
   }
  ],
@@ -701,7 +715,10 @@
      ],
      "formation": "4-4-2"
     }
-   }
+   },
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "m2",
@@ -844,7 +861,10 @@
      ],
      "formation": "4-4-2"
     }
-   }
+   },
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "m3",
@@ -916,7 +936,10 @@
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null
+   "tactics": null,
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "m4",
@@ -992,7 +1015,10 @@
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null
+   "tactics": null,
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "m5",
@@ -1056,7 +1082,10 @@
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null
+   "tactics": null,
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "m6",
@@ -1122,7 +1151,10 @@
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null
+   "tactics": null,
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "m7",
@@ -1192,7 +1224,10 @@
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null
+   "tactics": null,
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "m8",
@@ -1266,7 +1301,10 @@
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null
+   "tactics": null,
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "m9",
@@ -1329,7 +1367,10 @@
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null
+   "tactics": null,
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "m10",
@@ -1402,7 +1443,10 @@
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null
+   "tactics": null,
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "m11",
@@ -1457,7 +1501,10 @@
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null
+   "tactics": null,
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "m12",
@@ -1533,7 +1580,10 @@
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null
+   "tactics": null,
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "m13",
@@ -1608,7 +1658,10 @@
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null
+   "tactics": null,
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "m14",
@@ -1692,7 +1745,10 @@
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null
+   "tactics": null,
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "m15",
@@ -1791,7 +1847,10 @@
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null
+   "tactics": null,
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "m16",
@@ -1843,7 +1902,10 @@
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null
+   "tactics": null,
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "m17",
@@ -1898,7 +1960,10 @@
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null
+   "tactics": null,
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "m18",
@@ -1960,7 +2025,10 @@
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null
+   "tactics": null,
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "m20",
@@ -2037,7 +2105,10 @@
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null
+   "tactics": null,
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "m21",
@@ -2094,7 +2165,10 @@
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null
+   "tactics": null,
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "m22",
@@ -2166,7 +2240,10 @@
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null
+   "tactics": null,
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "m23",
@@ -2218,7 +2295,10 @@
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null
+   "tactics": null,
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "m24",
@@ -2272,7 +2352,10 @@
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null
+   "tactics": null,
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "m25",
@@ -2330,7 +2413,10 @@
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null
+   "tactics": null,
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "m26",
@@ -2397,7 +2483,10 @@
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null
+   "tactics": null,
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "m27",
@@ -2466,7 +2555,10 @@
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null
+   "tactics": null,
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "m28",
@@ -2531,7 +2623,10 @@
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null
+   "tactics": null,
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "mmrdsea473y4",
@@ -2600,7 +2695,10 @@
     "period": 2,
     "running": false
    },
-   "tactics": null
+   "tactics": null,
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "mmrfoxf3366a",
@@ -2694,7 +2792,10 @@
     "period": 2,
     "running": false
    },
-   "tactics": null
+   "tactics": null,
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "mmrjscgs73od",
@@ -2711,7 +2812,7 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-13T22:20:01.210397+00:00",
-   "updated_at": "2026-07-13T22:20:01.399+00:00",
+   "updated_at": "2026-07-14T13:37:38.441+00:00",
    "starters": [],
    "positions": {},
    "venue": "CDC Júlio Botelho",
@@ -2719,7 +2820,38 @@
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null
+   "tactics": null,
+   "meet_time": "20:30",
+   "ball_holder": null,
+   "kit_holder": null
+  },
+  {
+   "id": "mmrjsf87d34z",
+   "squad_id": "diverso",
+   "date": "2026-07-18",
+   "opponent": "Safari",
+   "status": "agendada",
+   "goals_for": 0,
+   "goals_against": 0,
+   "lineup": [],
+   "scorers": [],
+   "assists": [],
+   "lineup_complete": true,
+   "notes": "Time mesclado com o Veterano",
+   "started_at": null,
+   "created_at": "2026-07-13T22:22:09.998588+00:00",
+   "updated_at": "2026-07-14T13:23:19.404+00:00",
+   "starters": [],
+   "positions": {},
+   "venue": "Parque Municipal do Tatuapé (Sampaio Moreira)",
+   "kickoff": "07:00",
+   "kit": "Diverso",
+   "archived": false,
+   "clock": null,
+   "tactics": null,
+   "meet_time": "06:30",
+   "ball_holder": "Não sei",
+   "kit_holder": "Não sei"
   },
   {
    "id": "mmrjschd23nt",
@@ -2757,7 +2889,7 @@
    "notes": "Semifinal do TCA",
    "started_at": null,
    "created_at": "2026-07-13T22:20:01.885592+00:00",
-   "updated_at": "2026-07-14T03:27:19.677+00:00",
+   "updated_at": "2026-07-14T13:37:01.809+00:00",
    "starters": [
     "a13",
     "a22",
@@ -2799,7 +2931,7 @@
    "archived": false,
    "clock": null,
    "tactics": {
-    "com": {
+    "bp": {
      "slots": [
       "a13",
       "a22",
@@ -2842,6 +2974,65 @@
       [
        59.3,
        55.5
+      ],
+      [
+       10,
+       67.2
+      ],
+      [
+       89.4,
+       71.9
+      ],
+      [
+       54,
+       80.5
+      ]
+     ],
+     "formation": "4-3-3"
+    },
+    "com": {
+     "slots": [
+      "a13",
+      "a22",
+      "a5",
+      "a4",
+      "a16",
+      "a24",
+      "a7",
+      "a21",
+      "a11",
+      "a2",
+      "a8"
+     ],
+     "coords": [
+      null,
+      [
+       95.4,
+       28.7
+      ],
+      [
+       71,
+       15
+      ],
+      [
+       30.9,
+       14.9
+      ],
+      [
+       9.4,
+       27.9
+      ],
+      [
+       53.1,
+       31.3
+      ],
+      [
+       40.1,
+       45.9
+      ],
+      [
+       62.9,
+       58.1
       ],
       [
        10,
@@ -2916,33 +3107,12 @@
       ]
      ],
      "formation": "4-3-3"
-    }
-   }
-  },
-  {
-   "id": "mmrjsf87d34z",
-   "squad_id": "diverso",
-   "date": "2026-07-18",
-   "opponent": "Safari",
-   "status": "agendada",
-   "goals_for": 0,
-   "goals_against": 0,
-   "lineup": [],
-   "scorers": [],
-   "assists": [],
-   "lineup_complete": true,
-   "notes": "Time mesclado com o Veterano",
-   "started_at": null,
-   "created_at": "2026-07-13T22:22:09.998588+00:00",
-   "updated_at": "2026-07-13T22:22:10.249+00:00",
-   "starters": [],
-   "positions": {},
-   "venue": "Parque Municipal do Tatuapé (Sampaio Moreira)",
-   "kickoff": "06:30",
-   "kit": null,
-   "archived": false,
-   "clock": null,
-   "tactics": null
+    },
+    "cobradores": null
+   },
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "mmrjsci4x4r5",
@@ -2967,7 +3137,10 @@
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null
+   "tactics": null,
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "mmrjsciwolm",
@@ -2992,7 +3165,10 @@
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null
+   "tactics": null,
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "mmrjscjof44v",
@@ -3017,7 +3193,10 @@
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null
+   "tactics": null,
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "mmrjsckg34hj",
@@ -3042,7 +3221,10 @@
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null
+   "tactics": null,
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   },
   {
    "id": "mmrjscl7s132",
@@ -3067,7 +3249,10 @@
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null
+   "tactics": null,
+   "meet_time": null,
+   "ball_holder": null,
+   "kit_holder": null
   }
  ],
  "match_events": [
