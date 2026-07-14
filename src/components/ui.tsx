@@ -60,7 +60,7 @@ export function Stepper({ value, onChange }: { value: number; onChange: (v: numb
 export function Spinner() {
   return (
     <div className="boot">
-      <div className="ball-spin" />
+      <img className="boot-escudo" src="./escudo.png" alt="" />
       <p>Carregando…</p>
     </div>
   );

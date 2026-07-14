@@ -30,6 +30,51 @@ function roundedRect(
   ctx.closePath();
 }
 
+let escudoPromise: Promise<HTMLImageElement | null> | null = null;
+/** Escudo oficial (public/escudo.png), carregado uma vez e cacheado. */
+function loadEscudo(): Promise<HTMLImageElement | null> {
+  if (!escudoPromise) {
+    escudoPromise = new Promise((res) => {
+      const im = new Image();
+      im.onload = () => res(im);
+      im.onerror = () => res(null);
+      im.src = "./escudo.png";
+    });
+  }
+  return escudoPromise;
+}
+
+/** Cabeçalho das artes: o escudo oficial (que já traz o nome no banner) +
+    linha de contexto. Se o PNG não carregar, cai no monograma PA + nome. */
+async function drawHeader(ctx: CanvasRenderingContext2D, meta: string | null) {
+  const escudo = await loadEscudo();
+  if (escudo) {
+    const eh = 226, ew = eh * (escudo.width / escudo.height);
+    ctx.drawImage(escudo, (W - ew) / 2, 46, ew, eh);
+    if (meta) {
+      ctx.fillStyle = VERDE_300;
+      ctx.font = inter(600, 26);
+      ctx.fillText(meta.toUpperCase(), W / 2, 306);
+    }
+    return;
+  }
+  ctx.beginPath(); ctx.arc(W / 2, 148, 56, 0, Math.PI * 2);
+  ctx.fillStyle = CREME; ctx.fill();
+  ctx.lineWidth = 6; ctx.strokeStyle = "#0b4529"; ctx.beginPath();
+  ctx.arc(W / 2, 148, 47, 0, Math.PI * 2); ctx.stroke();
+  ctx.fillStyle = "#0b4529";
+  ctx.font = zilla(700, 44);
+  ctx.fillText("PA", W / 2, 151);
+  ctx.fillStyle = CREME_3;
+  ctx.font = zilla(700, 46);
+  ctx.fillText(TEAM.name.toUpperCase(), W / 2, 254);
+  if (meta) {
+    ctx.fillStyle = VERDE_300;
+    ctx.font = inter(600, 26);
+    ctx.fillText(meta.toUpperCase(), W / 2, 306);
+  }
+}
+
 function zilla(weight: number, px: number): string {
   return `${weight} ${px}px "Zilla Slab", Georgia, serif`;
 }
@@ -114,23 +159,7 @@ export async function renderResultArt(
   ctx.beginPath(); ctx.arc(W / 2, 660, 8, 0, Math.PI * 2);
   ctx.fillStyle = "rgba(242, 235, 214, .12)"; ctx.fill();
 
-  /* escudo */
-  ctx.beginPath(); ctx.arc(W / 2, 148, 56, 0, Math.PI * 2);
-  ctx.fillStyle = CREME; ctx.fill();
-  ctx.lineWidth = 6; ctx.strokeStyle = "#0b4529"; ctx.beginPath();
-  ctx.arc(W / 2, 148, 47, 0, Math.PI * 2); ctx.stroke();
-  ctx.fillStyle = "#0b4529";
-  ctx.font = zilla(700, 44);
-  ctx.fillText("PA", W / 2, 151);
-
-  /* cabeçalho */
-  ctx.fillStyle = CREME_3;
-  ctx.font = zilla(700, 46);
-  ctx.fillText(TEAM.name.toUpperCase(), W / 2, 254);
-  ctx.fillStyle = VERDE_300;
-  ctx.font = inter(600, 26);
-  const meta = [squadName, fmtDate(m.date)].filter(Boolean).join("  ·  ");
-  ctx.fillText(meta.toUpperCase(), W / 2, 300);
+  await drawHeader(ctx, [squadName, fmtDate(m.date)].filter(Boolean).join("  ·  ") || null);
 
   /* selo do resultado */
   const r = result(m);
@@ -241,23 +270,7 @@ export async function renderLineupArt(
   ctx.beginPath(); ctx.arc(W / 2, 620, 330, 0, Math.PI * 2); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(0, 620); ctx.lineTo(W, 620); ctx.stroke();
 
-  /* escudo + cabeçalho */
-  ctx.beginPath(); ctx.arc(W / 2, 148, 56, 0, Math.PI * 2);
-  ctx.fillStyle = CREME; ctx.fill();
-  ctx.lineWidth = 6; ctx.strokeStyle = "#0b4529"; ctx.beginPath();
-  ctx.arc(W / 2, 148, 47, 0, Math.PI * 2); ctx.stroke();
-  ctx.fillStyle = "#0b4529";
-  ctx.font = zilla(700, 44);
-  ctx.fillText("PA", W / 2, 151);
-
-  ctx.fillStyle = CREME_3;
-  ctx.font = zilla(700, 46);
-  ctx.fillText(TEAM.name.toUpperCase(), W / 2, 254);
-  if (squadName) {
-    ctx.fillStyle = VERDE_300;
-    ctx.font = inter(600, 26);
-    ctx.fillText(squadName.toUpperCase(), W / 2, 300);
-  }
+  await drawHeader(ctx, squadName);
 
   /* selo */
   ctx.font = inter(700, 30);
@@ -433,22 +446,7 @@ export async function renderTacticsArt(
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, W, H);
 
-  /* escudo + cabeçalho */
-  ctx.beginPath(); ctx.arc(W / 2, 148, 56, 0, Math.PI * 2);
-  ctx.fillStyle = CREME; ctx.fill();
-  ctx.lineWidth = 6; ctx.strokeStyle = "#0b4529"; ctx.beginPath();
-  ctx.arc(W / 2, 148, 47, 0, Math.PI * 2); ctx.stroke();
-  ctx.fillStyle = "#0b4529";
-  ctx.font = zilla(700, 44);
-  ctx.fillText("PA", W / 2, 151);
-
-  ctx.fillStyle = CREME_3;
-  ctx.font = zilla(700, 46);
-  ctx.fillText(TEAM.name.toUpperCase(), W / 2, 254);
-  ctx.fillStyle = VERDE_300;
-  ctx.font = inter(600, 26);
-  const meta = [squadName, fmtDate(m.date)].filter(Boolean).join("  ·  ");
-  ctx.fillText(meta.toUpperCase(), W / 2, 300);
+  await drawHeader(ctx, [squadName, fmtDate(m.date)].filter(Boolean).join("  ·  ") || null);
 
   /* selo da fase (bola parada não é uma formação — fica sem o nome) */
   const pa = PHASE_ART[phaseKey];
@@ -617,23 +615,7 @@ export async function renderWrappedArt(w: WrappedData): Promise<HTMLCanvasElemen
   ctx.lineWidth = 3;
   ctx.beginPath(); ctx.arc(W / 2, 560, 330, 0, Math.PI * 2); ctx.stroke();
 
-  /* escudo + cabeçalho */
-  ctx.beginPath(); ctx.arc(W / 2, 148, 56, 0, Math.PI * 2);
-  ctx.fillStyle = CREME; ctx.fill();
-  ctx.lineWidth = 6; ctx.strokeStyle = "#0b4529"; ctx.beginPath();
-  ctx.arc(W / 2, 148, 47, 0, Math.PI * 2); ctx.stroke();
-  ctx.fillStyle = "#0b4529";
-  ctx.font = zilla(700, 44);
-  ctx.fillText("PA", W / 2, 151);
-
-  ctx.fillStyle = CREME_3;
-  ctx.font = zilla(700, 46);
-  ctx.fillText(TEAM.name.toUpperCase(), W / 2, 254);
-  if (w.squadName) {
-    ctx.fillStyle = VERDE_300;
-    ctx.font = inter(600, 26);
-    ctx.fillText(w.squadName.toUpperCase(), W / 2, 300);
-  }
+  await drawHeader(ctx, w.squadName);
 
   /* selo do período */
   ctx.font = inter(700, 30);

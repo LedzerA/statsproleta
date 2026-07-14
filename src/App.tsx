@@ -61,7 +61,7 @@ export default function App() {
         <div className="wrap">
           <div className="hd">
             <button className="crest" onClick={() => navigate("#/")}>
-              <div className="mark">PA</div>
+              <img className="mark" src="./escudo.png" alt="Escudo do Proletariado Alviverde" />
               <div className="txt">
                 <h1>{TEAM.name}</h1>
                 <div className="sub">

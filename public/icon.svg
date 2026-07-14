@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="96" fill="#08351f"/>
-  <circle cx="256" cy="256" r="150" fill="none" stroke="#f2ebd6" stroke-width="26"/>
-  <circle cx="256" cy="256" r="56" fill="#f2ebd6"/>
-  <text x="256" y="278" text-anchor="middle" font-family="Georgia, serif" font-weight="bold" font-size="60" fill="#08351f">PA</text>
-</svg>

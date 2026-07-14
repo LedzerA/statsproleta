@@ -11,7 +11,7 @@ Football stats + live-match app for the amateur team "Proletariado Alviverde" (P
 - `npm run dev` — dev server (localhost:5173)
 - `npm run build` — typecheck (`tsc`, strict) + Vite build to `dist/`. There is no test suite or linter; a passing build is the verification bar.
 - `node scripts/gen-seed.mjs` — regenerate `supabase/seed.sql` from the legacy file
-- `node scripts/gen-icons.mjs` — regenerate PWA PNG icons (dependency-free PNG encoder)
+- PWA icons (`public/icon-*.png`) and `public/escudo.png` are derived from the official crest ("Proleta Escudo Novo.png": white bg removed, cropped, green padding on icons); `scripts/gen-icons.mjs` is a guard stub — do not regenerate over them
 - Deploy: push to `main` → `.github/workflows/deploy.yml` builds and publishes to GitHub Pages. Vite uses `base: "./"` so the app works at any path; never introduce absolute URLs for assets or the service worker.
 
 ## Data-model history (read before schema work)

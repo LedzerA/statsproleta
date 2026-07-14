@@ -30,12 +30,14 @@ code { background: rgba(0, 0, 0, .25); padding: 1px 5px; border-radius: 5px; fon
   min-height: 100dvh; display: flex; flex-direction: column; gap: 16px;
   align-items: center; justify-content: center; color: var(--verde-300); padding: 24px;
 }
-.ball-spin {
-  width: 42px; height: 42px; border-radius: 50%;
-  border: 3px solid var(--linha-forte); border-top-color: var(--verde-400);
-  animation: spin 1s linear infinite;
+.boot-escudo {
+  width: 96px; filter: drop-shadow(0 8px 24px rgba(0, 0, 0, .35));
+  animation: boot-pulse 1.6s ease-in-out infinite;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes boot-pulse {
+  0%, 100% { transform: scale(1); opacity: .85; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
 
 /* ---------- header ---------- */
 .app-header {
@@ -45,9 +47,12 @@ code { background: rgba(0, 0, 0, .25); padding: 1px 5px; border-radius: 5px; fon
 }
 .app-header::before {
   content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .5;
+  /* meio-tom do escudo + círculo central e linha do meio-campo */
   background:
+    radial-gradient(rgba(242, 235, 214, .07) 1.1px, transparent 1.7px),
     radial-gradient(circle at 50% 50%, transparent 46px, var(--linha) 46px, var(--linha) 47px, transparent 48px),
     linear-gradient(90deg, transparent calc(50% - .5px), var(--linha) calc(50% - .5px), var(--linha) calc(50% + .5px), transparent calc(50% + .5px));
+  background-size: 13px 13px, auto, auto;
 }
 .hd {
   position: relative; display: flex; align-items: center; justify-content: space-between;
@@ -55,10 +60,8 @@ code { background: rgba(0, 0, 0, .25); padding: 1px 5px; border-radius: 5px; fon
 }
 .crest { display: flex; align-items: center; gap: 12px; background: none; border: none; color: inherit; padding: 0; text-align: left; }
 .crest .mark {
-  width: 42px; height: 42px; border-radius: 50%;
-  background: var(--creme); color: var(--verde-800);
-  display: grid; place-items: center; font-family: 'Zilla Slab', serif; font-weight: 700; font-size: 19px;
-  box-shadow: inset 0 0 0 3px var(--verde-800), 0 0 0 2px var(--creme); flex-shrink: 0;
+  width: 46px; height: 52px; object-fit: contain; flex-shrink: 0;
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, .35));
 }
 .crest .txt h1 { font-size: 19px; line-height: 1.05; color: var(--creme-3); }
 .crest .txt .sub {
