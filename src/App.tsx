@@ -184,7 +184,7 @@ export default function App() {
           )}
           {route.view === "inicio" && <Home />}
           {route.view === "partidas" && <Matches openNew={route.nova} />}
-          {route.view === "partida" && <MatchDetail id={route.id} />}
+          {route.view === "partida" && <MatchDetail id={route.id} editar={route.editar} />}
           {route.view === "atletas" && <Athletes />}
           {route.view === "atleta" && <Athlete id={route.id} />}
           {route.view === "adversarios" && <Opponents />}

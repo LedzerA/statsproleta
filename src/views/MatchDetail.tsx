@@ -67,7 +67,7 @@ function LiveClock({ m }: { m: Match }) {
   );
 }
 
-export default function MatchDetail({ id }: { id: string }) {
+export default function MatchDetail({ id, editar }: { id: string; editar?: boolean }) {
   const {
     findMatch, roster, squads, athleteName, isAdmin, schemaLegacy,
     events, loadEvents, addEvent, updateEvent, deleteEvent, toggleClock, resetToScheduled,
@@ -85,6 +85,13 @@ export default function MatchDetail({ id }: { id: string }) {
 
   const m = findMatch(id);
   useEffect(() => { if (m) loadEvents(m.id); }, [id]);
+  // rota #/partida/:id/editar (lista de dados incompletos) abre o formulário direto
+  useEffect(() => {
+    if (editar && m && isAdmin) {
+      setEditing(true);
+      navigate(`#/partida/${id}`);
+    }
+  }, [editar, !!m, isAdmin, id]);
   const viewers = useLiveViewers(m?.id, !!m && isLive(m.status));
 
   const evList = m ? (events[m.id] || []) : [];

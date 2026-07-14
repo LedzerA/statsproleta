@@ -285,11 +285,11 @@ export default function More() {
               <>
                 <p>
                   <b>{pendentes.length}</b> partida{pendentes.length > 1 ? "s" : ""} de <b>{squad?.name}</b> com
-                  pendências — toque para abrir e editar.
+                  pendências — toque para abrir direto no formulário de edição.
                 </p>
                 <div className="pend-list">
                   {pendentes.map(({ m, flags }) => (
-                    <button key={m.id} className="pend-row" onClick={() => navigate(`#/partida/${m.id}`)}>
+                    <button key={m.id} className="pend-row" onClick={() => navigate(`#/partida/${m.id}/editar`)}>
                       <span className="pend-when num">{fmtDateShort(m.date)}</span>
                       <span className="pend-opp">vs {m.opponent}</span>
                       <span className="pend-flags">{flags.join(" · ")}</span>

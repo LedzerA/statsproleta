@@ -513,6 +513,15 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
           <button className="btn sm ghost" onClick={clearLineup}>Limpar</button>
         </div>
       </div>
+      {(() => {
+        const semSalvar = match ? (match.lineup || []).filter((id) => !match.positions?.[id]).length : 0;
+        return semSalvar > 0 ? (
+          <div className="warn show">
+            ⓘ {semSalvar} relacionado(s) ainda <b>sem posição salva</b> — as posições abaixo são
+            sugestões do histórico de cada atleta. Confira e toque em <b>Salvar alterações</b> para gravá-las.
+          </div>
+        ) : null;
+      })()}
       {grouped.map((g) => (
         <div key={g.label} className="pos-group">
           <div className="pg-label">{g.label}</div>
