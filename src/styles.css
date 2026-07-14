@@ -553,6 +553,7 @@ button.chip:hover { border-color: var(--verde-500); }
 .st-row:nth-child(even) { background: rgba(15, 32, 25, .03); }
 .st-row .nm { font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .st-row.slot { grid-template-columns: 42px 1fr; }
+.st-row.slot.tri { grid-template-columns: 42px 1fr 92px; }
 .st-row.bench { grid-template-columns: 1fr 28px; }
 .slot-pos { text-align: right; font-weight: 700; font-size: 12px; letter-spacing: .5px; color: #137a3c; }
 .slot-sel {

@@ -1,22 +1,26 @@
 import { monthsAgoISO } from "./period";
 
-/* Ordem convencional de escalação: goleiro → defesa (LD, ZG, LE) →
-   meio-campo (VOL, MC, MEI) → ataque (PE, PD, SA, CA).
+/* Ordem convencional de escalação: goleiro → defesa (lado direito → centro →
+   lado esquerdo: LD, ALD, ZD, ZC, ZG, ZE, ALE, LE) → meio-campo (VOL, MC,
+   MEI) → ataque (PE, PD, SA, CA).
    Posições são texto livre gravado por partida; variações comuns são
    normalizadas, desconhecidas vão para o fim (ordem alfabética de nome). */
 const RANK: Record<string, number> = {
   GOL: 0, GK: 0, GOLEIRO: 0,
-  LD: 10, ZG: 11, ZAG: 11, ZAGUEIRO: 11, LE: 12,
+  LD: 10, ALD: 11, ZD: 12, ZC: 13, ZG: 14, ZAG: 14, ZAGUEIRO: 14, ZE: 15, ALE: 16, LE: 17,
   VOL: 20, VOLANTE: 20, MC: 21, MEI: 22, MEIA: 22,
   PE: 30, PD: 31, SA: 32, CA: 33, ATA: 34, ATACANTE: 34,
 };
 
 /** Posições canônicas, na ordem convencional. */
-export const POSITIONS = ["GOL", "LD", "ZG", "LE", "VOL", "MC", "MEI", "PE", "PD", "SA", "CA"] as const;
+export const POSITIONS = [
+  "GOL", "LD", "ALD", "ZD", "ZC", "ZG", "ZE", "ALE", "LE",
+  "VOL", "MC", "MEI", "PE", "PD", "SA", "CA",
+] as const;
 
 export const POS_GROUPS: { label: string; positions: string[] }[] = [
   { label: "Goleiros", positions: ["GOL"] },
-  { label: "Defesa", positions: ["LD", "ZG", "LE"] },
+  { label: "Defesa", positions: ["LD", "ALD", "ZD", "ZC", "ZG", "ZE", "ALE", "LE"] },
   { label: "Meio-campo", positions: ["VOL", "MC", "MEI"] },
   { label: "Ataque", positions: ["PE", "PD", "SA", "CA"] },
 ];

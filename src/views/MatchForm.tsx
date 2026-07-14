@@ -25,6 +25,14 @@ interface FormTactics {
   bp: TacticsPhase;
 }
 
+/** Busca sem acento e sem caixa ("joao" encontra "João"). */
+function fold(s: string): string {
+  return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+}
+
+/** Quantos atletas aparecem como sugestão de relacionados — o resto via busca. */
+const SUGERIDOS = 20;
+
 const COBRANCAS: { k: keyof SetPieceTakers; label: string }[] = [
   { k: "penalti", label: "Pênalti" },
   { k: "falta", label: "Falta" },
@@ -109,6 +117,19 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
     return !!t && (t.com.formation !== t.sem.formation || t.com.slots.join() !== t.sem.slots.join());
   });
   const [bpManual, setBpManual] = useState<boolean>(() => !!match?.tactics?.bp);
+  // titulares cuja posição foi ajustada à mão (ex.: ZC numa vaga ZG) — para
+  // eles a posição salva NÃO é sobrescrita pelo rótulo da vaga
+  const [posManual, setPosManual] = useState<Set<string>>(() => {
+    const s = new Set<string>();
+    if (match?.tactics) {
+      const f = getFormation(match.tactics.com.formation);
+      match.tactics.com.slots.forEach((id, i) => {
+        const saved = id ? match.positions?.[id] : undefined;
+        if (id && saved && saved !== f.slots[i]?.pos) s.add(id);
+      });
+    }
+    return s;
+  });
   const [cobradores, setCobradores] = useState<SetPieceTakers>(() => ({ ...(match?.tactics?.cobradores || {}) }));
 
   const [scorers, setScorers] = useState<Record<string, number>>(
@@ -118,7 +139,7 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
     Object.fromEntries((match?.assists || []).map((x) => [x.a, x.n]))
   );
   const [complete, setComplete] = useState(match ? match.lineup_complete !== false : true);
-  const [newName, setNewName] = useState("");
+  const [busca, setBusca] = useState("");
 
   const gSum = useMemo(() => Object.values(scorers).reduce((a, b) => a + b, 0), [scorers]);
   const aSum = useMemo(() => Object.values(assists).reduce((a, b) => a + b, 0), [assists]);
@@ -151,7 +172,28 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
   );
   const slotOptions = phase === "com" ? comOptions : starters;
 
-  // elenco agrupado por posição principal do perfil, na ordem convencional
+  // sugestões: os últimos usados no elenco (quem nunca jogou fica por último);
+  // quem já está nesta partida aparece sempre — o resto do elenco, pela busca
+  const lastUsed = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const mt of squadMatches) {
+      for (const id of mt.lineup || []) {
+        if (!map[id] || mt.date > map[id]) map[id] = mt.date;
+      }
+    }
+    return map;
+  }, [squadMatches]);
+  const visiveis = useMemo(() => {
+    const q = fold(busca.trim());
+    if (q) return new Set(roster.filter((a) => fold(a.name).includes(q)).map((a) => a.id));
+    const recentes = roster.map((a) => a.id)
+      .sort((x, y) => (lastUsed[y] || "").localeCompare(lastUsed[x] || ""));
+    const set = new Set(recentes.slice(0, SUGERIDOS));
+    for (const id of lineup) set.add(id);
+    return set;
+  }, [busca, roster, lastUsed, lineup]);
+
+  // elenco visível agrupado por posição principal do perfil, na ordem convencional
   const grouped = useMemo(() => {
     const bucket = (a: { id: string }) => {
       const r = posRank(profilePos[a.id]?.[0]);
@@ -161,7 +203,7 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
       if (r < 40) return "Ataque";
       return "Sem posição definida";
     };
-    const sorted = [...roster].sort((a, b) =>
+    const sorted = roster.filter((a) => visiveis.has(a.id)).sort((a, b) =>
       posRank(profilePos[a.id]?.[0]) - posRank(profilePos[b.id]?.[0]) ||
       a.name.localeCompare(b.name, "pt"));
     const out: { label: string; athletes: typeof roster }[] = [];
@@ -170,7 +212,7 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
       if (list.length) out.push({ label: g, athletes: list });
     }
     return out;
-  }, [roster, profilePos]);
+  }, [roster, profilePos, visiveis]);
 
   const listed = useMemo(() => {
     const ids = new Set([...lineup, ...Object.keys(scorers), ...Object.keys(assists)]);
@@ -270,6 +312,17 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
     }
   }
 
+  /** Ajuste pontual da posição de um titular; escolher o rótulo da vaga
+      volta a herdar dele. */
+  function setStarterPos(id: string, slotPos: string, v: string) {
+    setPosManual((old) => {
+      const cp = new Set(old);
+      if (v && v !== slotPos) cp.add(id); else cp.delete(id);
+      return cp;
+    });
+    setPositions((old) => ({ ...old, [id]: v || slotPos }));
+  }
+
   function setPosition(id: string, v: string) {
     setPositions((old) => {
       const cp = { ...old };
@@ -292,8 +345,8 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
   }
 
   async function handleAddAthlete() {
-    const a = await addAthlete(newName);
-    if (a) { setLineup((old) => [...old, a.id]); setNewName(""); }
+    const a = await addAthlete(busca);
+    if (a) { setLineup((old) => [...old, a.id]); setBusca(""); }
   }
 
   async function save() {
@@ -319,7 +372,11 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
       const v = (positions[id] || "").trim();
       if (v) cleanPositions[id] = v;
     }
-    comSlots.forEach((id, i) => { if (id) cleanPositions[id] = comF.slots[i].pos; });
+    comSlots.forEach((id, i) => {
+      if (!id) return;
+      const manual = posManual.has(id) ? (positions[id] || "").trim() : "";
+      cleanPositions[id] = manual || comF.slots[i].pos;
+    });
     const rec: Match = {
       id: match?.id || uid("m"),
       squad_id: match?.squad_id || squadId,
@@ -457,7 +514,8 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
               const on = lineup.includes(a.id);
               const p = profilePos[a.id]?.[0];
               return (
-                <button key={a.id} className={`chip ${on ? "on" : ""}`} onClick={() => toggle(a.id)}>
+                <button key={a.id} className={`chip ${on ? "on" : ""}`}
+                  onClick={() => { toggle(a.id); if (busca) setBusca(""); }}>
                   {startersSet.has(a.id) && <span className="chip-ord num">★</span>}
                   {a.name}{p ? ` · ${p}` : ""}
                 </button>
@@ -466,12 +524,26 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
           </div>
         </div>
       ))}
+      {busca.trim() && grouped.length === 0 && (
+        <div className="ga-empty">Ninguém com esse nome no elenco — “Adicionar” cria um atleta novo.</div>
+      )}
+      {!busca.trim() && roster.length > visiveis.size && (
+        <div className="tot-line">
+          Sugestões: os {visiveis.size} usados mais recentemente · os outros {roster.length - visiveis.size} aparecem pela busca abaixo
+        </div>
+      )}
       <div className="add-athlete">
         <input
-          type="text" placeholder="+ Adicionar atleta ao elenco" autoComplete="off"
-          value={newName}
-          onChange={(e) => setNewName(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddAthlete(); } }}
+          type="text" placeholder="🔍 Buscar no elenco ou adicionar atleta" autoComplete="off"
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key !== "Enter") return;
+            e.preventDefault();
+            const first = busca.trim() ? grouped[0]?.athletes[0] : undefined;
+            if (first) { toggle(first.id); setBusca(""); }
+            else handleAddAthlete();
+          }}
         />
         <button className="btn sm" onClick={handleAddAthlete}>Adicionar</button>
       </div>
@@ -532,26 +604,46 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
             </div>
           )}
           <div className="st-list">
-            {activeF.slots.map((s, i) => (
-              <div className="st-row slot" key={`${active.formation}-${i}`}>
-                <span className="slot-pos num">{s.pos}</span>
-                <select
-                  className="slot-sel"
-                  value={active.slots[i] || ""}
-                  onChange={(e) => setSlot(phase, i, e.target.value)}
-                >
-                  <option value="">—</option>
-                  {slotOptions.map((id) => {
-                    const j = active.slots.indexOf(id);
-                    return (
-                      <option key={id} value={id}>
-                        {nameOf(id)}{j >= 0 && j !== i ? ` ⇄ ${activeF.slots[j].pos}` : ""}
-                      </option>
-                    );
-                  })}
-                </select>
-              </div>
-            ))}
+            {activeF.slots.map((s, i) => {
+              const occ = active.slots[i];
+              const editPos = phase === "com" && !!occ;
+              const cur = occ && posManual.has(occ) ? positions[occ] || s.pos : s.pos;
+              return (
+                <div className={`st-row slot ${editPos ? "tri" : ""}`} key={`${active.formation}-${i}`}>
+                  <span className="slot-pos num">{s.pos}</span>
+                  <select
+                    className="slot-sel"
+                    value={occ || ""}
+                    onChange={(e) => setSlot(phase, i, e.target.value)}
+                  >
+                    <option value="">—</option>
+                    {slotOptions.map((id) => {
+                      const j = active.slots.indexOf(id);
+                      return (
+                        <option key={id} value={id}>
+                          {nameOf(id)}{j >= 0 && j !== i ? ` ⇄ ${activeF.slots[j].pos}` : ""}
+                        </option>
+                      );
+                    })}
+                  </select>
+                  {editPos && (
+                    <select
+                      className="pos-sel"
+                      value={cur}
+                      onChange={(e) => setStarterPos(occ!, s.pos, e.target.value)}
+                      aria-label="Posição do titular"
+                    >
+                      {cur && !(POSITIONS as readonly string[]).includes(cur) && (
+                        <option value={cur}>{cur}</option>
+                      )}
+                      {POSITIONS.map((p) => (
+                        <option key={p} value={p}>{p === s.pos ? `${p} (vaga)` : p}</option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              );
+            })}
           </div>
           {phase === "bp" && (
             <>
@@ -604,8 +696,8 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
             </>
           )}
           <div className="tot-line">
-            Titular = vaga preenchida na formação com bola · a posição salva vem da vaga ·
-            sem bola usa os mesmos 11
+            Titular = vaga preenchida na formação com bola · a posição salva vem da vaga
+            (ajuste pontual no seletor à direita) · sem bola usa os mesmos 11
           </div>
         </>
       )}
