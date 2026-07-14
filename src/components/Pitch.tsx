@@ -10,12 +10,14 @@ import type { Formation } from "../lib/formations";
 const LINHA = "rgba(247, 242, 224, .5)";
 const W = 100, H = 140, M = 2;
 
-export function Pitch({ formation, slots, nameOf, coords, onMove }: {
+export function Pitch({ formation, slots, nameOf, coords, labels, onMove }: {
   formation: Formation;
   slots: (string | null)[];
   nameOf: (id: string) => string;
   /** ajuste fino por vaga ([x,y] em % do campo); null = padrão da formação */
   coords?: ([number, number] | null)[] | null;
+  /** rótulo de posição por vaga (ajuste pontual); null = rótulo da formação */
+  labels?: (string | null)[] | null;
   /** presente = arrastável; recebe a vaga e a nova coordenada em % do campo */
   onMove?: (slot: number, x: number, y: number) => void;
 }) {
@@ -106,6 +108,8 @@ export function Pitch({ formation, slots, nameOf, coords, onMove }: {
           );
         }
         const nome = nameOf(id).split(" ")[0];
+        // rótulo pontual da vaga; posição composta ("LE/ZG") mostra a primeira
+        const pos = (labels?.[i] || s.pos).split("/")[0].trim().toUpperCase();
         const ativo = dragIdx === i;
         return (
           <g
@@ -119,7 +123,7 @@ export function Pitch({ formation, slots, nameOf, coords, onMove }: {
               cx={cx} cy={cy} r={ativo ? 5.6 : 4.8}
               fill="#f7f2e0" stroke="#0f2019" strokeWidth={ativo ? 0.8 : 0.5}
             />
-            <text x={cx} y={cy + 1.1} textAnchor="middle" fontSize={3} fontWeight={700} fill="#14532d">{s.pos}</text>
+            <text x={cx} y={cy + 1.1} textAnchor="middle" fontSize={3} fontWeight={700} fill="#14532d">{pos}</text>
             <text x={cx} y={cy + (ativo ? 9.6 : 8.8)} textAnchor="middle" fontSize={3.8} fontWeight={600} fill="#f7f2e0">
               {nome.length > 10 ? nome.slice(0, 9) + "…" : nome}
             </text>

@@ -8,7 +8,7 @@ import MatchForm from "./MatchForm";
 import type { Match, Result } from "../lib/types";
 
 export default function Matches({ openNew }: { openNew?: boolean }) {
-  const { matches, squadMatches, periodOn, setPeriod, roster, isAdmin, deleteMatch } = useStore();
+  const { matches, squadMatches, periodOn, setPeriod, roster, isAdmin } = useStore();
   const [form, setForm] = useState<null | { match?: Match; schedule?: boolean }>(null);
   const [fRes, setFRes] = useState<Set<Result>>(new Set());
 
@@ -25,8 +25,9 @@ export default function Matches({ openNew }: { openNew?: boolean }) {
   const list = sortMatches(matches).reverse();
   const hasFilters = fRes.size > 0;
 
+  // próximas primeiro: agendadas em ordem cronológica (o resto da lista é decrescente)
   const upcoming = useMemo(
-    () => list.filter((m) => m.status === "agendada"),
+    () => list.filter((m) => m.status === "agendada").reverse(),
     [list]
   );
   const played = useMemo(
@@ -174,16 +175,6 @@ export default function Matches({ openNew }: { openNew?: boolean }) {
         {isAdmin && (
           <div className="mc-actions" onClick={(e) => e.stopPropagation()}>
             <button className="btn sm ghost" onClick={() => setForm({ match: m })}>Editar</button>
-            <button
-              className="btn sm danger"
-              onClick={() => {
-                if (confirm(`Excluir a partida contra ${m.opponent} (${fmtDate(m.date)})?\n\nEssa ação não pode ser desfeita.`)) {
-                  deleteMatch(m.id);
-                }
-              }}
-            >
-              Excluir
-            </button>
             {scheduled && <button className="btn sm primary" onClick={open}>Abrir / iniciar ao vivo →</button>}
           </div>
         )}

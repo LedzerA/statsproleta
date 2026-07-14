@@ -216,8 +216,10 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
 
   const listed = useMemo(() => {
     const ids = new Set([...lineup, ...Object.keys(scorers), ...Object.keys(assists)]);
-    return roster.filter((a) => ids.has(a.id));
-  }, [roster, lineup, scorers, assists]);
+    return roster.filter((a) => ids.has(a.id)).sort((a, b) =>
+      posRank(positions[a.id] || suggested[a.id]) - posRank(positions[b.id] || suggested[b.id]) ||
+      a.name.localeCompare(b.name, "pt"));
+  }, [roster, lineup, scorers, assists, positions, suggested]);
 
   /* mantém sem bola e bola parada coerentes após mudanças na com bola */
   function syncFrom(com: TacticsPhase): FormTactics {
@@ -584,7 +586,14 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
               {FORMATIONS.map((f) => <option key={f.name} value={f.name}>{f.name}</option>)}
             </select>
           </div>
-          <Pitch formation={activeF} slots={active.slots} coords={active.coords} nameOf={nameOf} onMove={moveSlot} />
+          <Pitch
+            formation={activeF}
+            slots={active.slots}
+            coords={active.coords}
+            labels={active.slots.map((id) => (id && posManual.has(id) ? positions[id] || null : null))}
+            nameOf={nameOf}
+            onMove={moveSlot}
+          />
           <div className="pitch-hint">
             Arraste os jogadores no campinho para ajustar o posicionamento — formação e posição não mudam.
             {active.coords?.some(Boolean) && (
@@ -609,8 +618,25 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
               const editPos = phase === "com" && !!occ;
               const cur = occ && posManual.has(occ) ? positions[occ] || s.pos : s.pos;
               return (
-                <div className={`st-row slot ${editPos ? "tri" : ""}`} key={`${active.formation}-${i}`}>
-                  <span className="slot-pos num">{s.pos}</span>
+                <div className="st-row slot" key={`${active.formation}-${i}`}>
+                  {editPos ? (
+                    <select
+                      className="slot-pos-sel num"
+                      value={cur}
+                      onChange={(e) => setStarterPos(occ!, s.pos, e.target.value)}
+                      aria-label="Posição do titular na partida"
+                      title="Ajusta a posição salva deste titular (a vaga da formação não muda)"
+                    >
+                      {cur && !(POSITIONS as readonly string[]).includes(cur) && (
+                        <option value={cur}>{cur}</option>
+                      )}
+                      {POSITIONS.map((p) => (
+                        <option key={p} value={p}>{p}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <span className="slot-pos num">{s.pos}</span>
+                  )}
                   <select
                     className="slot-sel"
                     value={occ || ""}
@@ -626,21 +652,6 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
                       );
                     })}
                   </select>
-                  {editPos && (
-                    <select
-                      className="pos-sel"
-                      value={cur}
-                      onChange={(e) => setStarterPos(occ!, s.pos, e.target.value)}
-                      aria-label="Posição do titular"
-                    >
-                      {cur && !(POSITIONS as readonly string[]).includes(cur) && (
-                        <option value={cur}>{cur}</option>
-                      )}
-                      {POSITIONS.map((p) => (
-                        <option key={p} value={p}>{p === s.pos ? `${p} (vaga)` : p}</option>
-                      ))}
-                    </select>
-                  )}
                 </div>
               );
             })}
@@ -696,8 +707,8 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
             </>
           )}
           <div className="tot-line">
-            Titular = vaga preenchida na formação com bola · a posição salva vem da vaga
-            (ajuste pontual no seletor à direita) · sem bola usa os mesmos 11
+            Titular = vaga preenchida na formação com bola · toque no rótulo verde da vaga
+            para ajustar a posição de um titular · sem bola usa os mesmos 11
           </div>
         </>
       )}

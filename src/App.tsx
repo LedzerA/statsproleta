@@ -65,7 +65,7 @@ export default function App() {
               <div className="txt">
                 <h1>{TEAM.name}</h1>
                 <div className="sub">
-                  {TEAM.short}{squad ? ` · ${squad.name}` : ""} · Sequência: {streak}
+                  {TEAM.short}{squad ? ` · ${squad.name}` : ""}<span className="seq"> · Sequência: {streak}</span>
                 </div>
               </div>
             </button>

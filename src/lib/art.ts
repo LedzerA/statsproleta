@@ -206,11 +206,12 @@ export async function renderResultArt(
   return canvas;
 }
 
-/** Arte de convocação do próximo jogo: data, horário, local, uniforme,
-    titulares (na ordem convencional das posições) e banco. */
+/** Arte de convocação do próximo jogo: só as informações do jogo — data,
+    horário, local, apresentação, uniforme (e com quem está) e bolas.
+    A escalação fica nas artes do campinho (com/sem bola). */
 export async function renderLineupArt(
   m: Match,
-  nameOf: (id: string) => string,
+  _nameOf: (id: string) => string,
   squadName: string | null
 ): Promise<HTMLCanvasElement> {
   try {
@@ -282,83 +283,43 @@ export async function renderLineupArt(
   ctx.font = zilla(500, 56);
   ctx.fillText("×", W / 2, 494);
 
-  /* data, hora, local, uniforme */
-  let y = 578;
-  const info = (txt: string) => {
-    ctx.fillStyle = CREME;
-    ctx.font = inter(600, 30);
-    ctx.fillText(txt, W / 2, y);
-    y += 48;
-  };
-  info(`📅 ${fmtDate(m.date)}${m.kickoff ? `   ·   🕒 ${m.kickoff}` : ""}`);
-  if (m.venue) info(`📍 ${m.venue}`);
-  if (m.kit) info(`👕 ${m.kit}`);
-  y += 26;
-
-  /* escalação */
-  const starters = sortLineup(m.starters || [], m.positions, nameOf);
-  const bench = sortLineup(
-    (m.lineup || []).filter((id) => !(m.starters || []).includes(id)),
-    m.positions, nameOf
-  );
-
-  const label = (txt: string) => {
-    ctx.fillStyle = VERDE_300;
-    ctx.font = inter(700, 25);
-    ctx.fillText(txt, W / 2, y);
-    y += 50;
-  };
-
-  if (starters.length > 0) {
-    label(`★  TITULARES (${starters.length})`);
-    const shown = starters.slice(0, 12);
-    const rows = Math.ceil(shown.length / 2);
-    const rowH = 46;
-    const x1 = 150, x2 = W / 2 + 60;
-    ctx.textAlign = "left";
-    shown.forEach((id, i) => {
-      const col = i < rows ? x1 : x2;
-      const yy = y + (i % rows) * rowH;
-      // posição composta ("LE/ZG") mostra só a primeira — cartaz limpo
-      const p = (m.positions?.[id] || "").split("/")[0].trim().toUpperCase();
-      if (p) {
-        ctx.fillStyle = VERDE_300;
-        ctx.font = inter(700, 21);
-        ctx.fillText(p, col, yy);
-      }
-      ctx.fillStyle = CREME;
-      ctx.font = zilla(600, 33);
-      let name = nameOf(id);
-      const maxW = W / 2 - 210;
-      while (ctx.measureText(name).width > maxW && name.length > 3) name = name.slice(0, -2) + "…";
-      ctx.fillText(name, col + 78, yy);
+  /* informações do jogo em blocos grandes (rótulo verde + valor creme) */
+  const blocks: { label: string; value: string }[] = [
+    {
+      label: "DATA · HORÁRIO",
+      value: `${fmtDate(m.date)}${m.kickoff ? `  ·  ${m.kickoff}` : ""}`,
+    },
+  ];
+  if (m.venue) blocks.push({ label: "📍 LOCAL", value: m.venue });
+  if (m.meet_time) blocks.push({ label: "🕒 APRESENTAÇÃO", value: m.meet_time });
+  if (m.kit || m.kit_holder) {
+    blocks.push({
+      label: "👕 UNIFORME",
+      value: m.kit_holder ? `${m.kit ? `${m.kit} · ` : ""}com ${m.kit_holder}` : m.kit!,
     });
-    ctx.textAlign = "center";
-    y += rows * rowH + 26;
-
-    if (bench.length > 0) {
-      label(`BANCO (${bench.length})`);
-      ctx.fillStyle = "rgba(242, 235, 214, .85)";
-      ctx.font = zilla(600, 29);
-      for (const line of wrapText(ctx, bench.map(nameOf).join(", "), 900, 3)) {
-        ctx.fillText(line, W / 2, y);
-        y += 42;
-      }
-    }
-  } else if ((m.lineup || []).length > 0) {
-    label(`RELACIONADOS (${m.lineup.length})`);
-    ctx.fillStyle = CREME;
-    ctx.font = zilla(600, 31);
-    const nomes = sortLineup(m.lineup, m.positions, nameOf).map(nameOf).join(", ");
-    for (const line of wrapText(ctx, nomes, 900, 5)) {
-      ctx.fillText(line, W / 2, y);
-      y += 46;
-    }
-  } else {
-    ctx.fillStyle = "rgba(242, 235, 214, .6)";
-    ctx.font = inter(600, 27);
-    ctx.fillText("Escalação a definir — bora, Proleta! 💪", W / 2, y + 20);
   }
+  if (m.ball_holder) blocks.push({ label: "⚽ BOLAS", value: `com ${m.ball_holder}` });
+
+  let y = blocks.length >= 5 ? 588 : blocks.length === 4 ? 606 : 645;
+  const step = blocks.length >= 5 ? 116 : blocks.length === 4 ? 132 : 152;
+  for (const b of blocks) {
+    ctx.fillStyle = VERDE_300;
+    ctx.font = inter(700, 24);
+    ctx.fillText(b.label, W / 2, y);
+    ctx.fillStyle = CREME_3;
+    ctx.font = zilla(600, 44);
+    const lines = wrapText(ctx, b.value, 920, 2);
+    let yy = y + 48;
+    for (const line of lines) {
+      ctx.fillText(line, W / 2, yy);
+      yy += 50;
+    }
+    y += step + (lines.length - 1) * 44;
+  }
+
+  ctx.fillStyle = "rgba(242, 235, 214, .65)";
+  ctx.font = inter(600, 26);
+  ctx.fillText("Bora, Proleta! 💪", W / 2, Math.max(y + 10, 1200));
 
   /* rodapé */
   ctx.fillStyle = "rgba(95, 212, 143, .8)";
@@ -443,9 +404,9 @@ export async function renderTacticsArt(
   ctx.font = zilla(600, vs);
   ctx.fillText(versus, W / 2, 460);
 
-  /* campo */
-  const fh = 720, fw = 540;
-  const fx = (W - fw) / 2, fy = 510;
+  /* campo (deixa espaço embaixo para banco / cobradores) */
+  const fh = 640, fw = 520;
+  const fx = (W - fw) / 2, fy = 505;
   roundedRect(ctx, fx, fy, fw, fh, 20);
   ctx.fillStyle = "#1c5e34";
   ctx.fill();
@@ -493,7 +454,9 @@ export async function renderTacticsArt(
     ctx.lineWidth = 3; ctx.strokeStyle = "#0f2019"; ctx.stroke();
     ctx.fillStyle = "#14532d";
     ctx.font = inter(700, 18);
-    ctx.fillText(s.pos, cx, cy + 1);
+    // posição ajustada pontualmente vale mais que o rótulo da vaga
+    const lbl = (m.positions?.[id] || s.pos).split("/")[0].trim().toUpperCase() || s.pos;
+    ctx.fillText(lbl, cx, cy + 1);
     let nome = nameOf(id).split(" ")[0];
     ctx.font = zilla(600, 28);
     while (ctx.measureText(nome).width > 150 && nome.length > 3) nome = nome.slice(0, -2) + "…";
@@ -505,6 +468,46 @@ export async function renderTacticsArt(
     ctx.fillText(nome, cx, cy + 52);
     ctx.restore();
   });
+
+  /* embaixo do campo: banco (com/sem bola) ou cobradores (bola parada) */
+  if (phaseKey !== "bp") {
+    const bench = sortLineup(
+      (m.lineup || []).filter((id) => !(m.starters || []).includes(id)),
+      m.positions, nameOf
+    );
+    if (bench.length > 0) {
+      ctx.fillStyle = VERDE_300;
+      ctx.font = inter(700, 22);
+      ctx.fillText(`BANCO (${bench.length})`, W / 2, 1178);
+      ctx.fillStyle = CREME;
+      ctx.font = zilla(600, 27);
+      let by = 1212;
+      for (const line of wrapText(ctx, bench.map(nameOf).join(", "), 940, 2)) {
+        ctx.fillText(line, W / 2, by);
+        by += 36;
+      }
+    }
+  } else if (m.tactics?.cobradores) {
+    const cb = m.tactics.cobradores;
+    const partes = [
+      cb.penalti && `🥅 Pênalti: ${nameOf(cb.penalti).split(" ")[0]}`,
+      cb.falta && `🎯 Falta: ${nameOf(cb.falta).split(" ")[0]}`,
+      cb.escanteio_e && `⛳ Esc. esq.: ${nameOf(cb.escanteio_e).split(" ")[0]}`,
+      cb.escanteio_d && `⛳ Esc. dir.: ${nameOf(cb.escanteio_d).split(" ")[0]}`,
+    ].filter(Boolean) as string[];
+    if (partes.length > 0) {
+      ctx.fillStyle = VERDE_300;
+      ctx.font = inter(700, 22);
+      ctx.fillText("COBRADORES", W / 2, 1178);
+      ctx.fillStyle = CREME;
+      ctx.font = zilla(600, 27);
+      let by = 1212;
+      for (const line of wrapText(ctx, partes.join("   ·   "), 940, 2)) {
+        ctx.fillText(line, W / 2, by);
+        by += 36;
+      }
+    }
+  }
 
   /* rodapé */
   ctx.fillStyle = "rgba(95, 212, 143, .8)";

@@ -80,6 +80,7 @@ export default function MatchDetail({ id }: { id: string }) {
   const [busy, setBusy] = useState(false);
   const [art, setArt] = useState<{ label: string; url: string; file: string }[] | null>(null);
   const [artBusy, setArtBusy] = useState(false);
+  const [waBusy, setWaBusy] = useState(false);
   const [tacPhase, setTacPhase] = useState<"com" | "sem" | "bp">("com");
 
   const m = findMatch(id);
@@ -207,24 +208,29 @@ export default function MatchDetail({ id }: { id: string }) {
     downloadArt(item);
   }
 
-  /** Compartilha a arte com a legenda da convocação (apresentação, bolas,
-      uniforme). Sem suporte a arquivos no menu de compartilhar (desktop),
-      baixa o PNG e abre o WhatsApp com a legenda pronta para colar. */
-  async function shareWhatsApp(item: { label: string; url: string; file: string }) {
-    if (!m) return;
+  /** Compartilha TODAS as artes de uma vez com a legenda da convocação
+      (apresentação, bolas, uniforme). Sem suporte a arquivos no menu de
+      compartilhar (desktop), baixa os PNGs e abre o WhatsApp com a legenda. */
+  async function shareWhatsAppAll() {
+    if (!m || !art || waBusy) return;
+    setWaBusy(true);
     const caption = convocacaoCaption(m);
     try {
-      const blob = await (await fetch(item.url)).blob();
-      const file = new File([blob], item.file, { type: "image/png" });
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], text: caption });
-        return;
+      try {
+        const files = await Promise.all(art.map(async (item) => {
+          const blob = await (await fetch(item.url)).blob();
+          return new File([blob], item.file, { type: "image/png" });
+        }));
+        if (navigator.canShare && navigator.canShare({ files })) {
+          await navigator.share({ files, text: caption });
+          return;
+        }
+      } catch (e) {
+        if ((e as any)?.name === "AbortError") return; // usuário desistiu no menu
       }
-    } catch (e) {
-      if ((e as any)?.name === "AbortError") return; // usuário desistiu no menu
-    }
-    downloadArt(item);
-    window.open(`https://wa.me/?text=${encodeURIComponent(caption)}`, "_blank");
+      art.forEach(downloadArt);
+      window.open(`https://wa.me/?text=${encodeURIComponent(caption)}`, "_blank");
+    } finally { setWaBusy(false); }
   }
 
   const infoBits = [
@@ -269,13 +275,18 @@ export default function MatchDetail({ id }: { id: string }) {
       </div>
 
       {(m.status === "encerrada" || m.status === "agendada") && (
-        <button className="btn ghost-light block" style={{ marginBottom: 14 }} disabled={artBusy} onClick={makeArt}>
-          {artBusy
-            ? "Gerando artes…"
-            : m.status === "agendada"
-              ? m.tactics ? "🖼️ Gerar artes da convocação" : "🖼️ Gerar arte da convocação"
-              : "🖼️ Gerar arte do resultado"}
-        </button>
+        <div className="row-gap" style={{ marginBottom: 14 }}>
+          <button className="btn ghost-light block" style={{ flex: 2 }} disabled={artBusy} onClick={makeArt}>
+            {artBusy
+              ? "Gerando artes…"
+              : m.status === "agendada"
+                ? m.tactics ? "🖼️ Gerar artes da convocação" : "🖼️ Gerar arte da convocação"
+                : "🖼️ Gerar arte do resultado"}
+          </button>
+          {isAdmin && m.status === "encerrada" && (
+            <button className="btn ghost-light" style={{ flex: 1 }} onClick={() => setEditing(true)}>✎ Editar</button>
+          )}
+        </div>
       )}
 
       {isAdmin && m.status === "agendada" && (
@@ -407,6 +418,7 @@ export default function MatchDetail({ id }: { id: string }) {
                   formation={getFormation(tacCur.formation)}
                   slots={tacCur.slots}
                   coords={tacCur.coords}
+                  labels={tacCur.slots.map((id) => (id && m.positions?.[id]) || null)}
                   nameOf={athleteName}
                 />
                 {cobradores && (
@@ -445,7 +457,6 @@ export default function MatchDetail({ id }: { id: string }) {
 
       {isAdmin && m.status === "encerrada" && (
         <div className="row-gap" style={{ marginTop: 8, flexWrap: "wrap" }}>
-          <button className="btn ghost-light block" onClick={() => setEditing(true)}>Editar partida</button>
           {!schemaLegacy && (
             <button className="btn ghost-light block" onClick={() => {
               upsertMatch({ ...m, archived: !m.archived });
@@ -492,7 +503,14 @@ export default function MatchDetail({ id }: { id: string }) {
             : "🖼️ Arte do resultado"}
           onClose={() => setArt(null)}
           footer={
-            <button className="btn ghost" style={{ flex: 1 }} onClick={() => setArt(null)}>Fechar</button>
+            <>
+              <button className="btn ghost" style={{ flex: 1 }} onClick={() => setArt(null)}>Fechar</button>
+              {artKind === "convocacao" && (
+                <button className="btn wa" style={{ flex: 2 }} disabled={waBusy} onClick={shareWhatsAppAll}>
+                  {waBusy ? "Preparando…" : art.length > 1 ? `WhatsApp · ${art.length} artes + legenda` : "WhatsApp · arte + legenda"}
+                </button>
+              )}
+            </>
           }
         >
           {art.map((item) => (
@@ -501,18 +519,13 @@ export default function MatchDetail({ id }: { id: string }) {
               <img src={item.url} alt={item.label} style={{ width: "100%", borderRadius: 10, display: "block" }} />
               <div className="row-gap" style={{ margin: "8px 0 16px" }}>
                 <button className="btn ghost" style={{ flex: 1 }} onClick={() => downloadArt(item)}>↓ Baixar</button>
-                {artKind === "convocacao" && (
-                  <button className="btn wa" style={{ flex: 1.4 }} onClick={() => shareWhatsApp(item)}>WhatsApp</button>
-                )}
-                <button className="btn primary" style={{ flex: artKind === "convocacao" ? 1.4 : 2 }} onClick={() => shareArt(item)}>
-                  Compartilhar
-                </button>
+                <button className="btn primary" style={{ flex: 2 }} onClick={() => shareArt(item)}>Compartilhar</button>
               </div>
             </div>
           ))}
           <p className="muted" style={{ fontSize: 13, marginTop: 2 }}>
             {artKind === "convocacao"
-              ? "O botão WhatsApp envia a arte já com a legenda: apresentação, bolas e uniforme. No computador, ele baixa o PNG e abre o WhatsApp com a legenda pronta para colar."
+              ? "O botão verde envia todas as artes de uma vez no WhatsApp, com a legenda pronta (apresentação, bolas e uniforme). No computador, ele baixa os PNGs e abre o WhatsApp com a legenda para colar."
               : "No celular, “Compartilhar” abre direto o WhatsApp / Instagram. Se o aparelho não suportar, o botão baixa o PNG."}
           </p>
         </Modal>

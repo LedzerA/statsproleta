@@ -150,6 +150,12 @@ code { background: rgba(0, 0, 0, .25); padding: 1px 5px; border-radius: 5px; fon
   .topnav { display: none; }
   .bottomnav { display: flex; }
   body { padding-bottom: 66px; }
+  /* linhas de chips viram trilhos horizontais — o header fica baixo */
+  .squad-row, .period-row {
+    flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none;
+  }
+  .squad-row::-webkit-scrollbar, .period-row::-webkit-scrollbar { display: none; }
+  .squad-chip, .p-chip, .period-lb, .period-note { flex-shrink: 0; white-space: nowrap; }
 }
 
 /* ---------- conteúdo ---------- */
@@ -552,8 +558,15 @@ button.chip:hover { border-color: var(--verde-500); }
 .st-row { display: grid; grid-template-columns: 40px 1fr 28px 28px 28px; gap: 6px; align-items: center; padding: 3px 6px; border-radius: 8px; }
 .st-row:nth-child(even) { background: rgba(15, 32, 25, .03); }
 .st-row .nm { font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.st-row.slot { grid-template-columns: 42px 1fr; }
-.st-row.slot.tri { grid-template-columns: 42px 1fr 92px; }
+.st-row.slot { grid-template-columns: 48px 1fr; }
+/* rótulo da vaga editável (ajuste pontual de posição do titular) */
+.slot-pos-sel {
+  appearance: none; -webkit-appearance: none;
+  background: none; border: none; border-bottom: 1px dashed rgba(19, 122, 60, .6); border-radius: 0;
+  color: #137a3c; font-weight: 700; font-size: 12px; letter-spacing: .5px;
+  text-align: right; text-align-last: right; padding: 0 0 2px; width: 100%; cursor: pointer;
+}
+.slot-pos-sel:focus { outline: none; border-bottom: 1px solid var(--verde-500); }
 .st-row.bench { grid-template-columns: 1fr 28px; }
 .slot-pos { text-align: right; font-weight: 700; font-size: 12px; letter-spacing: .5px; color: #137a3c; }
 .slot-sel {
@@ -606,10 +619,20 @@ button.chip:hover { border-color: var(--verde-500); }
 @media (max-width: 720px) { .toast { bottom: 80px; } }
 
 @media (max-width: 560px) {
-  .hd { padding-top: 12px; }
-  .scoreboard { width: 100%; justify-content: space-between; gap: 12px; }
-  .aprov .n { font-size: 32px; }
-  .kpi { padding: 6px 8px; min-width: 42px; }
+  /* header compacto: uma linha só de placar (kpis + aproveitamento);
+     a forma recente segue no subtítulo ("Sequência: …") */
+  .hd { padding: 10px 16px 8px; }
+  .scoreboard { width: 100%; justify-content: space-between; gap: 6px; flex-wrap: nowrap; }
+  .kpis { flex-wrap: nowrap; gap: 4px; }
+  .kpi { padding: 4px 5px; min-width: 34px; }
+  .kpi .n { font-size: 15px; }
+  .kpi .l { font-size: 8px; letter-spacing: 1px; margin-top: 2px; }
+  .form-dots { display: none; }
+  .aprov { flex-shrink: 0; }
+  .aprov .n { font-size: 24px; }
+  .aprov .l { font-size: 8px; letter-spacing: 1px; margin-top: 2px; }
+  .squad-row { padding-bottom: 10px; }
+  .period-row { padding-bottom: 10px; }
 }
 
 /* ---------- comparativo ---------- */
@@ -804,5 +827,12 @@ button.chip:hover { border-color: var(--verde-500); }
 .ord-btn:hover:not(:disabled) { background: rgba(15, 32, 25, .06); color: var(--carvao); }
 .ord-btn:disabled { opacity: .3; cursor: default; }
 .ord-btn.rm { color: #a83f30; border-color: rgba(168, 63, 48, .35); }
+
+/* chips do gráfico em trilho horizontal no mobile (fica após a regra base) */
+@media (max-width: 720px) {
+  .chart-chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .chart-chips::-webkit-scrollbar { display: none; }
+  .chart-chips .f-chip { flex-shrink: 0; white-space: nowrap; }
+}
 
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
