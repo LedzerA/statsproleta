@@ -4,6 +4,7 @@ import { navigate } from "../lib/router";
 import { TEAM } from "../config";
 import { dec, fmtDate, fmtDateShort, pct, pts as ptsOf, result, sortMatches } from "../lib/format";
 import { PERIOD_ALL, periodLabel } from "../lib/period";
+import { bestStreaks, hatTricks } from "../lib/records";
 import { EmptyState, ResultBadge } from "../components/ui";
 import { LineChart } from "../components/LineChart";
 
@@ -15,9 +16,15 @@ const EVO_INFO: Record<EvoMode, { chip: string; sub: string }> = {
 };
 
 export default function Home() {
-  const { stats, matches, squadMatches, period, periodOn, setPeriod, isAdmin } = useStore();
+  const { stats, matches, squadMatches, period, periodOn, setPeriod, isAdmin, athleteName } = useStore();
   const t = stats.team;
   const [evoMode, setEvoMode] = useState<EvoMode>("aprov");
+
+  // recordes são da história completa do elenco (ignoram o período)
+  const recordes = useMemo(
+    () => ({ ...bestStreaks(squadMatches), hats: hatTricks(squadMatches) }),
+    [squadMatches]
+  );
 
   const done = useMemo(
     () => sortMatches(matches).filter((m) => m.status === "encerrada" && !m.archived),
@@ -225,6 +232,51 @@ export default function Home() {
               <div className="stat-sub">vs {pd.m.opponent} · {fmtDate(pd.m.date)} →</div>
             </button>
           )}
+        </div>
+      )}
+
+      {(recordes.vitorias || recordes.invicto || recordes.hats.length > 0) && (
+        <div className="panel">
+          <div className="panel-head">
+            <div>
+              <h3>📜 Recordes do elenco</h3>
+              <div className="sub">história completa — não segue o filtro de período</div>
+            </div>
+          </div>
+          <div className="rec-list">
+            {recordes.vitorias && (
+              <div className="rec-row">
+                <span className="rec-ic">🏆</span>
+                <div>
+                  <div className="rec-t">Maior série de vitórias</div>
+                  <div className="rec-s">{fmtDateShort(recordes.vitorias.from)} — {fmtDateShort(recordes.vitorias.to)}</div>
+                </div>
+                <div className="rec-v num">{recordes.vitorias.n}<span className="rec-u"> jogos</span></div>
+              </div>
+            )}
+            {recordes.invicto && (
+              <div className="rec-row">
+                <span className="rec-ic">🛡️</span>
+                <div>
+                  <div className="rec-t">Maior invencibilidade</div>
+                  <div className="rec-s">{fmtDateShort(recordes.invicto.from)} — {fmtDateShort(recordes.invicto.to)}</div>
+                </div>
+                <div className="rec-v num">{recordes.invicto.n}<span className="rec-u"> jogos</span></div>
+              </div>
+            )}
+            {recordes.hats.length > 0 && (
+              <div className="rec-row">
+                <span className="rec-ic">🎩</span>
+                <div>
+                  <div className="rec-t">Hat-tricks</div>
+                  <div className="rec-s">
+                    último: {athleteName(recordes.hats[0].athleteId)} ({recordes.hats[0].gols} gols) vs {recordes.hats[0].m.opponent}
+                  </div>
+                </div>
+                <div className="rec-v num">{recordes.hats.length}</div>
+              </div>
+            )}
+          </div>
         </div>
       )}
 

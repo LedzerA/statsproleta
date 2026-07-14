@@ -7,7 +7,7 @@ import {
   FORMATIONS, getFormation, autoSlots, bestFreeSlot, inferFormation, remapPhase, reconcileSem,
 } from "../lib/formations";
 import { Pitch } from "../components/Pitch";
-import type { Match, Tactics, TacticsPhase } from "../lib/types";
+import type { Match, SetPieceTakers, TacticsPhase } from "../lib/types";
 
 interface Props {
   match?: Match | null;       // editar existente
@@ -15,7 +15,22 @@ interface Props {
   onClose: () => void;
 }
 
-type PhaseKey = "com" | "sem";
+type PhaseKey = "com" | "sem" | "bp";
+
+/* no formulário a fase bola parada sempre existe (espelhando a com bola);
+   ela só é SALVA quando o admin personaliza vagas, pontos ou formação */
+interface FormTactics {
+  com: TacticsPhase;
+  sem: TacticsPhase;
+  bp: TacticsPhase;
+}
+
+const COBRANCAS: { k: keyof SetPieceTakers; label: string }[] = [
+  { k: "penalti", label: "Pênalti" },
+  { k: "falta", label: "Falta" },
+  { k: "escanteio_e", label: "Esc. esq." },
+  { k: "escanteio_d", label: "Esc. dir." },
+];
 
 export default function MatchForm({ match, schedule, onClose }: Props) {
   const { roster, squadMatches, squadId, schemaLegacy, schemaTactics, upsertMatch, addAthlete, toast } = useStore();
@@ -57,7 +72,7 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
   });
   // tática com/sem bola; partida antiga (sem tática salva) entra com a
   // formação inferida dos titulares e das posições já registradas
-  const [tactics, setTactics] = useState<Tactics>(() => {
+  const [tactics, setTactics] = useState<FormTactics>(() => {
     if (match?.tactics) {
       const inLineup = new Set(match.lineup || []);
       const fit = (p: TacticsPhase): TacticsPhase => {
@@ -71,22 +86,27 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
           coords: p.coords ? f.slots.map((_, i) => p.coords![i] || null) : null,
         };
       };
-      return { com: fit(match.tactics.com), sem: fit(match.tactics.sem) };
+      const com = fit(match.tactics.com);
+      return {
+        com,
+        sem: fit(match.tactics.sem),
+        bp: match.tactics.bp ? fit(match.tactics.bp) : remapPhase(com, com.formation),
+      };
     }
     const st = (match?.starters || []).map((id) => ({ id, pos: match?.positions?.[id] || suggested[id] }));
     const f = inferFormation(st.map((x) => x.pos));
     const slots = autoSlots(f, st);
-    return {
-      com: { formation: f.name, slots, coords: null },
-      sem: { formation: f.name, slots: [...slots], coords: null },
-    };
+    const espelho = (): TacticsPhase => ({ formation: f.name, slots: [...slots], coords: null });
+    return { com: { formation: f.name, slots, coords: null }, sem: espelho(), bp: espelho() };
   });
   const [phase, setPhase] = useState<PhaseKey>("com");
-  // a fase sem bola espelha a com bola até o usuário mexer nela de propósito
+  // sem bola e bola parada espelham a com bola até o usuário mexer nelas
   const [semManual, setSemManual] = useState<boolean>(() => {
     const t = match?.tactics;
     return !!t && (t.com.formation !== t.sem.formation || t.com.slots.join() !== t.sem.slots.join());
   });
+  const [bpManual, setBpManual] = useState<boolean>(() => !!match?.tactics?.bp);
+  const [cobradores, setCobradores] = useState<SetPieceTakers>(() => ({ ...(match?.tactics?.cobradores || {}) }));
 
   const [scorers, setScorers] = useState<Record<string, number>>(
     Object.fromEntries((match?.scorers || []).map((x) => [x.a, x.g]))
@@ -154,16 +174,31 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
     return roster.filter((a) => ids.has(a.id));
   }, [roster, lineup, scorers, assists]);
 
-  /* mantém a fase sem bola coerente depois de qualquer mudança na com bola */
-  function withSem(com: TacticsPhase): Tactics {
-    return { com, sem: semManual ? reconcileSem(tactics.sem, com) : remapPhase(com, tactics.sem.formation) };
+  /* mantém sem bola e bola parada coerentes após mudanças na com bola */
+  function syncFrom(com: TacticsPhase): FormTactics {
+    return {
+      com,
+      sem: semManual ? reconcileSem(tactics.sem, com) : remapPhase(com, tactics.sem.formation),
+      bp: bpManual ? reconcileSem(tactics.bp, com) : remapPhase(com, tactics.bp.formation),
+    };
+  }
+
+  function patchPhase(ph: PhaseKey, next: TacticsPhase): FormTactics {
+    return ph === "com" ? { ...tactics, com: next }
+      : ph === "sem" ? { ...tactics, sem: next }
+      : { ...tactics, bp: next };
+  }
+
+  function markManual(ph: PhaseKey) {
+    if (ph === "sem") setSemManual(true);
+    else if (ph === "bp") setBpManual(true);
   }
 
   function toggle(id: string) {
     if (lineup.includes(id)) {
       setLineup((old) => old.filter((x) => x !== id));
       const com = { ...tactics.com, slots: tactics.com.slots.map((x) => (x === id ? null : x)) };
-      setTactics(withSem(com));
+      setTactics(syncFrom(com));
       return;
     }
     setLineup((old) => [...old, id]);
@@ -175,7 +210,7 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
       if (i >= 0) {
         const slots = [...tactics.com.slots];
         slots[i] = id;
-        setTactics(withSem({ ...tactics.com, slots }));
+        setTactics(syncFrom({ ...tactics.com, slots }));
       }
     }
   }
@@ -185,8 +220,11 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
     setTactics((t) => ({
       com: { ...t.com, slots: t.com.slots.map(() => null), coords: null },
       sem: { ...t.sem, slots: t.sem.slots.map(() => null), coords: null },
+      bp: { ...t.bp, slots: t.bp.slots.map(() => null), coords: null },
     }));
     setSemManual(false);
+    setBpManual(false);
+    setCobradores({});
   }
 
   /** Arrasto no campinho: só muda o ponto da vaga na fase ativa. */
@@ -196,23 +234,20 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
       ? [...base.coords]
       : getFormation(base.formation).slots.map(() => null as [number, number] | null);
     coords[i] = [x, y];
-    if (phase === "com") setTactics({ ...tactics, com: { ...base, coords } });
-    else { setSemManual(true); setTactics({ ...tactics, sem: { ...base, coords } }); }
+    markManual(phase);
+    setTactics(patchPhase(phase, { ...base, coords }));
   }
 
   function resetCoords() {
-    const base = tactics[phase];
-    setTactics(phase === "com"
-      ? { ...tactics, com: { ...base, coords: null } }
-      : { ...tactics, sem: { ...base, coords: null } });
+    setTactics(patchPhase(phase, { ...tactics[phase], coords: null }));
   }
 
   function setFormation(ph: PhaseKey, name: string) {
     if (ph === "com") {
-      setTactics(withSem(remapPhase(tactics.com, name)));
+      setTactics(syncFrom(remapPhase(tactics.com, name)));
     } else {
-      setSemManual(true);
-      setTactics({ ...tactics, sem: remapPhase(tactics.sem, name) });
+      markManual(ph);
+      setTactics(patchPhase(ph, remapPhase(tactics[ph], name)));
     }
   }
 
@@ -225,10 +260,10 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
     if (dup >= 0) slots[dup] = prev; // já estava em outra vaga → troca
     slots[idx] = id;
     if (ph === "com") {
-      setTactics(withSem({ ...base, slots }));
+      setTactics(syncFrom({ ...base, slots }));
     } else {
-      setSemManual(true);
-      setTactics({ ...tactics, sem: { ...base, slots } });
+      markManual(ph);
+      setTactics(patchPhase(ph, { ...base, slots }));
     }
   }
 
@@ -262,11 +297,19 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
     if (!opponent.trim()) { toast("Informe o adversário"); return; }
     const comF = getFormation(tactics.com.formation);
     const semF = getFormation(tactics.sem.formation);
+    const bpF = getFormation(tactics.bp.formation);
     const comSlots = tactics.com.slots.map((id) => (id && lineup.includes(id) ? id : null));
     const st = comSlots.filter((x): x is string => !!x);
     const semSlots = tactics.sem.slots.map((id) => (id && st.includes(id) ? id : null));
+    const bpSlots = tactics.bp.slots.map((id) => (id && st.includes(id) ? id : null));
     const fitCoords = (p: TacticsPhase, f: ReturnType<typeof getFormation>) =>
       p.coords && p.coords.some(Boolean) ? f.slots.map((_, i) => p.coords![i] || null) : null;
+    const cb: SetPieceTakers = {};
+    for (const { k } of COBRANCAS) {
+      const v = cobradores[k];
+      if (v && lineup.includes(v)) cb[k] = v;
+    }
+    const salvaBp = bpManual || !!tactics.bp.coords?.some(Boolean);
     // posição por relacionado; titular herda o rótulo da vaga (com bola)
     const cleanPositions: Record<string, string> = {};
     for (const id of lineup) {
@@ -299,6 +342,8 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
         ? {
             com: { formation: comF.name, slots: comSlots, coords: fitCoords(tactics.com, comF) },
             sem: { formation: semF.name, slots: semSlots, coords: fitCoords(tactics.sem, semF) },
+            bp: salvaBp ? { formation: bpF.name, slots: bpSlots, coords: fitCoords(tactics.bp, bpF) } : null,
+            cobradores: Object.keys(cb).length ? cb : null,
           }
         : null,
     };
@@ -429,6 +474,9 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
             <button type="button" className={`chip ${phase === "sem" ? "on" : ""}`} onClick={() => setPhase("sem")}>
               🛡️ Sem bola
             </button>
+            <button type="button" className={`chip ${phase === "bp" ? "on" : ""}`} onClick={() => setPhase("bp")}>
+              🎯 Bola parada
+            </button>
             <select
               className="pos-sel formation-sel"
               value={active.formation}
@@ -450,6 +498,12 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
           </div>
           {phase === "sem" && !semManual && (
             <div className="tot-line">Sem bola está espelhando a com bola — mexa nas vagas para personalizar.</div>
+          )}
+          {phase === "bp" && !bpManual && (
+            <div className="tot-line">
+              Bola parada está espelhando a com bola — arraste os jogadores (ex.: todo mundo na área
+              para o escanteio) ou troque vagas para personalizar e salvar.
+            </div>
           )}
           <div className="st-list">
             {activeF.slots.map((s, i) => (
@@ -473,6 +527,28 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
               </div>
             ))}
           </div>
+          {phase === "bp" && (
+            <>
+              <div className="subhead">
+                <div className="t">Cobradores <span className="muted" style={{ fontWeight: 400, fontSize: 12 }}>· aparecem na página da partida</span></div>
+              </div>
+              <div className="st-list">
+                {COBRANCAS.map(({ k, label }) => (
+                  <div className="st-row cob" key={k}>
+                    <span className="slot-pos">{label}</span>
+                    <select
+                      className="slot-sel"
+                      value={cobradores[k] || ""}
+                      onChange={(e) => setCobradores((c) => ({ ...c, [k]: e.target.value || null }))}
+                    >
+                      <option value="">—</option>
+                      {comOptions.map((id) => <option key={id} value={id}>{nameOf(id)}</option>)}
+                    </select>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
           {bench.length > 0 && (
             <>
               <div className="subhead">

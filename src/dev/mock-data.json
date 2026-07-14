@@ -27,11 +27,14 @@
  ],
  "athletes": [
   {
-   "id": "a4",
+   "id": "a21",
    "squad_id": "esporte",
-   "name": "Vini França",
+   "name": "Wez",
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "positions": []
+   "positions": [
+    "MC",
+    "MEI"
+   ]
   },
   {
    "id": "a5",
@@ -461,6 +464,13 @@
    ]
   },
   {
+   "id": "a4",
+   "squad_id": "esporte",
+   "name": "Vini França",
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
+  },
+  {
    "id": "a44",
    "squad_id": "esporte",
    "name": "Bruninho",
@@ -560,14 +570,11 @@
    ]
   },
   {
-   "id": "a21",
-   "squad_id": "esporte",
-   "name": "Wez",
-   "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "positions": [
-    "MC",
-    "MEI"
-   ]
+   "id": "amrk3l61f578",
+   "squad_id": "diverso",
+   "name": "Led",
+   "created_at": "2026-07-14T03:34:42.826229+00:00",
+   "positions": []
   }
  ],
  "matches": [
@@ -608,27 +615,93 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-14T03:31:49.392+00:00",
    "starters": [
     "a13",
-    "a6",
     "a20",
     "a28",
-    "a29",
     "a5",
-    "a24",
-    "a10",
-    "a12",
+    "a29",
+    "a6",
     "a3",
-    "a11"
+    "a24",
+    "a11",
+    "a12",
+    "a10"
    ],
-   "positions": {},
+   "positions": {
+    "a3": "VOL",
+    "a5": "ZG",
+    "a6": "LE",
+    "a7": "MEI",
+    "a9": "MEI",
+    "a10": "CA",
+    "a11": "PE",
+    "a12": "PD",
+    "a13": "GOL",
+    "a18": "ZG",
+    "a20": "ZG",
+    "a24": "MC",
+    "a28": "ZG",
+    "a29": "LD",
+    "a30": "SA"
+   },
    "venue": null,
    "kickoff": null,
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null
+   "tactics": {
+    "com": {
+     "slots": [
+      "a13",
+      "a20",
+      "a28",
+      "a5",
+      "a29",
+      "a6",
+      "a3",
+      "a24",
+      "a11",
+      "a12",
+      "a10"
+     ],
+     "coords": null,
+     "formation": "3-4-3"
+    },
+    "sem": {
+     "slots": [
+      "a13",
+      "a29",
+      "a20",
+      "a28",
+      "a6",
+      "a24",
+      "a5",
+      "a11",
+      "a12",
+      "a10",
+      "a3"
+     ],
+     "coords": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      [
+       44.2,
+       72.2
+      ],
+      null
+     ],
+     "formation": "4-4-2"
+    }
+   }
   },
   {
    "id": "m2",
@@ -684,19 +757,19 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-14T00:32:07.05+00:00",
+   "updated_at": "2026-07-14T03:32:23.049+00:00",
    "starters": [
-    "a3",
+    "a14",
     "a20",
     "a18",
+    "a4",
+    "a3",
     "a6",
     "a1",
     "a10",
-    "a14",
-    "a2",
     "a11",
-    "a8",
-    "a4"
+    "a2",
+    "a8"
    ],
    "positions": {
     "a1": "VOL",
@@ -721,7 +794,57 @@
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null
+   "tactics": {
+    "com": {
+     "slots": [
+      "a14",
+      "a20",
+      "a18",
+      "a4",
+      "a3",
+      "a6",
+      "a1",
+      "a10",
+      "a11",
+      "a2",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "3-4-3"
+    },
+    "sem": {
+     "slots": [
+      "a14",
+      "a3",
+      "a20",
+      "a18",
+      "a6",
+      "a1",
+      "a4",
+      "a11",
+      "a2",
+      "a10",
+      "a8"
+     ],
+     "coords": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      [
+       43.9,
+       73.2
+      ],
+      null
+     ],
+     "formation": "4-4-2"
+    }
+   }
   },
   {
    "id": "m3",
@@ -2617,12 +2740,10 @@
     "a8",
     "a10",
     "a11",
-    "a12",
     "a13",
     "a15",
     "a16",
     "a18",
-    "a19",
     "a20",
     "a21",
     "a22",
@@ -2636,7 +2757,7 @@
    "notes": "Semifinal do TCA",
    "started_at": null,
    "created_at": "2026-07-13T22:20:01.885592+00:00",
-   "updated_at": "2026-07-14T01:48:47.2+00:00",
+   "updated_at": "2026-07-14T03:27:19.677+00:00",
    "starters": [
     "a13",
     "a22",
@@ -2661,12 +2782,10 @@
     "a8": "CA",
     "a10": "MC",
     "a11": "PE",
-    "a12": "PD",
     "a13": "GOL",
     "a15": "ZG",
     "a16": "LE",
     "a18": "ZG",
-    "a19": "MC",
     "a20": "LD",
     "a21": "MEI",
     "a22": "LD",
@@ -2694,6 +2813,49 @@
       "a2",
       "a8"
      ],
+     "coords": [
+      null,
+      [
+       95.4,
+       28.7
+      ],
+      [
+       71,
+       15
+      ],
+      [
+       30.9,
+       14.9
+      ],
+      [
+       9.4,
+       27.9
+      ],
+      [
+       53.1,
+       31.3
+      ],
+      [
+       34,
+       48
+      ],
+      [
+       59.3,
+       55.5
+      ],
+      [
+       10,
+       67.2
+      ],
+      [
+       89.4,
+       71.9
+      ],
+      [
+       54,
+       80.5
+      ]
+     ],
      "formation": "4-3-3"
     },
     "sem": {
@@ -2709,6 +2871,49 @@
       "a11",
       "a2",
       "a8"
+     ],
+     "coords": [
+      null,
+      [
+       95.4,
+       28.7
+      ],
+      [
+       71,
+       15
+      ],
+      [
+       30.9,
+       14.9
+      ],
+      [
+       9.4,
+       27.9
+      ],
+      [
+       53.1,
+       31.3
+      ],
+      [
+       34,
+       48
+      ],
+      [
+       59.3,
+       55.5
+      ],
+      [
+       10,
+       67.2
+      ],
+      [
+       89.4,
+       71.9
+      ],
+      [
+       54,
+       80.5
+      ]
      ],
      "formation": "4-3-3"
     }

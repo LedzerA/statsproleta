@@ -129,6 +129,45 @@ export default function Athletes() {
         </div>
       </div>
 
+      {stats.goalkeepers.length > 0 && (
+        <div className="panel">
+          <div className="panel-head">
+            <div>
+              <h3>🧤 Goleiros</h3>
+              <div className="sub">derivado da posição GOL registrada em cada partida{periodOn ? " · período filtrado" : ""}</div>
+            </div>
+          </div>
+          <div className="table-wrap">
+            <table className="stats">
+              <thead>
+                <tr>
+                  <th>Goleiro</th>
+                  <th title="Jogos no gol">J</th>
+                  <th title="Gols sofridos">GS</th>
+                  <th title="Gols sofridos por jogo">Média</th>
+                  <th title="Jogos sem levar gol">Sem sofrer</th>
+                  <th>V</th><th>E</th><th>D</th>
+                </tr>
+              </thead>
+              <tbody>
+                {stats.goalkeepers.map((g, i) => (
+                  <tr key={g.id} className="row-link" onClick={() => navigate(`#/atleta/${g.id}`)}>
+                    <td className="name"><span className="rk">{i + 1}</span>{g.name}</td>
+                    <td className="cell-num">{g.jogos}</td>
+                    <td className="cell-num">{g.sofridos}</td>
+                    <td className="cell-num">{dec(g.media)}</td>
+                    <td className={g.semSofrer ? "cell-num" : "cell-num muted"}>{g.semSofrer}</td>
+                    <td className="cell-num">{g.v}</td>
+                    <td className="cell-num">{g.e}</td>
+                    <td className="cell-num">{g.d}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       {isAdmin && (
         <div className="add-athlete" style={{ marginBottom: 18 }}>
           <input

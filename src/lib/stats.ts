@@ -1,4 +1,5 @@
 import type { Athlete, Match, Result } from "./types";
+import { canonPos } from "./formations";
 import { result, pts, sortMatches } from "./format";
 
 export interface PlayerStats {
@@ -48,14 +49,61 @@ export interface TeamStats {
   piorDerrota: { m: Match; diff: number } | null;
 }
 
+export interface GkStats {
+  id: string;
+  name: string;
+  jogos: number; // partidas como goleiro
+  sofridos: number;
+  media: number; // gols sofridos por jogo
+  semSofrer: number; // jogos sem levar gol
+  v: number;
+  e: number;
+  d: number;
+}
+
 export interface SquadStats {
   team: TeamStats;
   players: PlayerStats[];
   opponents: OpponentStats[];
+  goalkeepers: GkStats[];
   artilheiro: PlayerStats | null;
   garcom: PlayerStats | null;
   partialLineups: number;
   totalJogadores: number;
+}
+
+/** Goleiro(s) da partida: titulares com posição GOL; sem titulares
+    registrados, cai para os relacionados com posição GOL. */
+export function matchGoalkeepers(m: Match): string[] {
+  const pos = m.positions || {};
+  const isGk = (id: string) => canonPos(pos[id]) === "GOL";
+  const titulares = (m.starters || []).filter(isGk);
+  if ((m.starters || []).length) return titulares;
+  return (m.lineup || []).filter(isGk);
+}
+
+/** Estatísticas de goleiro derivadas das posições salvas por partida. */
+export function computeGk(roster: Athlete[], allMatches: Match[]): GkStats[] {
+  const done = allMatches.filter((m) => m.status === "encerrada" && !m.archived);
+  const nomes = new Map(roster.map((a) => [a.id, a.name]));
+  const map = new Map<string, GkStats>();
+  for (const m of done) {
+    for (const id of matchGoalkeepers(m)) {
+      if (!nomes.has(id)) continue;
+      const g = map.get(id) || {
+        id, name: nomes.get(id)!, jogos: 0, sofridos: 0, media: 0, semSofrer: 0, v: 0, e: 0, d: 0,
+      };
+      g.jogos++;
+      g.sofridos += m.goals_against;
+      if (m.goals_against === 0) g.semSofrer++;
+      const r = result(m);
+      if (r === "V") g.v++; else if (r === "E") g.e++; else g.d++;
+      map.set(id, g);
+    }
+  }
+  return [...map.values()]
+    .map((g) => ({ ...g, media: g.jogos ? g.sofridos / g.jogos : 0 }))
+    .sort((a, b) => b.jogos - a.jogos || a.media - b.media);
 }
 
 /** Estatísticas do elenco a partir das partidas ENCERRADAS (não arquivadas). */
@@ -133,6 +181,7 @@ export function compute(roster: Athlete[], allMatches: Match[]): SquadStats {
 
   return {
     team, players, opponents, artilheiro, garcom, partialLineups,
+    goalkeepers: computeGk(roster, matches),
     totalJogadores: players.filter((p) => p.jogos > 0 || p.gols > 0 || p.assist > 0).length,
   };
 }

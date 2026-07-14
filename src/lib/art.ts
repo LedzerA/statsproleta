@@ -1,5 +1,5 @@
 import { TEAM } from "../config";
-import { fmtDate, resWord, result } from "./format";
+import { fmtDate, pct, resWord, result } from "./format";
 import { getFormation } from "./formations";
 import { sortLineup } from "./positions";
 import type { Match, TacticsPhase } from "./types";
@@ -504,6 +504,117 @@ export async function renderTacticsArt(
   ctx.font = inter(600, 23);
   const site = `${location.host}${location.pathname}`.replace(/\/$/, "");
   ctx.fillText(`📊  acompanhe ao vivo:  ${site}`, W / 2, 1290);
+
+  return canvas;
+}
+
+export interface WrappedData {
+  squadName: string | null;
+  periodo: string; // ex.: "1º SEMESTRE DE 2026"
+  J: number; V: number; E: number; D: number;
+  GP: number; GC: number;
+  aprov: number; // 0..1
+  artilheiro: { name: string; n: number } | null;
+  garcom: { name: string; n: number } | null;
+  goleiro: { name: string; semSofrer: number; jogos: number } | null;
+  goleada: { placar: string; opp: string } | null;
+  invicto: number | null; // maior sequência sem perder no recorte
+  hats: number;
+}
+
+/** Retrospectiva do semestre (1080×1350): números do time + destaques. */
+export async function renderWrappedArt(w: WrappedData): Promise<HTMLCanvasElement> {
+  try {
+    await Promise.all([
+      document.fonts.load(zilla(700, 150), "0"),
+      document.fonts.load(zilla(600, 37), "A"),
+      document.fonts.load(inter(700, 30), "A"),
+      document.fonts.load(inter(600, 26), "A"),
+    ]);
+  } catch { /* segue com a fonte substituta */ }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext("2d")!;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+
+  const bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, "#0b4529");
+  bg.addColorStop(1, "#062a1c");
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.strokeStyle = "rgba(242, 235, 214, .07)";
+  ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(W / 2, 560, 330, 0, Math.PI * 2); ctx.stroke();
+
+  /* escudo + cabeçalho */
+  ctx.beginPath(); ctx.arc(W / 2, 148, 56, 0, Math.PI * 2);
+  ctx.fillStyle = CREME; ctx.fill();
+  ctx.lineWidth = 6; ctx.strokeStyle = "#0b4529"; ctx.beginPath();
+  ctx.arc(W / 2, 148, 47, 0, Math.PI * 2); ctx.stroke();
+  ctx.fillStyle = "#0b4529";
+  ctx.font = zilla(700, 44);
+  ctx.fillText("PA", W / 2, 151);
+
+  ctx.fillStyle = CREME_3;
+  ctx.font = zilla(700, 46);
+  ctx.fillText(TEAM.name.toUpperCase(), W / 2, 254);
+  if (w.squadName) {
+    ctx.fillStyle = VERDE_300;
+    ctx.font = inter(600, 26);
+    ctx.fillText(w.squadName.toUpperCase(), W / 2, 300);
+  }
+
+  /* selo do período */
+  ctx.font = inter(700, 30);
+  const word = `RETROSPECTIVA  ·  ${w.periodo}`;
+  const pw = ctx.measureText(word).width + 76;
+  ctx.fillStyle = "#e6b94b";
+  roundedRect(ctx, (W - pw) / 2, 344, pw, 62, 31);
+  ctx.fill();
+  ctx.fillStyle = "#3d2f05";
+  ctx.fillText(word, W / 2, 377);
+
+  /* aproveitamento gigante */
+  ctx.fillStyle = CREME_3;
+  ctx.font = zilla(700, 150);
+  ctx.fillText(pct(w.aprov), W / 2, 540);
+  ctx.fillStyle = VERDE_300;
+  ctx.font = inter(700, 24);
+  ctx.fillText("APROVEITAMENTO", W / 2, 632);
+
+  ctx.fillStyle = CREME;
+  ctx.font = inter(600, 30);
+  ctx.fillText(`${w.J} jogos   ·   ${w.V}V  ${w.E}E  ${w.D}D`, W / 2, 700);
+  ctx.fillText(`${w.GP} gols feitos   ×   ${w.GC} sofridos`, W / 2, 748);
+
+  /* destaques */
+  const rows: string[] = [];
+  if (w.artilheiro) rows.push(`⚽  Artilheiro:  ${w.artilheiro.name} (${w.artilheiro.n} gols)`);
+  if (w.garcom) rows.push(`🅰️  Garçom:  ${w.garcom.name} (${w.garcom.n} assistências)`);
+  if (w.goleiro) rows.push(`🧤  Paredão:  ${w.goleiro.name} (${w.goleiro.semSofrer} jogo${w.goleiro.semSofrer !== 1 ? "s" : ""} sem sofrer)`);
+  if (w.goleada) rows.push(`🔥  Maior goleada:  ${w.goleada.placar} vs ${w.goleada.opp}`);
+  if (w.invicto && w.invicto > 1) rows.push(`🛡️  Invencibilidade:  ${w.invicto} jogos seguidos sem perder`);
+  if (w.hats > 0) rows.push(`🎩  Hat-tricks no semestre:  ${w.hats}`);
+
+  let y = rows.length >= 6 ? 828 : 850;
+  const step = rows.length >= 6 ? 62 : 68;
+  for (const linha of rows) {
+    const size = fitFont(ctx, linha, 37, 940, (px) => zilla(600, px));
+    ctx.font = zilla(600, size);
+    ctx.fillStyle = CREME;
+    ctx.fillText(linha, W / 2, y);
+    y += step;
+  }
+
+  /* rodapé */
+  ctx.fillStyle = "rgba(95, 212, 143, .8)";
+  ctx.font = inter(600, 23);
+  const site = `${location.host}${location.pathname}`.replace(/\/$/, "");
+  ctx.fillText(`📊  estatísticas completas:  ${site}`, W / 2, 1290);
 
   return canvas;
 }

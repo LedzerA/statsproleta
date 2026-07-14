@@ -53,6 +53,17 @@ export function inPeriod(date: string, r: { from: string; to: string }): boolean
   return (!r.from || date >= r.from) && (!r.to || date <= r.to);
 }
 
+/** Último semestre fechado (em jul–dez → 1º semestre do ano; em jan–jun →
+    2º semestre do ano anterior). Base da retrospectiva. */
+export function lastSemesterRange(): { label: string; from: string; to: string } {
+  const hoje = todayISO();
+  const ano = +hoje.slice(0, 4);
+  const mes = +hoje.slice(5, 7);
+  return mes >= 7
+    ? { label: `1º semestre de ${ano}`, from: `${ano}-01-01`, to: `${ano}-06-30` }
+    : { label: `2º semestre de ${ano - 1}`, from: `${ano - 1}-07-01`, to: `${ano - 1}-12-31` };
+}
+
 /** Descrição curta para títulos ("últimos 3 meses", "01/01/2026 — 30/06/2026"). */
 export function periodLabel(p: Period): string {
   const r = periodRange(p);

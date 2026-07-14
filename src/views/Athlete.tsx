@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
 import { useStore } from "../state/store";
 import { navigate } from "../lib/router";
-import { compute } from "../lib/stats";
+import { compute, matchGoalkeepers } from "../lib/stats";
 import { dec, fmtDate, fmtDateShort, pct, result, sortMatches } from "../lib/format";
 import { inPeriod, periodRange } from "../lib/period";
 import { POSITIONS, athletePositions } from "../lib/positions";
+import { athleteMarcos } from "../lib/records";
 import { Modal, ResultBadge } from "../components/ui";
 import { LineChart } from "../components/LineChart";
 
@@ -29,7 +30,24 @@ export default function Athlete({ id }: { id: string }) {
       .reverse();
     // posições do perfil (curadas) ou derivadas do histórico completo
     const posList = athletePositions(athlete, all);
-    return { p, played, posList };
+    // estatísticas de goleiro no período (posição GOL nas partidas)
+    const gk = stats.goalkeepers.find((g) => g.id === id) || null;
+    // marcos são da carreira COMPLETA — ignoram o filtro de período
+    let jogosAll = 0, golsAll = 0, assistAll = 0, hats = 0, gkJogos = 0, gkSemSofrer = 0;
+    for (const m of all) {
+      if (m.status !== "encerrada" || m.archived) continue;
+      if ((m.lineup || []).includes(id)) jogosAll++;
+      const g = (m.scorers || []).find((s) => s.a === id)?.g || 0;
+      golsAll += g;
+      if (g >= 3) hats++;
+      assistAll += (m.assists || []).find((s) => s.a === id)?.n || 0;
+      if (matchGoalkeepers(m).includes(id)) {
+        gkJogos++;
+        if (m.goals_against === 0) gkSemSofrer++;
+      }
+    }
+    const marcos = athleteMarcos({ jogos: jogosAll, gols: golsAll, assist: assistAll, gkJogos, gkSemSofrer });
+    return { p, played, posList, gk, marcos, hats, temCarreira: jogosAll + golsAll + assistAll > 0 };
   }, [athlete, athletes, allMatches, period, id]);
 
   const evo = useMemo(() => {
@@ -148,6 +166,47 @@ export default function Athlete({ id }: { id: string }) {
             <div className="stat-num num">{p.jogos ? dec(p.ppj) : "–"}</div>
             <div className="stat-label">Part. por jogo</div>
             <div className="stat-sub">{p.jogos ? dec(p.gpj) : "–"} gol(s) por jogo</div>
+          </div>
+          {data.gk && (
+            <div className="card dark">
+              <div className="stat-num num">{data.gk.semSofrer}</div>
+              <div className="stat-label">🧤 Jogos sem sofrer</div>
+              <div className="stat-sub">
+                {data.gk.jogos} jogo{data.gk.jogos !== 1 ? "s" : ""} no gol · {dec(data.gk.media)} sofrido(s)/jogo
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {data.temCarreira && (
+        <div className="panel">
+          <div className="panel-head">
+            <div>
+              <h3>🏅 Marcos da carreira</h3>
+              <div className="sub">todos os tempos neste elenco — não segue o filtro de período</div>
+            </div>
+          </div>
+          <div className="detail-body">
+            <div className="chips">
+              {data.marcos.filter((mc) => mc.atingido).map((mc) => (
+                <span key={mc.tipo} className="chip static on">{mc.icon} {mc.atingido}+ {mc.tipo}</span>
+              ))}
+              {data.hats > 0 && (
+                <span className="chip static on">🎩 {data.hats} hat-trick{data.hats > 1 ? "s" : ""}</span>
+              )}
+              {!data.marcos.some((mc) => mc.atingido) && data.hats === 0 && (
+                <span className="muted" style={{ fontSize: 13 }}>Nenhum marco atingido ainda — o primeiro vem aí.</span>
+              )}
+            </div>
+            {data.marcos.some((mc) => mc.proximo) && (
+              <p className="marcos-next">
+                Próximos:{" "}
+                {data.marcos.filter((mc) => mc.proximo)
+                  .map((mc) => `${mc.icon} ${mc.proximo!.falta} para ${mc.proximo!.alvo} ${mc.tipo}`)
+                  .join(" · ")}
+              </p>
+            )}
           </div>
         </div>
       )}

@@ -2,7 +2,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useStore } from "../state/store";
 import { VAPID_PUBLIC_KEY } from "../config";
 import { pushSupported, subscribePush, unsubscribePush, getSubscription } from "../lib/push";
+import { renderWrappedArt } from "../lib/art";
 import { dec, fmtDate, pct, resWord, result, sortMatches } from "../lib/format";
+import { inPeriod, lastSemesterRange } from "../lib/period";
+import { bestStreaks, hatTricks } from "../lib/records";
+import { compute } from "../lib/stats";
 import { Modal } from "../components/ui";
 
 function download(filename: string, text: string, type = "application/json") {
@@ -26,7 +30,63 @@ export default function More() {
   const [pushBusy, setPushBusy] = useState(false);
   const [importing, setImporting] = useState(false);
   const [filling, setFilling] = useState(false);
+  const [retroArt, setRetroArt] = useState<string | null>(null);
+  const [retroBusy, setRetroBusy] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // retrospectiva do último semestre fechado (independente do filtro do topo)
+  const retro = useMemo(() => {
+    const r = lastSemesterRange();
+    const jogos = squadMatches.filter((m) => inPeriod(m.date, r));
+    return { r, s: compute(roster, jogos), streaks: bestStreaks(jogos), hats: hatTricks(jogos) };
+  }, [squadMatches, roster]);
+
+  async function makeRetro() {
+    if (retroBusy || !retro.s.team.J) return;
+    setRetroBusy(true);
+    try {
+      const s = retro.s;
+      const gk = [...s.goalkeepers].sort((a, b) => b.semSofrer - a.semSofrer || a.media - b.media)[0] || null;
+      const mg = s.team.maiorGoleada;
+      const canvas = await renderWrappedArt({
+        squadName: squad?.name || null,
+        periodo: retro.r.label.toUpperCase(),
+        J: s.team.J, V: s.team.V, E: s.team.E, D: s.team.D,
+        GP: s.team.GP, GC: s.team.GC, aprov: s.team.aprov,
+        artilheiro: s.artilheiro ? { name: s.artilheiro.name, n: s.artilheiro.gols } : null,
+        garcom: s.garcom ? { name: s.garcom.name, n: s.garcom.assist } : null,
+        goleiro: gk && gk.semSofrer > 0 ? { name: gk.name, semSofrer: gk.semSofrer, jogos: gk.jogos } : null,
+        goleada: mg ? { placar: `${mg.m.goals_for}×${mg.m.goals_against}`, opp: mg.m.opponent } : null,
+        invicto: retro.streaks.invicto?.n || null,
+        hats: retro.hats.length,
+      });
+      setRetroArt(canvas.toDataURL("image/png"));
+    } catch (e) {
+      console.error(e);
+      toast("Não foi possível gerar a retrospectiva.");
+    } finally { setRetroBusy(false); }
+  }
+
+  function downloadRetro() {
+    if (!retroArt) return;
+    const a = document.createElement("a");
+    a.href = retroArt;
+    a.download = `proleta-retrospectiva-${stamp()}.png`;
+    a.click();
+  }
+
+  async function shareRetro() {
+    if (!retroArt) return;
+    try {
+      const blob = await (await fetch(retroArt)).blob();
+      const file = new File([blob], `proleta-retrospectiva-${stamp()}.png`, { type: "image/png" });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: `Retrospectiva · ${retro.r.label}` });
+        return;
+      }
+    } catch { /* cancelado ou sem suporte — cai para o download */ }
+    downloadRetro();
+  }
 
   // relacionados sem posição salva nas partidas encerradas do elenco atual
   const pend = useMemo(() => {
@@ -177,6 +237,19 @@ export default function More() {
           </p>
         </div>
 
+        <div className="data-card">
+          <h3>🎉 Retrospectiva · {retro.r.label}</h3>
+          <p>
+            {retro.s.team.J > 0
+              ? <>Cartaz com os números do <b>{squad?.name}</b> no semestre: aproveitamento, artilheiro,
+                  garçom, paredão e recordes — pronto para o grupo.</>
+              : <>Nenhuma partida encerrada do <b>{squad?.name}</b> no {retro.r.label}.</>}
+          </p>
+          <button className="btn primary block" disabled={!retro.s.team.J || retroBusy} onClick={makeRetro}>
+            {retroBusy ? "Gerando…" : "🖼️ Gerar retrospectiva"}
+          </button>
+        </div>
+
         {isAdmin && (
           <div className="data-card">
             <h3>📤 Exportar dados</h3>
@@ -289,6 +362,23 @@ export default function More() {
         )}
       </div>
 
+      {retroArt && (
+        <Modal
+          title={`🎉 Retrospectiva · ${retro.r.label}`}
+          onClose={() => setRetroArt(null)}
+          footer={
+            <>
+              <button className="btn ghost" style={{ flex: 1 }} onClick={downloadRetro}>↓ Baixar</button>
+              <button className="btn primary" style={{ flex: 2 }} onClick={shareRetro}>Compartilhar</button>
+            </>
+          }
+        >
+          <img src={retroArt} alt="Retrospectiva do semestre" style={{ width: "100%", borderRadius: 10, display: "block" }} />
+          <p className="muted" style={{ fontSize: 13, marginTop: 10 }}>
+            No celular, “Compartilhar” abre direto o WhatsApp / Instagram.
+          </p>
+        </Modal>
+      )}
       {login && <LoginModal onClose={() => setLogin(false)} />}
     </>
   );

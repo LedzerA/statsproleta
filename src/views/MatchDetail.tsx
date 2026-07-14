@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useStore } from "../state/store";
 import { navigate } from "../lib/router";
+import { sb } from "../lib/supabase";
 import { TEAM } from "../config";
 import {
-  clockSeconds, fmtClock, fmtDate, fmtEventMinute, isLive, result, resWord, statusLabel,
+  clockSeconds, fmtClock, fmtDate, fmtEventMinute, isLive, result, resWord, statusLabel, uid,
 } from "../lib/format";
 import { Modal } from "../components/ui";
 import { Pitch } from "../components/Pitch";
@@ -24,6 +25,30 @@ const EVENT_LABEL: Record<string, string> = {
   fim_1t: "Fim do 1º tempo", inicio_2t: "Começa o 2º tempo", fim_jogo: "Fim de jogo",
   sub: "Substituição",
 };
+
+/** Quantos aparelhos estão com esta partida aberta AGORA (Supabase Presence).
+    Cada visitante entra anônimo no canal da partida com uma chave estável por
+    aparelho (abas duplicadas contam uma vez); ninguém grava nada no banco. */
+function useLiveViewers(matchId: string | undefined, live: boolean): number {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    if (!matchId || !live) { setCount(0); return; }
+    let key: string;
+    try {
+      key = localStorage.getItem("proleta_viewer") || uid("v");
+      localStorage.setItem("proleta_viewer", key);
+    } catch { key = uid("v"); }
+    const ch = sb.channel(`viewers:${matchId}`, { config: { presence: { key } } });
+    ch.on("presence", { event: "sync" }, () => {
+      setCount(Object.keys(ch.presenceState()).length);
+    });
+    ch.subscribe((status) => {
+      if (status === "SUBSCRIBED") ch.track({ at: new Date().toISOString() });
+    });
+    return () => { sb.removeChannel(ch); setCount(0); };
+  }, [matchId, live]);
+  return count;
+}
 
 /** Cronômetro que se atualiza sozinho enquanto está rodando. */
 function LiveClock({ m }: { m: Match }) {
@@ -55,10 +80,11 @@ export default function MatchDetail({ id }: { id: string }) {
   const [busy, setBusy] = useState(false);
   const [art, setArt] = useState<{ label: string; url: string; file: string }[] | null>(null);
   const [artBusy, setArtBusy] = useState(false);
-  const [tacPhase, setTacPhase] = useState<"com" | "sem">("com");
+  const [tacPhase, setTacPhase] = useState<"com" | "sem" | "bp">("com");
 
   const m = findMatch(id);
   useEffect(() => { if (m) loadEvents(m.id); }, [id]);
+  const viewers = useLiveViewers(m?.id, !!m && isLive(m.status));
 
   const evList = m ? (events[m.id] || []) : [];
   /* quem está em campo AGORA: titulares + entradas − saídas (na ordem em que
@@ -180,6 +206,11 @@ export default function MatchDetail({ id }: { id: string }) {
     m.kit && `👕 ${m.kit}`,
   ].filter(Boolean) as string[];
 
+  // escalação tática: fase ativa (bola parada só existe quando personalizada)
+  const tac = m.tactics && m.tactics.com.slots.some(Boolean) ? m.tactics : null;
+  const tacCur = tac ? ((tacPhase === "bp" ? tac.bp : tac[tacPhase]) || tac.com) : null;
+  const cobradores = tac?.cobradores || null;
+
   return (
     <>
       <button className="back-link" onClick={() => navigate("#/partidas")}>← Partidas</button>
@@ -199,6 +230,11 @@ export default function MatchDetail({ id }: { id: string }) {
           <div className="sh-team">{m.opponent}</div>
         </div>
         {live && <LiveClock m={m} />}
+        {live && viewers > 0 && (
+          <div className="sh-viewers">
+            👁 <b className="num">{viewers}</b> {viewers === 1 ? "pessoa acompanhando" : "pessoas acompanhando"}
+          </div>
+        )}
         {infoBits.length > 0 && <div className="sh-info">{infoBits.join("   ·   ")}</div>}
       </div>
 
@@ -322,22 +358,35 @@ export default function MatchDetail({ id }: { id: string }) {
             <h3>Escalação <span className="sub" style={{ display: "inline" }}>· {m.lineup.length} relacionados</span></h3>
           </div>
           <div className="detail-body">
-            {m.tactics && m.tactics.com.slots.some(Boolean) && (
+            {tac && tacCur && (
               <>
                 <div className="phase-tabs">
                   <button className={`chip ${tacPhase === "com" ? "on" : ""}`} onClick={() => setTacPhase("com")}>
-                    ⚽ Com bola · {m.tactics.com.formation}
+                    ⚽ Com bola · {tac.com.formation}
                   </button>
                   <button className={`chip ${tacPhase === "sem" ? "on" : ""}`} onClick={() => setTacPhase("sem")}>
-                    🛡️ Sem bola · {m.tactics.sem.formation}
+                    🛡️ Sem bola · {tac.sem.formation}
                   </button>
+                  {tac.bp && (
+                    <button className={`chip ${tacPhase === "bp" ? "on" : ""}`} onClick={() => setTacPhase("bp")}>
+                      🎯 Bola parada
+                    </button>
+                  )}
                 </div>
                 <Pitch
-                  formation={getFormation(m.tactics[tacPhase].formation)}
-                  slots={m.tactics[tacPhase].slots}
-                  coords={m.tactics[tacPhase].coords}
+                  formation={getFormation(tacCur.formation)}
+                  slots={tacCur.slots}
+                  coords={tacCur.coords}
                   nameOf={athleteName}
                 />
+                {cobradores && (
+                  <div className="cobradores">
+                    {cobradores.penalti && <span>🥅 Pênalti: <b>{athleteName(cobradores.penalti)}</b></span>}
+                    {cobradores.falta && <span>🎯 Falta: <b>{athleteName(cobradores.falta)}</b></span>}
+                    {cobradores.escanteio_e && <span>⛳ Esc. esq.: <b>{athleteName(cobradores.escanteio_e)}</b></span>}
+                    {cobradores.escanteio_d && <span>⛳ Esc. dir.: <b>{athleteName(cobradores.escanteio_d)}</b></span>}
+                  </div>
+                )}
               </>
             )}
             {starters.length > 0 && (

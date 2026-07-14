@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { sb } from "../lib/supabase";
 import { TEAM } from "../config";
-import type { Assist, Athlete, EventPayload, EventType, Match, MatchEvent, Scorer, Squad, Tactics, TacticsPhase } from "../lib/types";
+import type { Assist, Athlete, EventPayload, EventType, Match, MatchEvent, Scorer, SetPieceTakers, Squad, Tactics, TacticsPhase } from "../lib/types";
 import { compute, type SquadStats } from "../lib/stats";
 import { lastPosition } from "../lib/positions";
 import { clockSeconds, result, uid } from "../lib/format";
@@ -46,11 +46,25 @@ function normPhase(p: any): TacticsPhase | null {
   };
 }
 
+const COBRANCAS = ["penalti", "falta", "escanteio_e", "escanteio_d"] as const;
+
+function normCobradores(c: any): SetPieceTakers | null {
+  if (!c || typeof c !== "object") return null;
+  const out: SetPieceTakers = {};
+  for (const k of COBRANCAS) if (typeof c[k] === "string" && c[k]) out[k] = c[k];
+  return Object.keys(out).length ? out : null;
+}
+
 function normTactics(t: any): Tactics | null {
   const com = normPhase(t?.com);
   if (!com) return null;
   const sem = normPhase(t?.sem);
-  return { com, sem: sem || { formation: com.formation, slots: [...com.slots], coords: null } };
+  return {
+    com,
+    sem: sem || { formation: com.formation, slots: [...com.slots], coords: null },
+    bp: normPhase(t?.bp),
+    cobradores: normCobradores(t?.cobradores),
+  };
 }
 
 /* táticas de um backup importado: os ids dos atletas mudam, as vagas seguem */
@@ -62,7 +76,18 @@ function remapTactics(t: any, idMap: Map<string, string>): Tactics | null {
     slots: p.slots.map((id) => (id && idMap.get(id)) || null),
     coords: p.coords ?? null, // ajustes de vaga não dependem de id
   });
-  return { com: remap(base.com), sem: remap(base.sem) };
+  const cb: SetPieceTakers = {};
+  for (const k of COBRANCAS) {
+    const v = base.cobradores?.[k];
+    const nid = v ? idMap.get(v) : null;
+    if (nid) cb[k] = nid;
+  }
+  return {
+    com: remap(base.com),
+    sem: remap(base.sem),
+    bp: base.bp ? remap(base.bp) : null,
+    cobradores: Object.keys(cb).length ? cb : null,
+  };
 }
 
 function normalizeMatch(r: any): Match {

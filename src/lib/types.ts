@@ -50,10 +50,21 @@ export interface TacticsPhase {
   coords?: ([number, number] | null)[] | null;
 }
 
-/** Escalação tática com bola / sem bola — mesmos 11, distribuição diferente. */
+/** Cobradores de bola parada (atletaId por tipo de cobrança). */
+export interface SetPieceTakers {
+  penalti?: string | null;
+  falta?: string | null;
+  escanteio_e?: string | null;
+  escanteio_d?: string | null;
+}
+
+/** Escalação tática com bola / sem bola — mesmos 11, distribuição diferente.
+    bp (bola parada) e cobradores são opcionais, só existem quando definidos. */
 export interface Tactics {
   com: TacticsPhase;
   sem: TacticsPhase;
+  bp?: TacticsPhase | null;
+  cobradores?: SetPieceTakers | null;
 }
 
 export interface Match {
