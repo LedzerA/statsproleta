@@ -548,6 +548,15 @@ button.chip:hover { border-color: var(--verde-500); }
 .st-row { display: grid; grid-template-columns: 40px 1fr 28px 28px 28px; gap: 6px; align-items: center; padding: 3px 6px; border-radius: 8px; }
 .st-row:nth-child(even) { background: rgba(15, 32, 25, .03); }
 .st-row .nm { font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.st-row.slot { grid-template-columns: 42px 1fr; }
+.st-row.bench { grid-template-columns: 1fr 28px; }
+.slot-pos { text-align: right; font-weight: 700; font-size: 12px; letter-spacing: .5px; color: #137a3c; }
+.slot-sel {
+  width: 100%; padding: 6px 8px;
+  border: 1px solid rgba(15, 32, 25, .25); border-radius: 8px;
+  background: var(--creme-2); color: inherit; font-size: 13.5px; font-weight: 600;
+}
+.slot-sel:focus { outline: none; border-color: var(--verde-500); }
 .st-toggle {
   width: 30px; height: 30px; border-radius: 7px; border: 1px solid rgba(15, 32, 25, .2);
   background: var(--creme-3); color: rgba(15, 32, 25, .4); font-size: 16px; line-height: 1;
@@ -749,13 +758,10 @@ button.chip:hover { border-color: var(--verde-500); }
   border-radius: 50%; background: var(--verde-800); color: var(--creme-3);
   font-size: 11px; font-weight: 700; margin-right: 6px; padding: 0 3px;
 }
-.st-ord { text-align: right; font-weight: 700; color: var(--carvao-2); font-size: 13.5px; }
-.st-ord.tit { color: #137a3c; }
-.bench-divider {
-  text-align: center; font-size: 10.5px; letter-spacing: 1.5px; text-transform: uppercase;
-  font-weight: 700; color: var(--carvao-2); padding: 8px 0 4px;
-  border-top: 1px dashed rgba(15, 32, 25, .25); margin-top: 6px;
-}
+/* formações com/sem bola + campinho tático */
+.phase-tabs { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 6px 0 10px; }
+.phase-tabs .formation-sel { margin-left: auto; max-width: none; font-weight: 700; font-size: 13px; padding: 5px 8px; }
+.pitch { display: block; width: 100%; max-width: 340px; margin: 2px auto 10px; border-radius: 12px; box-shadow: var(--sombra); }
 .pos-sel {
   margin-left: 7px; padding: 2px 5px; max-width: 100px;
   border: 1px solid rgba(15, 32, 25, .25); border-radius: 7px;

@@ -5,8 +5,9 @@ import type { ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { sb } from "../lib/supabase";
 import { TEAM } from "../config";
-import type { Assist, Athlete, EventPayload, EventType, Match, MatchEvent, Scorer, Squad } from "../lib/types";
+import type { Assist, Athlete, EventPayload, EventType, Match, MatchEvent, Scorer, Squad, Tactics, TacticsPhase } from "../lib/types";
 import { compute, type SquadStats } from "../lib/stats";
+import { lastPosition } from "../lib/positions";
 import { clockSeconds, result, uid } from "../lib/format";
 import { PERIOD_ALL, PERIOD_PRESETS, inPeriod, periodRange, type Period } from "../lib/period";
 
@@ -31,6 +32,29 @@ function loadPeriod(): Period {
    banco não tiver sido atualizado, elas são removidas das escritas */
 const V21_FIELDS = ["starters", "positions", "venue", "kickoff", "kit", "archived", "clock"] as const;
 
+function normPhase(p: any): TacticsPhase | null {
+  if (!p || typeof p !== "object" || typeof p.formation !== "string" || !Array.isArray(p.slots)) return null;
+  return { formation: p.formation, slots: p.slots.map((x: any) => (typeof x === "string" && x ? x : null)) };
+}
+
+function normTactics(t: any): Tactics | null {
+  const com = normPhase(t?.com);
+  if (!com) return null;
+  const sem = normPhase(t?.sem);
+  return { com, sem: sem || { formation: com.formation, slots: [...com.slots] } };
+}
+
+/* táticas de um backup importado: os ids dos atletas mudam, as vagas seguem */
+function remapTactics(t: any, idMap: Map<string, string>): Tactics | null {
+  const base = normTactics(t);
+  if (!base) return null;
+  const remap = (p: TacticsPhase): TacticsPhase => ({
+    formation: p.formation,
+    slots: p.slots.map((id) => (id && idMap.get(id)) || null),
+  });
+  return { com: remap(base.com), sem: remap(base.sem) };
+}
+
 function normalizeMatch(r: any): Match {
   return {
     ...r,
@@ -45,6 +69,7 @@ function normalizeMatch(r: any): Match {
     archived: r.archived === true,
     clock: r.clock ?? null,
     started_at: r.started_at ?? null,
+    tactics: normTactics(r.tactics),
   };
 }
 
@@ -52,6 +77,8 @@ interface StoreValue {
   loading: boolean;
   fatal: string | null;
   schemaLegacy: boolean;
+  /** true quando o banco tem a coluna matches.tactics (atualização 4). */
+  schemaTactics: boolean;
   squads: Squad[];
   squadId: string;
   setSquadId: (id: string) => void;
@@ -82,6 +109,9 @@ interface StoreValue {
   addAthlete: (name: string) => Promise<Athlete | null>;
   /** Salva as posições do perfil do atleta (precisa da atualização 3 no banco). */
   updateAthletePositions: (id: string, positions: string[]) => Promise<void>;
+  /** Preenche as posições em falta nas partidas encerradas do elenco atual
+      com a última posição que cada atleta jogou (fallback: perfil). */
+  fillMissingPositions: () => Promise<{ matches: number; spots: number }>;
   addSquad: (name: string) => Promise<void>;
   addEvent: (
     m: Match,
@@ -156,6 +186,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
   const [schemaLegacy, setSchemaLegacy] = useState(false);
+  const [schemaTactics, setSchemaTactics] = useState(false);
   const toastTimer = useRef<number>(0);
   const ownEvents = useRef<Set<string>>(new Set());
 
@@ -182,11 +213,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return (sq.data as Squad[]) || [];
   }, []);
 
-  /* o banco já recebeu a atualização 1 (colunas de titulares etc.)? */
+  /* o banco já recebeu a atualização 1 (colunas de titulares etc.)? e a 4 (tactics)? */
   useEffect(() => {
     sb.from("matches").select("starters").limit(1).then(({ error }) => {
       setSchemaLegacy(!!error);
       if (error) console.warn("Banco sem a atualização 1 — rode supabase/atualizacao-1.sql:", error.message);
+    });
+    sb.from("matches").select("tactics").limit(1).then(({ error }) => {
+      setSchemaTactics(!error);
+      if (error) console.warn("Banco sem a atualização 4 — rode supabase/atualizacao-4.sql (as formações táticas não serão salvas):", error.message);
     });
   }, []);
 
@@ -369,9 +404,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     });
     const row: any = { ...m, updated_at: new Date().toISOString() };
     if (schemaLegacy) for (const f of V21_FIELDS) delete row[f];
+    if (schemaLegacy || !schemaTactics) delete row.tactics;
     const { error } = await sb.from("matches").upsert(row);
     if (error) { console.error(error); toast("Erro ao salvar. Verifique a conexão."); }
-  }, [toast, schemaLegacy]);
+  }, [toast, schemaLegacy, schemaTactics]);
 
   const deleteMatch = useCallback(async (id: string) => {
     setAllMatches((old) => old.filter((m) => m.id !== id));
@@ -403,6 +439,45 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       toast("Erro ao salvar — o banco tem a atualização 3 (coluna positions)?");
     } else toast("Posições salvas ✓");
   }, [toast]);
+
+  /** Preenche as posições em falta nas partidas ENCERRADAS do elenco atual:
+      para cada relacionado sem posição, usa a última em que ele jogou até a
+      data da partida (sem histórico anterior, a primeira seguinte; sem nada,
+      a primeira do perfil). Grava tudo em um upsert só. */
+  const fillMissingPositions = useCallback(async () => {
+    const src = allMatches.filter((m) => m.squad_id === squadId);
+    const perfil = new Map(athletes.map((a) => [a.id, a.positions?.[0] || ""]));
+    const cheias: Match[] = [];
+    let spots = 0;
+    for (const m of src) {
+      if (m.status !== "encerrada") continue;
+      const faltam = (m.lineup || []).filter((id) => !m.positions?.[id]);
+      if (!faltam.length) continue;
+      const positions = { ...m.positions };
+      let mudou = false;
+      for (const id of faltam) {
+        const p = lastPosition(id, src, m) || perfil.get(id);
+        if (p) { positions[id] = p; spots++; mudou = true; }
+      }
+      if (mudou) cheias.push({ ...m, positions });
+    }
+    if (!cheias.length) return { matches: 0, spots: 0 };
+    setAllMatches((old) => old.map((m) => cheias.find((c) => c.id === m.id) || m));
+    const now = new Date().toISOString();
+    const rows = cheias.map((m) => {
+      const row: any = { ...m, updated_at: now };
+      if (schemaLegacy) for (const f of V21_FIELDS) delete row[f];
+      if (schemaLegacy || !schemaTactics) delete row.tactics;
+      return row;
+    });
+    const { error } = await sb.from("matches").upsert(rows);
+    if (error) {
+      console.error(error);
+      toast("Erro ao salvar. Verifique a conexão.");
+      return { matches: 0, spots: 0 };
+    }
+    return { matches: cheias.length, spots };
+  }, [allMatches, athletes, squadId, schemaLegacy, schemaTactics, toast]);
 
   const addSquad = useCallback(async (name: string) => {
     const s: Squad = { id: uid("s"), name: name.trim(), position: squads.length + 1 };
@@ -573,6 +648,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       archived: m.archived === true,
       clock: m.clock ?? null,
       started_at: null,
+      tactics: remapTactics(m.tactics, idMap),
     }));
 
     let r = await sb.from("matches").delete().eq("squad_id", squadId);
@@ -584,12 +660,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (r.error) throw r.error;
     }
     if (newMatches.length) {
-      r = await sb.from("matches").insert(newMatches);
+      r = await sb.from("matches").insert(newMatches.map((m) => {
+        const row: any = { ...m };
+        if (schemaLegacy || !schemaTactics) delete row.tactics;
+        return row;
+      }));
       if (r.error) throw r.error;
     }
     await refetch();
     return { athletes: newAthletes.length, matches: newMatches.length };
-  }, [squadId, refetch]);
+  }, [squadId, refetch, schemaLegacy, schemaTactics]);
 
   /** Apaga todas as partidas do elenco atual (mantém os atletas). */
   const wipeMatches = useCallback(async () => {
@@ -607,11 +687,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(async () => { await sb.auth.signOut(); }, []);
 
   const value: StoreValue = {
-    loading, fatal, schemaLegacy, squads, squadId, setSquadId, squad,
+    loading, fatal, schemaLegacy, schemaTactics, squads, squadId, setSquadId, squad,
     roster, athletes, athleteName, matches, squadMatches, allMatches,
     period, setPeriod, periodOn, findMatch, stats,
     liveMatch, events, loadEvents, session, isAdmin, signIn, signOut,
-    upsertMatch, deleteMatch, addAthlete, updateAthletePositions, addSquad, addEvent,
+    upsertMatch, deleteMatch, addAthlete, updateAthletePositions, fillMissingPositions, addSquad, addEvent,
     updateEvent, deleteEvent, toggleClock,
     resetToScheduled, importBackup, wipeMatches, toast, toastMsg,
   };

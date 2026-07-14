@@ -6,7 +6,9 @@ import {
   clockSeconds, fmtClock, fmtDate, fmtEventMinute, isLive, result, resWord, statusLabel,
 } from "../lib/format";
 import { Modal } from "../components/ui";
+import { Pitch } from "../components/Pitch";
 import { renderLineupArt, renderResultArt } from "../lib/art";
+import { getFormation } from "../lib/formations";
 import { posRank, sortLineup } from "../lib/positions";
 import MatchForm from "./MatchForm";
 import type { EventType, Match, MatchEvent } from "../lib/types";
@@ -53,6 +55,7 @@ export default function MatchDetail({ id }: { id: string }) {
   const [busy, setBusy] = useState(false);
   const [art, setArt] = useState<string | null>(null);
   const [artBusy, setArtBusy] = useState(false);
+  const [tacPhase, setTacPhase] = useState<"com" | "sem">("com");
 
   const m = findMatch(id);
   useEffect(() => { if (m) loadEvents(m.id); }, [id]);
@@ -294,6 +297,23 @@ export default function MatchDetail({ id }: { id: string }) {
             <h3>Escalação <span className="sub" style={{ display: "inline" }}>· {m.lineup.length} relacionados</span></h3>
           </div>
           <div className="detail-body">
+            {m.tactics && m.tactics.com.slots.some(Boolean) && (
+              <>
+                <div className="phase-tabs">
+                  <button className={`chip ${tacPhase === "com" ? "on" : ""}`} onClick={() => setTacPhase("com")}>
+                    ⚽ Com bola · {m.tactics.com.formation}
+                  </button>
+                  <button className={`chip ${tacPhase === "sem" ? "on" : ""}`} onClick={() => setTacPhase("sem")}>
+                    🛡️ Sem bola · {m.tactics.sem.formation}
+                  </button>
+                </div>
+                <Pitch
+                  formation={getFormation(m.tactics[tacPhase].formation)}
+                  slots={m.tactics[tacPhase].slots}
+                  nameOf={athleteName}
+                />
+              </>
+            )}
             {starters.length > 0 && (
               <>
                 <div className="esc-label">★ Titulares ({starters.length})</div>

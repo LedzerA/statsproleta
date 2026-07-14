@@ -2,10 +2,12 @@ import { useMemo, useState } from "react";
 import { useStore } from "../state/store";
 import { Modal, Stepper } from "../components/ui";
 import { todayISO, uid } from "../lib/format";
-import { POSITIONS, POS_GROUPS, athletePositions, posRank } from "../lib/positions";
-import type { Match } from "../lib/types";
-
-const TITULARES = 11;
+import { POSITIONS, POS_GROUPS, athletePositions, lastPosition, posRank } from "../lib/positions";
+import {
+  FORMATIONS, getFormation, autoSlots, bestFreeSlot, inferFormation, remapPhase, reconcileSem,
+} from "../lib/formations";
+import { Pitch } from "../components/Pitch";
+import type { Match, Tactics, TacticsPhase } from "../lib/types";
 
 interface Props {
   match?: Match | null;       // editar existente
@@ -13,8 +15,10 @@ interface Props {
   onClose: () => void;
 }
 
+type PhaseKey = "com" | "sem";
+
 export default function MatchForm({ match, schedule, onClose }: Props) {
-  const { roster, squadMatches, squadId, schemaLegacy, upsertMatch, addAthlete, updateAthletePositions, toast } = useStore();
+  const { roster, squadMatches, squadId, schemaLegacy, schemaTactics, upsertMatch, addAthlete, toast } = useStore();
   const isEdit = !!match;
   const scheduling = schedule || match?.status === "agendada";
 
@@ -25,20 +29,61 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
   const [kit, setKit] = useState(match?.kit || "");
   const [gf, setGf] = useState(match?.goals_for ?? 0);
   const [ga, setGa] = useState(match?.goals_against ?? 0);
-  // lista ORDENADA: os 11 primeiros são os titulares, o resto é banco
-  const [lineup, setLineup] = useState<string[]>(() => {
-    if (!match) return [];
-    const st = match.starters || [];
-    return [...st, ...(match.lineup || []).filter((id) => !st.includes(id))];
-  });
-  const [positions, setPositions] = useState<Record<string, string>>({ ...(match?.positions || {}) });
 
-  // posições do perfil (curadas ou derivadas do histórico), para agrupar e sugerir
+  // sugestão por atleta: a ÚLTIMA posição em que ele jogou até a data desta
+  // partida (sem histórico, cai na primeira posição curada do perfil)
+  const suggested = useMemo(() => {
+    const ref = { id: match?.id, date: match?.date || todayISO() };
+    const map: Record<string, string> = {};
+    for (const a of roster) map[a.id] = lastPosition(a.id, squadMatches, ref) || a.positions?.[0] || "";
+    return map;
+  }, [roster, squadMatches, match]);
+
+  // posições do perfil (curadas ou derivadas do histórico) — agrupa o elenco
   const profilePos = useMemo(() => {
     const map: Record<string, string[]> = {};
     for (const a of roster) map[a.id] = athletePositions(a, squadMatches);
     return map;
   }, [roster, squadMatches]);
+
+  const [lineup, setLineup] = useState<string[]>(() => (match ? [...(match.lineup || [])] : []));
+  // posições da partida; relacionado sem registro entra com a última que jogou
+  const [positions, setPositions] = useState<Record<string, string>>(() => {
+    const init: Record<string, string> = { ...(match?.positions || {}) };
+    for (const id of match?.lineup || []) {
+      if (!init[id] && suggested[id]) init[id] = suggested[id];
+    }
+    return init;
+  });
+  // tática com/sem bola; partida antiga (sem tática salva) entra com a
+  // formação inferida dos titulares e das posições já registradas
+  const [tactics, setTactics] = useState<Tactics>(() => {
+    if (match?.tactics) {
+      const inLineup = new Set(match.lineup || []);
+      const fit = (p: TacticsPhase): TacticsPhase => {
+        const f = getFormation(p.formation);
+        return {
+          formation: f.name,
+          slots: f.slots.map((_, i) => {
+            const id = p.slots[i];
+            return id && inLineup.has(id) ? id : null;
+          }),
+        };
+      };
+      return { com: fit(match.tactics.com), sem: fit(match.tactics.sem) };
+    }
+    const st = (match?.starters || []).map((id) => ({ id, pos: match?.positions?.[id] || suggested[id] }));
+    const f = inferFormation(st.map((x) => x.pos));
+    const slots = autoSlots(f, st);
+    return { com: { formation: f.name, slots }, sem: { formation: f.name, slots: [...slots] } };
+  });
+  const [phase, setPhase] = useState<PhaseKey>("com");
+  // a fase sem bola espelha a com bola até o usuário mexer nela de propósito
+  const [semManual, setSemManual] = useState<boolean>(() => {
+    const t = match?.tactics;
+    return !!t && (t.com.formation !== t.sem.formation || t.com.slots.join() !== t.sem.slots.join());
+  });
+
   const [scorers, setScorers] = useState<Record<string, number>>(
     Object.fromEntries((match?.scorers || []).map((x) => [x.a, x.g]))
   );
@@ -56,9 +101,31 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
     return (id: string) => m[id] || "?";
   }, [roster]);
 
+  const active = tactics[phase];
+  const activeF = getFormation(active.formation);
+  const starters = useMemo(
+    () => tactics.com.slots.filter((x): x is string => !!x),
+    [tactics]
+  );
+  const startersSet = useMemo(() => new Set(starters), [starters]);
+  const bench = useMemo(
+    () => lineup.filter((id) => !startersSet.has(id)).sort((a, b) =>
+      posRank(positions[a] || suggested[a]) - posRank(positions[b] || suggested[b]) ||
+      nameOf(a).localeCompare(nameOf(b), "pt")),
+    [lineup, startersSet, positions, suggested, nameOf]
+  );
+  // opções dos selects de vaga, em ordem de posição (com bola: todos os
+  // relacionados; sem bola: só os 11 titulares, na ordem das vagas)
+  const comOptions = useMemo(
+    () => [...lineup].sort((a, b) =>
+      posRank(positions[a] || suggested[a]) - posRank(positions[b] || suggested[b]) ||
+      nameOf(a).localeCompare(nameOf(b), "pt")),
+    [lineup, positions, suggested, nameOf]
+  );
+  const slotOptions = phase === "com" ? comOptions : starters;
+
   // elenco agrupado por posição principal do perfil, na ordem convencional
   const grouped = useMemo(() => {
-    // agrupa pela faixa do posRank (normaliza apelidos: GK→GOL, ZAG→ZG…)
     const bucket = (a: { id: string }) => {
       const r = posRank(profilePos[a.id]?.[0]);
       if (r < 10) return "Goleiros";
@@ -83,25 +150,64 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
     return roster.filter((a) => ids.has(a.id));
   }, [roster, lineup, scorers, assists]);
 
-  function toggle(id: string) {
-    setLineup((old) => {
-      if (old.includes(id)) return old.filter((x) => x !== id);
-      // ao entrar na lista, sugere a posição do perfil se a partida ainda não tiver
-      const sug = profilePos[id]?.[0];
-      if (sug) setPositions((p) => (p[id] ? p : { ...p, [id]: sug }));
-      return [...old, id];
-    });
+  /* mantém a fase sem bola coerente depois de qualquer mudança na com bola */
+  function withSem(com: TacticsPhase): Tactics {
+    return { com, sem: semManual ? reconcileSem(tactics.sem, com) : remapPhase(com, tactics.sem.formation) };
   }
 
-  function move(id: string, dir: -1 | 1) {
-    setLineup((old) => {
-      const i = old.indexOf(id);
-      const j = i + dir;
-      if (i < 0 || j < 0 || j >= old.length) return old;
-      const cp = [...old];
-      [cp[i], cp[j]] = [cp[j], cp[i]];
-      return cp;
-    });
+  function toggle(id: string) {
+    if (lineup.includes(id)) {
+      setLineup((old) => old.filter((x) => x !== id));
+      const com = { ...tactics.com, slots: tactics.com.slots.map((x) => (x === id ? null : x)) };
+      setTactics(withSem(com));
+      return;
+    }
+    setLineup((old) => [...old, id]);
+    const sug = positions[id] || suggested[id];
+    if (sug && !positions[id]) setPositions((p) => ({ ...p, [id]: sug }));
+    // com posição conhecida, já ocupa a vaga livre mais parecida (vira titular)
+    if (sug) {
+      const i = bestFreeSlot(getFormation(tactics.com.formation), tactics.com.slots, sug);
+      if (i >= 0) {
+        const slots = [...tactics.com.slots];
+        slots[i] = id;
+        setTactics(withSem({ ...tactics.com, slots }));
+      }
+    }
+  }
+
+  function clearLineup() {
+    setLineup([]);
+    setTactics((t) => ({
+      com: { ...t.com, slots: t.com.slots.map(() => null) },
+      sem: { ...t.sem, slots: t.sem.slots.map(() => null) },
+    }));
+    setSemManual(false);
+  }
+
+  function setFormation(ph: PhaseKey, name: string) {
+    if (ph === "com") {
+      setTactics(withSem(remapPhase(tactics.com, name)));
+    } else {
+      setSemManual(true);
+      setTactics({ ...tactics, sem: remapPhase(tactics.sem, name) });
+    }
+  }
+
+  function setSlot(ph: PhaseKey, idx: number, raw: string) {
+    const id = raw || null;
+    const base = tactics[ph];
+    const slots = [...base.slots];
+    const prev = slots[idx] ?? null;
+    const dup = id ? slots.indexOf(id) : -1;
+    if (dup >= 0) slots[dup] = prev; // já estava em outra vaga → troca
+    slots[idx] = id;
+    if (ph === "com") {
+      setTactics(withSem({ ...base, slots }));
+    } else {
+      setSemManual(true);
+      setTactics({ ...tactics, sem: { ...base, slots } });
+    }
   }
 
   function setPosition(id: string, v: string) {
@@ -119,7 +225,10 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
       if (v <= 0) delete cp[id]; else cp[id] = v;
       return cp;
     });
-    if (v > 0) setLineup((old) => (old.includes(id) ? old : [...old, id]));
+    if (v > 0) {
+      setLineup((old) => (old.includes(id) ? old : [...old, id]));
+      setPositions((p) => (p[id] || !suggested[id] ? p : { ...p, [id]: suggested[id] }));
+    }
   }
 
   async function handleAddAthlete() {
@@ -129,9 +238,18 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
 
   async function save() {
     if (!opponent.trim()) { toast("Informe o adversário"); return; }
-    const cleanPositions = Object.fromEntries(
-      Object.entries(positions).filter(([id, v]) => lineup.includes(id) && v.trim())
-    );
+    const comF = getFormation(tactics.com.formation);
+    const semF = getFormation(tactics.sem.formation);
+    const comSlots = tactics.com.slots.map((id) => (id && lineup.includes(id) ? id : null));
+    const st = comSlots.filter((x): x is string => !!x);
+    const semSlots = tactics.sem.slots.map((id) => (id && st.includes(id) ? id : null));
+    // posição por relacionado; titular herda o rótulo da vaga (com bola)
+    const cleanPositions: Record<string, string> = {};
+    for (const id of lineup) {
+      const v = (positions[id] || "").trim();
+      if (v) cleanPositions[id] = v;
+    }
+    comSlots.forEach((id, i) => { if (id) cleanPositions[id] = comF.slots[i].pos; });
     const rec: Match = {
       id: match?.id || uid("m"),
       squad_id: match?.squad_id || squadId,
@@ -141,7 +259,7 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
       goals_for: scheduling ? 0 : gf,
       goals_against: scheduling ? 0 : ga,
       lineup: [...lineup],
-      starters: lineup.slice(0, TITULARES),
+      starters: st,
       positions: cleanPositions,
       scorers: Object.entries(scorers).map(([a, g]) => ({ a, g })),
       assists: Object.entries(assists).map(([a, n]) => ({ a, n })),
@@ -153,6 +271,9 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
       archived: match?.archived === true,
       clock: match?.clock || null,
       started_at: match?.started_at || null,
+      tactics: st.length
+        ? { com: { formation: comF.name, slots: comSlots }, sem: { formation: semF.name, slots: semSlots } }
+        : null,
     };
     await upsertMatch(rec);
     toast(isEdit ? "Partida atualizada" : scheduling ? "Jogo agendado ✓" : "Partida salva ✓");
@@ -225,9 +346,9 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
       )}
 
       <div className="subhead">
-        <div className="t">Relacionados <span className="muted" style={{ fontWeight: 400, fontSize: 12 }}>· toque na ordem: 1º ao 11º viram titulares</span></div>
+        <div className="t">Relacionados <span className="muted" style={{ fontWeight: 400, fontSize: 12 }}>· quem ganha vaga na formação vira titular (★)</span></div>
         <div className="mini">
-          <button className="btn sm ghost" onClick={() => { setLineup([]); }}>Limpar</button>
+          <button className="btn sm ghost" onClick={clearLineup}>Limpar</button>
         </div>
       </div>
       {grouped.map((g) => (
@@ -235,11 +356,11 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
           <div className="pg-label">{g.label}</div>
           <div className="chips">
             {g.athletes.map((a) => {
-              const i = lineup.indexOf(a.id);
+              const on = lineup.includes(a.id);
               const p = profilePos[a.id]?.[0];
               return (
-                <button key={a.id} className={`chip ${i >= 0 ? "on" : ""}`} onClick={() => toggle(a.id)}>
-                  {i >= 0 && <span className="chip-ord num">{i + 1}</span>}
+                <button key={a.id} className={`chip ${on ? "on" : ""}`} onClick={() => toggle(a.id)}>
+                  {startersSet.has(a.id) && <span className="chip-ord num">★</span>}
                   {a.name}{p ? ` · ${p}` : ""}
                 </button>
               );
@@ -261,46 +382,93 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
         <>
           <div className="subhead">
             <div className="t">
-              Escalação na ordem{" "}
+              Escalação{" "}
               <span className="muted" style={{ fontWeight: 400, fontSize: 12 }}>
-                · {Math.min(lineup.length, TITULARES)} titular{Math.min(lineup.length, TITULARES) !== 1 ? "es" : ""}
-                {lineup.length > TITULARES ? ` + ${lineup.length - TITULARES} no banco` : ""}
+                · {starters.length} titular{starters.length !== 1 ? "es" : ""}
+                {bench.length > 0 ? ` + ${bench.length} no banco` : ""}
               </span>
             </div>
           </div>
+          {!schemaTactics && (
+            <div className="warn show">
+              ⚠ Este banco ainda não tem a coluna de formações — rode <b>supabase/atualizacao-4.sql</b>.
+              Titulares e posições continuam sendo salvos; só o desenho tático não.
+            </div>
+          )}
+          <div className="phase-tabs">
+            <button type="button" className={`chip ${phase === "com" ? "on" : ""}`} onClick={() => setPhase("com")}>
+              ⚽ Com bola
+            </button>
+            <button type="button" className={`chip ${phase === "sem" ? "on" : ""}`} onClick={() => setPhase("sem")}>
+              🛡️ Sem bola
+            </button>
+            <select
+              className="pos-sel formation-sel"
+              value={active.formation}
+              onChange={(e) => setFormation(phase, e.target.value)}
+              aria-label="Formação"
+            >
+              {FORMATIONS.map((f) => <option key={f.name} value={f.name}>{f.name}</option>)}
+            </select>
+          </div>
+          <Pitch formation={activeF} slots={active.slots} nameOf={nameOf} />
+          {phase === "sem" && !semManual && (
+            <div className="tot-line">Sem bola está espelhando a com bola — mexa nas vagas para personalizar.</div>
+          )}
           <div className="st-list">
-            {lineup.map((id, i) => (
-              <div key={id}>
-                {i === TITULARES && <div className="bench-divider">— banco a partir daqui —</div>}
-                <div className="st-row">
-                  <span className={`st-ord num ${i < TITULARES ? "tit" : ""}`}>
-                    {i < TITULARES ? "★" : ""}{i + 1}
-                  </span>
-                  <div className="nm">
-                    {nameOf(id)}
-                    <select
-                      className="pos-sel"
-                      value={positions[id] || ""}
-                      onChange={(e) => {
-                        // a posição da partida entra sozinha no perfil (janela de 3 meses)
-                        setPosition(id, e.target.value);
-                      }}
-                    >
-                      <option value="">posição…</option>
-                      {positions[id] && !(POSITIONS as readonly string[]).includes(positions[id]) && (
-                        <option value={positions[id]}>{positions[id]}</option>
-                      )}
-                      {POSITIONS.map((p) => <option key={p} value={p}>{p}</option>)}
-                    </select>
-                  </div>
-                  <button type="button" className="ord-btn" disabled={i === 0} onClick={() => move(id, -1)} aria-label="Subir">↑</button>
-                  <button type="button" className="ord-btn" disabled={i === lineup.length - 1} onClick={() => move(id, 1)} aria-label="Descer">↓</button>
-                  <button type="button" className="ord-btn rm" onClick={() => toggle(id)} aria-label="Remover">×</button>
-                </div>
+            {activeF.slots.map((s, i) => (
+              <div className="st-row slot" key={`${active.formation}-${i}`}>
+                <span className="slot-pos num">{s.pos}</span>
+                <select
+                  className="slot-sel"
+                  value={active.slots[i] || ""}
+                  onChange={(e) => setSlot(phase, i, e.target.value)}
+                >
+                  <option value="">—</option>
+                  {slotOptions.map((id) => {
+                    const j = active.slots.indexOf(id);
+                    return (
+                      <option key={id} value={id}>
+                        {nameOf(id)}{j >= 0 && j !== i ? ` ⇄ ${activeF.slots[j].pos}` : ""}
+                      </option>
+                    );
+                  })}
+                </select>
               </div>
             ))}
           </div>
-          <div className="tot-line">★ 11 primeiros = titulares · ↑ ↓ ajustam a ordem · posição vem do perfil do atleta</div>
+          {bench.length > 0 && (
+            <>
+              <div className="subhead">
+                <div className="t">Banco <span className="muted" style={{ fontWeight: 400, fontSize: 12 }}>· ordenado por posição</span></div>
+              </div>
+              <div className="st-list">
+                {bench.map((id) => (
+                  <div className="st-row bench" key={id}>
+                    <div className="nm">
+                      {nameOf(id)}
+                      <select
+                        className="pos-sel"
+                        value={positions[id] || ""}
+                        onChange={(e) => setPosition(id, e.target.value)}
+                      >
+                        <option value="">posição…</option>
+                        {positions[id] && !(POSITIONS as readonly string[]).includes(positions[id]) && (
+                          <option value={positions[id]}>{positions[id]}</option>
+                        )}
+                        {POSITIONS.map((p) => <option key={p} value={p}>{p}</option>)}
+                      </select>
+                    </div>
+                    <button type="button" className="ord-btn rm" onClick={() => toggle(id)} aria-label="Remover">×</button>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+          <div className="tot-line">
+            Titular = vaga preenchida na formação com bola · a posição salva vem da vaga ·
+            sem bola usa os mesmos 11
+          </div>
         </>
       )}
 

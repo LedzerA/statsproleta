@@ -39,6 +39,19 @@ export interface Clock {
   at?: string | null;
 }
 
+/** Uma fase tática: formação + atleta por vaga.
+    slots[i] corresponde à vaga i da formação (ordem de src/lib/formations.ts). */
+export interface TacticsPhase {
+  formation: string; // ex.: "4-3-3"
+  slots: (string | null)[]; // atletaId por vaga (null = vaga livre)
+}
+
+/** Escalação tática com bola / sem bola — mesmos 11, distribuição diferente. */
+export interface Tactics {
+  com: TacticsPhase;
+  sem: TacticsPhase;
+}
+
 export interface Match {
   id: string;
   squad_id: string;
@@ -60,6 +73,7 @@ export interface Match {
   archived: boolean;
   clock: Clock | null;
   started_at: string | null;
+  tactics: Tactics | null; // formações com/sem bola (atualização 4)
 }
 
 export type EventType =

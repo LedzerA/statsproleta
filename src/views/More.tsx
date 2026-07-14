@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useStore } from "../state/store";
 import { VAPID_PUBLIC_KEY } from "../config";
 import { pushSupported, subscribePush, unsubscribePush, getSubscription } from "../lib/push";
@@ -17,15 +17,41 @@ const stamp = () => new Date().toISOString().slice(0, 10);
 
 export default function More() {
   const {
-    squad, squads, roster, matches, squadMatches, stats, session, isAdmin,
-    signOut, addSquad, importBackup, wipeMatches, toast,
+    squad, squads, roster, matches, squadMatches, stats, session, isAdmin, schemaLegacy,
+    signOut, addSquad, importBackup, wipeMatches, fillMissingPositions, toast,
   } = useStore();
   const [login, setLogin] = useState(false);
   const [newSquad, setNewSquad] = useState("");
   const [pushOn, setPushOn] = useState(false);
   const [pushBusy, setPushBusy] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [filling, setFilling] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // relacionados sem posição salva nas partidas encerradas do elenco atual
+  const pend = useMemo(() => {
+    let partidas = 0, lacunas = 0;
+    for (const m of squadMatches) {
+      if (m.status !== "encerrada") continue;
+      const n = (m.lineup || []).filter((id) => !m.positions?.[id]).length;
+      if (n > 0) { partidas++; lacunas += n; }
+    }
+    return { partidas, lacunas };
+  }, [squadMatches]);
+
+  async function runFill() {
+    if (!confirm(
+      `Preencher ${pend.lacunas} posição(ões) em ${pend.partidas} partida(s) encerrada(s) do elenco ${squad?.name}?\n\n` +
+      "Cada atleta recebe a última posição em que jogou (sem histórico, a do perfil). Dá para ajustar depois partida a partida."
+    )) return;
+    setFilling(true);
+    try {
+      const r = await fillMissingPositions();
+      toast(r.matches
+        ? `Posições preenchidas ✓ ${r.spots} atleta(s) em ${r.matches} partida(s)`
+        : "Nada preenchido — os atletas pendentes não têm histórico nem posição no perfil.");
+    } finally { setFilling(false); }
+  }
 
   async function handleImportFile(file: File) {
     let raw: unknown;
@@ -182,6 +208,24 @@ export default function More() {
                 e.target.value = "";
               }}
             />
+          </div>
+        )}
+
+        {isAdmin && !schemaLegacy && (
+          <div className="data-card">
+            <h3>🧩 Posições nas partidas antigas</h3>
+            {pend.lacunas > 0 ? (
+              <p>
+                <b>{pend.lacunas}</b> relacionado(s) sem posição salva em <b>{pend.partidas}</b> partida(s)
+                encerrada(s) de <b>{squad?.name}</b>. Preenche tudo de uma vez com a última posição em que
+                cada atleta jogou (sem histórico, usa a do perfil).
+              </p>
+            ) : (
+              <p>Todas as partidas encerradas de <b>{squad?.name}</b> têm posição salva para cada relacionado ✓</p>
+            )}
+            <button className="btn block" disabled={!pend.lacunas || filling} onClick={runFill}>
+              {filling ? "Preenchendo…" : "Preencher posições em falta"}
+            </button>
           </div>
         )}
 

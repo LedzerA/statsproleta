@@ -50,6 +50,23 @@ export function athletePositions(
   return derivedPositions(a.id, matches);
 }
 
+/** Última posição registrada do atleta em partida: a mais recente até a data
+    de referência (exclusive a própria partida). Sem nada antes, usa a primeira
+    registrada depois — útil para completar partidas antigas de trás pra frente. */
+export function lastPosition(
+  athleteId: string,
+  matches: { id?: string; date?: string; positions?: Record<string, string> }[],
+  ref?: { id?: string; date?: string }
+): string | undefined {
+  const played = matches
+    .filter((m) => m.id !== ref?.id && m.positions?.[athleteId])
+    .sort((a, b) => (a.date || "").localeCompare(b.date || ""));
+  if (!played.length) return undefined;
+  const antes = ref?.date ? played.filter((m) => (m.date || "") <= ref.date!) : played;
+  const m = antes.length ? antes[antes.length - 1] : played[0];
+  return m.positions![athleteId];
+}
+
 export function posRank(pos: string | null | undefined): number {
   if (!pos) return 99;
   // posição composta ("LE/ZG", "MEI/MC") conta pela primeira
