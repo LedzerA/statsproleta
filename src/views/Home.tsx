@@ -69,7 +69,8 @@ export default function Home() {
     );
   }
 
-  const recent = sortMatches(matches).filter((m) => m.status === "encerrada").slice(-5).reverse();
+  const recent = sortMatches(matches)
+    .filter((m) => m.status === "encerrada" && !m.archived).slice(-5).reverse();
   const next = sortMatches(matches).find((m) => m.status === "agendada");
   const top = [...stats.players].filter((p) => p.part > 0)
     .sort((a, b) => b.part - a.part || b.gols - a.gols).slice(0, 5);

@@ -70,8 +70,8 @@ function LiveClock({ m }: { m: Match }) {
 export default function MatchDetail({ id, editar }: { id: string; editar?: boolean }) {
   const {
     findMatch, roster, squads, athleteName, isAdmin, schemaLegacy,
-    events, loadEvents, addEvent, updateEvent, deleteEvent, toggleClock, resetToScheduled,
-    deleteMatch, upsertMatch, toast,
+    events, loadEvents, addEvent, updateEvent, deleteEvent, undoLastEvent,
+    toggleClock, resetToScheduled, deleteMatch, upsertMatch, toast, ask,
   } = useStore();
   const [editing, setEditing] = useState(false);
   const [goalPicker, setGoalPicker] = useState(false);
@@ -84,10 +84,11 @@ export default function MatchDetail({ id, editar }: { id: string; editar?: boole
   const [tacPhase, setTacPhase] = useState<"com" | "sem" | "bp">("com");
 
   const m = findMatch(id);
-  useEffect(() => { if (m) loadEvents(m.id); }, [id]);
-  // rota #/partida/:id/editar (lista de dados incompletos) abre o formulário direto
+  useEffect(() => { if (m) loadEvents(m.id); }, [id, !!m]);
+  // rota #/partida/:id/editar (lista de dados incompletos) abre o formulário
+  // direto — nunca para partida ao vivo (o form congelaria o placar)
   useEffect(() => {
-    if (editar && m && isAdmin) {
+    if (editar && m && isAdmin && !isLive(m.status)) {
       setEditing(true);
       navigate(`#/partida/${id}`);
     }
@@ -121,6 +122,12 @@ export default function MatchDetail({ id, editar }: { id: string; editar?: boole
   }
 
   const live = isLive(m.status);
+  // último lance registrado — desfazível quando é gol, pênalti ou substituição
+  const lastEv = evList.slice()
+    .sort((a, b) => (a.created_at < b.created_at ? -1 : a.created_at > b.created_at ? 1 : 0))
+    .slice(-1)[0];
+  const canUndo = !!lastEv &&
+    ["gol_pro", "gol_contra", "penalti_pro", "penalti_contra", "sub"].includes(lastEv.type);
   // ordena por período e minuto (com a ordem de registro como desempate) para
   // que um lance com o tempo corrigido apareça no lugar certo da linha do tempo
   const timeline = evList.slice().sort(cmpChrono).reverse();
@@ -138,8 +145,8 @@ export default function MatchDetail({ id, editar }: { id: string; editar?: boole
     try { await addEvent(m!, type, opts); } finally { setBusy(false); }
   }
 
-  function confirmFire(msg: string, type: EventType) {
-    if (confirm(msg)) fire(type);
+  async function confirmFire(msg: string, type: EventType) {
+    if (await ask(msg)) fire(type);
   }
 
   const artKind = m?.status === "agendada" ? "convocacao" : "resultado";
@@ -275,7 +282,9 @@ export default function MatchDetail({ id, editar }: { id: string; editar?: boole
         {live && <LiveClock m={m} />}
         {live && viewers > 0 && (
           <div className="sh-viewers">
-            👁 <b className="num">{viewers}</b> {viewers === 1 ? "pessoa acompanhando" : "pessoas acompanhando"}
+            👁 {viewers === 1
+              ? "você está acompanhando"
+              : <><b className="num">{viewers}</b> pessoas acompanhando</>}
           </div>
         )}
         {infoBits.length > 0 && <div className="sh-info">{infoBits.join("   ·   ")}</div>}
@@ -299,13 +308,13 @@ export default function MatchDetail({ id, editar }: { id: string; editar?: boole
       {isAdmin && m.status === "agendada" && (
         <div className="live-controls">
           <button className="btn primary block lg" disabled={busy}
-            onClick={() => { if (confirm("Iniciar a partida ao vivo? Os inscritos receberão notificação.")) fire("inicio"); }}>
+            onClick={async () => { if (await ask("Iniciar a partida ao vivo? Os inscritos receberão notificação.", { okLabel: "Iniciar ao vivo" })) fire("inicio"); }}>
             🔴 Iniciar partida ao vivo
           </button>
           <div className="row-gap">
             <button className="btn ghost-light block" onClick={() => setEditing(true)}>Editar</button>
-            <button className="btn danger block" onClick={() => {
-              if (confirm(`Excluir a partida contra ${m.opponent}?`)) { deleteMatch(m.id); navigate("#/partidas"); }
+            <button className="btn danger block" onClick={async () => {
+              if (await ask(`Excluir a partida contra ${m.opponent}?`, { danger: true, okLabel: "Excluir" })) { deleteMatch(m.id); navigate("#/partidas"); }
             }}>Excluir</button>
           </div>
         </div>
@@ -353,9 +362,21 @@ export default function MatchDetail({ id, editar }: { id: string; editar?: boole
               🏁 Encerrar partida
             </button>
           )}
+          {canUndo && (
+            <button className="btn ghost-light block sm" disabled={busy}
+              onClick={async () => {
+                const rotulo = lastEv!.payload?.title || lastEv!.type;
+                const corpo = lastEv!.payload?.body ? `\n${lastEv!.payload.body}` : "";
+                if (await ask(`Desfazer o último lance?\n\n${rotulo}${corpo}`, { okLabel: "Desfazer" })) {
+                  undoLastEvent(m);
+                }
+              }}>
+              ↩ Desfazer último lance
+            </button>
+          )}
           <button className="btn ghost-light block sm" disabled={busy}
-            onClick={() => {
-              if (confirm("Zerar e REAGENDAR esta partida? Placar, gols e lances são apagados (escalação, local e horário ficam). Bom para desfazer um teste.")) {
+            onClick={async () => {
+              if (await ask("Zerar e REAGENDAR esta partida? Placar, gols e lances são apagados (escalação, local e horário ficam). Bom para desfazer um teste.", { danger: true, okLabel: "Zerar e reagendar" })) {
                 resetToScheduled(m);
               }
             }}>
@@ -472,15 +493,15 @@ export default function MatchDetail({ id, editar }: { id: string; editar?: boole
               {m.archived ? "Desarquivar" : "Arquivar (sai das estatísticas)"}
             </button>
           )}
-          <button className="btn ghost-light block" onClick={() => {
-            if (confirm("Zerar e REAGENDAR esta partida? Placar, gols e lances são apagados (escalação, local e horário ficam). Bom para desfazer um teste ou um encerramento por engano.")) {
+          <button className="btn ghost-light block" onClick={async () => {
+            if (await ask("Zerar e REAGENDAR esta partida? Placar, gols e lances são apagados (escalação, local e horário ficam). Bom para desfazer um teste ou um encerramento por engano.", { danger: true, okLabel: "Zerar e reagendar" })) {
               resetToScheduled(m);
             }
           }}>
             ↩ Zerar e reagendar
           </button>
-          <button className="btn danger block" onClick={() => {
-            if (confirm(`Excluir a partida contra ${m.opponent} (${fmtDate(m.date)})?\n\nEssa ação não pode ser desfeita.`)) {
+          <button className="btn danger block" onClick={async () => {
+            if (await ask(`Excluir a partida contra ${m.opponent} (${fmtDate(m.date)})?\n\nEssa ação não pode ser desfeita.`, { danger: true, okLabel: "Excluir" })) {
               deleteMatch(m.id); navigate("#/partidas");
             }
           }}>Excluir</button>
@@ -542,8 +563,8 @@ export default function MatchDetail({ id, editar }: { id: string; editar?: boole
           ev={editEv}
           onClose={() => setEditEv(null)}
           onSave={(patch) => { updateEvent(editEv, patch); setEditEv(null); }}
-          onDelete={() => {
-            if (confirm("Excluir este lance da linha do tempo?\n\nO placar não muda — se for um gol, ajuste o resultado em \"Editar partida\".")) {
+          onDelete={async () => {
+            if (await ask("Excluir este lance da linha do tempo?\n\nO placar não muda — se for um gol, ajuste o resultado em “Editar partida”.", { danger: true, okLabel: "Excluir lance" })) {
               deleteEvent(editEv); setEditEv(null);
             }
           }}

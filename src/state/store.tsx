@@ -147,7 +147,8 @@ interface StoreValue {
   isAdmin: boolean;
   signIn: (email: string, pass: string) => Promise<void>;
   signOut: () => Promise<void>;
-  upsertMatch: (m: Match) => Promise<void>;
+  /** Grava a partida; false = a escrita falhou (estado já reconciliado). */
+  upsertMatch: (m: Match) => Promise<boolean>;
   deleteMatch: (id: string) => Promise<void>;
   addAthlete: (name: string) => Promise<Athlete | null>;
   /** Salva as posições do perfil do atleta (precisa da atualização 3 no banco). */
@@ -160,12 +161,20 @@ interface StoreValue {
   ) => Promise<void>;
   updateEvent: (ev: MatchEvent, patch: { minute?: number | null; period?: number }) => Promise<void>;
   deleteEvent: (ev: MatchEvent) => Promise<void>;
+  /** Desfaz o último lance (gols/pênaltis/sub): apaga o evento e reverte o placar. */
+  undoLastEvent: (m: Match) => Promise<void>;
   toggleClock: (m: Match) => Promise<void>;
   resetToScheduled: (m: Match) => Promise<void>;
   importBackup: (raw: unknown) => Promise<{ athletes: number; matches: number }>;
   wipeMatches: () => Promise<void>;
   toast: (msg: string) => void;
   toastMsg: string;
+  /** Confirmação no modal do app (substitui window.confirm). */
+  ask: (msg: string, opts?: { title?: string; okLabel?: string; danger?: boolean }) => Promise<boolean>;
+  /** Aviso no modal do app (substitui window.alert). */
+  tell: (msg: string, title?: string) => Promise<void>;
+  dialog: { title: string; msg: string; okLabel: string; danger: boolean; showCancel: boolean } | null;
+  resolveDialog: (v: boolean) => void;
 }
 
 const Ctx = createContext<StoreValue | null>(null);
@@ -225,9 +234,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
+  /* assume o schema completo até um probe confirmar coluna ausente (42703):
+     um erro transitório de rede no boot não pode descartar dados nas escritas */
   const [schemaLegacy, setSchemaLegacy] = useState(false);
-  const [schemaTactics, setSchemaTactics] = useState(false);
-  const [schemaLogistics, setSchemaLogistics] = useState(false);
+  const [schemaTactics, setSchemaTactics] = useState(true);
+  const [schemaLogistics, setSchemaLogistics] = useState(true);
   const toastTimer = useRef<number>(0);
   const ownEvents = useRef<Set<string>>(new Set());
 
@@ -237,7 +248,42 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     toastTimer.current = window.setTimeout(() => setToastMsg(""), 2500);
   }, []);
 
+  /* diálogo do app (confirmação/aviso) — substitui confirm()/alert() nativos,
+     que destoam da identidade e travam o PWA. App.tsx renderiza. */
+  const dialogResolve = useRef<((v: boolean) => void) | null>(null);
+  const [dialog, setDialog] = useState<StoreValue["dialog"]>(null);
+  const ask = useCallback((msg: string, opts?: { title?: string; okLabel?: string; danger?: boolean }) => {
+    return new Promise<boolean>((resolve) => {
+      dialogResolve.current?.(false); // pedido pendente é cancelado pelo novo
+      dialogResolve.current = resolve;
+      setDialog({
+        title: opts?.title || "Confirmar",
+        msg,
+        okLabel: opts?.okLabel || "Confirmar",
+        danger: !!opts?.danger,
+        showCancel: true,
+      });
+    });
+  }, []);
+  const tell = useCallback((msg: string, title = "Aviso") => {
+    return new Promise<void>((resolve) => {
+      dialogResolve.current?.(false);
+      dialogResolve.current = () => resolve();
+      setDialog({ title, msg, okLabel: "Entendi", danger: false, showCancel: false });
+    });
+  }, []);
+  const resolveDialog = useCallback((v: boolean) => {
+    setDialog(null);
+    const r = dialogResolve.current;
+    dialogResolve.current = null;
+    r?.(v);
+  }, []);
+
+  const refetchSeq = useRef(0);
   const refetch = useCallback(async () => {
+    // número de sequência: se dois refetches se cruzam, o snapshot mais
+    // antigo não pode sobrescrever o mais novo (placar "voltando" no ao vivo)
+    const seq = ++refetchSeq.current;
     const [sq, at, ma] = await Promise.all([
       sb.from("squads").select("*").order("position"),
       sb.from("athletes").select("*").order("created_at"),
@@ -246,28 +292,34 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (sq.error || at.error || ma.error) {
       throw sq.error || at.error || ma.error;
     }
-    setSquads((sq.data as Squad[]) || []);
-    setAthletes((((at.data as any[]) || []).map((a) => ({
-      ...a, positions: Array.isArray(a.positions) ? a.positions : [],
-    })) as Athlete[]));
-    setAllMatches(((ma.data as any[]) || []).map(normalizeMatch));
+    if (seq === refetchSeq.current) {
+      setSquads((sq.data as Squad[]) || []);
+      setAthletes((((at.data as any[]) || []).map((a) => ({
+        ...a, positions: Array.isArray(a.positions) ? a.positions : [],
+      })) as Athlete[]));
+      setAllMatches(((ma.data as any[]) || []).map(normalizeMatch));
+    }
     return (sq.data as Squad[]) || [];
   }, []);
 
-  /* o banco já recebeu a atualização 1 (colunas de titulares etc.)? e a 4 (tactics)? */
+  /* o banco já recebeu as atualizações 1 (titulares etc.), 4 (tactics) e
+     5 (logística)? Só o erro 42703 ("coluna não existe") liga o modo de
+     compatibilidade — timeout/rede não podem degradar as escritas. */
   useEffect(() => {
-    sb.from("matches").select("starters").limit(1).then(({ error }) => {
-      setSchemaLegacy(!!error);
-      if (error) console.warn("Banco sem a atualização 1 — rode supabase/atualizacao-1.sql:", error.message);
-    });
-    sb.from("matches").select("tactics").limit(1).then(({ error }) => {
-      setSchemaTactics(!error);
-      if (error) console.warn("Banco sem a atualização 4 — rode supabase/atualizacao-4.sql (as formações táticas não serão salvas):", error.message);
-    });
-    sb.from("matches").select("meet_time").limit(1).then(({ error }) => {
-      setSchemaLogistics(!error);
-      if (error) console.warn("Banco sem a atualização 5 — rode supabase/atualizacao-5.sql (apresentação, bolas e uniforme não serão salvos):", error.message);
-    });
+    const probe = (col: string, onMissing: () => void, aviso: string) => {
+      sb.from("matches").select(col).limit(1).then(({ error }) => {
+        if (!error) return;
+        if ((error as { code?: string }).code === "42703") {
+          onMissing();
+          console.warn(aviso, error.message);
+        } else {
+          console.warn(`Probe de matches.${col} falhou (${error.message}) — assumindo schema completo.`);
+        }
+      });
+    };
+    probe("starters", () => setSchemaLegacy(true), "Banco sem a atualização 1 — rode supabase/atualizacao-1.sql:");
+    probe("tactics", () => setSchemaTactics(false), "Banco sem a atualização 4 — rode supabase/atualizacao-4.sql (as formações táticas não serão salvas):");
+    probe("meet_time", () => setSchemaLogistics(false), "Banco sem a atualização 5 — rode supabase/atualizacao-5.sql (apresentação, bolas e uniforme não serão salvos):");
   }, []);
 
   /* ---- boot ---- */
@@ -418,7 +470,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const payload: EventPayload = {
       ...ev.payload,
       period,
-      seconds: minute != null ? minute * 60 : ev.payload?.seconds,
+      seconds: minute != null ? minute * 60 : undefined,
     };
     const upd: MatchEvent = { ...ev, minute, payload };
     setEvents((old) => ({
@@ -426,9 +478,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       [ev.match_id]: (old[ev.match_id] || []).map((x) => (x.id === ev.id ? upd : x)),
     }));
     const { error } = await sb.from("match_events").update({ minute, payload }).eq("id", ev.id);
-    if (error) { console.error(error); toast("Erro ao editar o lance."); }
+    if (error) { console.error(error); toast("Erro ao editar o lance."); loadEvents(ev.match_id); }
     else toast("Lance atualizado ✓");
-  }, [toast]);
+  }, [toast, loadEvents]);
 
   /** Remove um lance da linha do tempo. Não mexe no placar. */
   const deleteEvent = useCallback(async (ev: MatchEvent) => {
@@ -437,11 +489,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       [ev.match_id]: (old[ev.match_id] || []).filter((x) => x.id !== ev.id),
     }));
     const { error } = await sb.from("match_events").delete().eq("id", ev.id);
-    if (error) { console.error(error); toast("Erro ao excluir o lance."); }
+    if (error) { console.error(error); toast("Erro ao excluir o lance."); loadEvents(ev.match_id); }
     else toast("Lance excluído");
-  }, [toast]);
+  }, [toast, loadEvents]);
 
-  const upsertMatch = useCallback(async (m: Match) => {
+  /** Grava a partida (otimista). Em erro, reconcilia o estado com o banco e
+      devolve false — quem depende da escrita (ex.: addEvent) pode abortar. */
+  const upsertMatch = useCallback(async (m: Match): Promise<boolean> => {
     setAllMatches((old) => {
       const i = old.findIndex((x) => x.id === m.id);
       if (i >= 0) { const cp = [...old]; cp[i] = m; return cp; }
@@ -452,15 +506,24 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (schemaLegacy || !schemaTactics) delete row.tactics;
     if (schemaLegacy || !schemaLogistics) for (const f of LOGISTICS_FIELDS) delete row[f];
     const { error } = await sb.from("matches").upsert(row);
-    if (error) { console.error(error); toast("Erro ao salvar. Verifique a conexão."); }
-  }, [toast, schemaLegacy, schemaTactics, schemaLogistics]);
+    if (error) {
+      console.error(error);
+      toast("Erro ao salvar. Verifique a conexão.");
+      refetch().catch(console.error); // desfaz o otimismo com a verdade do banco
+      return false;
+    }
+    return true;
+  }, [toast, schemaLegacy, schemaTactics, schemaLogistics, refetch]);
 
   const deleteMatch = useCallback(async (id: string) => {
     setAllMatches((old) => old.filter((m) => m.id !== id));
     const { error } = await sb.from("matches").delete().eq("id", id);
-    if (error) { console.error(error); toast("Erro ao excluir."); }
-    else toast("Partida excluída");
-  }, [toast]);
+    if (error) {
+      console.error(error);
+      toast("Erro ao excluir.");
+      refetch().catch(console.error);
+    } else toast("Partida excluída");
+  }, [toast, refetch]);
 
   const addAthlete = useCallback(async (name: string): Promise<Athlete | null> => {
     const clean = name.trim();
@@ -472,7 +535,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const a: Athlete = { id: uid("a"), squad_id: squadId, name: clean };
     setAthletes((old) => [...old, a]);
     const { error } = await sb.from("athletes").insert(a);
-    if (error) { console.error(error); toast("Erro ao salvar atleta."); return null; }
+    if (error) {
+      console.error(error);
+      // remove o atleta-fantasma, senão o guard de duplicado trava a retentativa
+      setAthletes((old) => old.filter((x) => x.id !== a.id));
+      toast("Erro ao salvar atleta.");
+      return null;
+    }
     toast(`${clean} adicionado ao elenco`);
     return a;
   }, [roster, squadId, toast]);
@@ -572,12 +641,53 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       };
       ownEvents.current.add(ev.id);
       setEvents((old) => ({ ...old, [m.id]: [...(old[m.id] || []), ev] }));
-      await upsertMatch(upd);
+      const ok = await upsertMatch(upd);
+      if (!ok) {
+        // partida não gravou (upsertMatch já reconciliou) — não insere o lance
+        ownEvents.current.delete(ev.id);
+        setEvents((old) => ({ ...old, [m.id]: (old[m.id] || []).filter((x) => x.id !== ev.id) }));
+        return;
+      }
       const { error } = await sb.from("match_events").insert(ev);
-      if (error) { console.error(error); toast("Erro ao registrar evento."); }
+      if (error) { console.error(error); toast("Erro ao registrar evento."); loadEvents(m.id); }
     },
-    [athleteName, upsertMatch, toast]
+    [athleteName, upsertMatch, toast, loadEvents]
   );
+
+  /** Desfaz o ÚLTIMO lance registrado (gols, pênaltis e substituições):
+      apaga o lance e reverte o placar/marcadores quando for gol. Transições
+      de tempo têm os próprios controles e não passam por aqui. */
+  const undoLastEvent = useCallback(async (m: Match) => {
+    const list = (events[m.id] || []).slice()
+      .sort((a, b) => (a.created_at < b.created_at ? -1 : a.created_at > b.created_at ? 1 : 0));
+    const ev = list[list.length - 1];
+    const desfazivel: EventType[] = ["gol_pro", "gol_contra", "penalti_pro", "penalti_contra", "sub"];
+    if (!ev || !desfazivel.includes(ev.type)) {
+      toast("O último lance não é desfazível por aqui.");
+      return;
+    }
+    const upd: Match = { ...m };
+    if (ev.type === "gol_pro") {
+      upd.goals_for = Math.max(0, m.goals_for - 1);
+      if (ev.athlete_id) {
+        upd.scorers = (m.scorers || [])
+          .map((x) => (x.a === ev.athlete_id ? { ...x, g: x.g - 1 } : x))
+          .filter((x) => x.g > 0);
+      }
+      if (ev.assist_id) {
+        upd.assists = (m.assists || [])
+          .map((x) => (x.a === ev.assist_id ? { ...x, n: x.n - 1 } : x))
+          .filter((x) => x.n > 0);
+      }
+    } else if (ev.type === "gol_contra") {
+      upd.goals_against = Math.max(0, m.goals_against - 1);
+    }
+    setEvents((old) => ({ ...old, [m.id]: (old[m.id] || []).filter((x) => x.id !== ev.id) }));
+    const { error } = await sb.from("match_events").delete().eq("id", ev.id);
+    if (error) { console.error(error); toast("Erro ao desfazer."); loadEvents(m.id); return; }
+    if (ev.type === "gol_pro" || ev.type === "gol_contra") await upsertMatch(upd);
+    toast("Último lance desfeito ↩");
+  }, [events, upsertMatch, toast, loadEvents]);
 
   /** Volta a partida para "agendada": zera placar, gols, lances e relógio.
       Mantém relacionados, titulares, posições, local, horário e uniforme. */
@@ -610,18 +720,27 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   /** Importa backup .json (formato v1 do arquivo único OU v2) substituindo
       atletas e partidas do ELENCO ATUAL. IDs são remapeados para não colidir
-      com outros elencos. */
+      com outros elencos. Ordem à prova de falha: valida tudo, INSERE os
+      novos primeiro e só então apaga os antigos — um erro no meio nunca
+      deixa o elenco vazio. */
   const importBackup = useCallback(async (raw: any) => {
     const rosterIn: any[] | null = Array.isArray(raw?.roster) ? raw.roster
       : Array.isArray(raw?.athletes) ? raw.athletes : null;
     const matchesIn: any[] | null = Array.isArray(raw?.matches) ? raw.matches : null;
     if (!rosterIn || !matchesIn) throw new Error("formato");
+    // valida ANTES de escrever qualquer coisa
+    for (const m of matchesIn) {
+      if (!/^\d{4}-\d{2}-\d{2}/.test(String(m.date || ""))) throw new Error("formato");
+    }
 
     const idMap = new Map<string, string>();
     const newAthletes: Athlete[] = rosterIn.map((a: any) => {
       const nid = uid("a");
       idMap.set(String(a.id), nid);
-      return { id: nid, squad_id: squadId, name: String(a.name || "?") };
+      return {
+        id: nid, squad_id: squadId, name: String(a.name || "?"),
+        positions: Array.isArray(a.positions) ? a.positions.map(String) : [],
+      };
     });
     const VALID = ["agendada", "ao_vivo_1t", "intervalo", "ao_vivo_2t", "encerrada"];
     const newMatches: Match[] = matchesIn.map((m: any) => ({
@@ -661,26 +780,46 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       tactics: remapTactics(m.tactics, idMap),
     }));
 
-    let r = await sb.from("matches").delete().eq("squad_id", squadId);
-    if (r.error) throw r.error;
-    r = await sb.from("athletes").delete().eq("squad_id", squadId);
-    if (r.error) throw r.error;
+    const oldMatchIds = allMatches.filter((m) => m.squad_id === squadId).map((m) => m.id);
+    const oldAthleteIds = athletes.filter((a) => a.squad_id === squadId).map((a) => a.id);
+
+    // 1) insere os novos (ids recém-gerados não colidem com os antigos)
     if (newAthletes.length) {
-      r = await sb.from("athletes").insert(newAthletes);
+      const rows = newAthletes.map((a) => {
+        const row: any = { ...a };
+        if (schemaLegacy) delete row.positions; // coluna da atualização 3
+        return row;
+      });
+      const r = await sb.from("athletes").insert(rows);
       if (r.error) throw r.error;
     }
     if (newMatches.length) {
-      r = await sb.from("matches").insert(newMatches.map((m) => {
+      const rows = newMatches.map((m) => {
         const row: any = { ...m };
+        if (schemaLegacy) for (const f of V21_FIELDS) delete row[f];
         if (schemaLegacy || !schemaTactics) delete row.tactics;
         if (schemaLegacy || !schemaLogistics) for (const f of LOGISTICS_FIELDS) delete row[f];
         return row;
-      }));
+      });
+      const r = await sb.from("matches").insert(rows);
+      if (r.error) {
+        // desfaz os atletas recém-inseridos para não deixar duplicata
+        await sb.from("athletes").delete().in("id", newAthletes.map((a) => a.id));
+        throw r.error;
+      }
+    }
+    // 2) só então remove os antigos, em lotes (URLs curtas)
+    for (let i = 0; i < oldMatchIds.length; i += 80) {
+      const r = await sb.from("matches").delete().in("id", oldMatchIds.slice(i, i + 80));
+      if (r.error) throw r.error;
+    }
+    for (let i = 0; i < oldAthleteIds.length; i += 80) {
+      const r = await sb.from("athletes").delete().in("id", oldAthleteIds.slice(i, i + 80));
       if (r.error) throw r.error;
     }
     await refetch();
     return { athletes: newAthletes.length, matches: newMatches.length };
-  }, [squadId, refetch, schemaLegacy, schemaTactics, schemaLogistics]);
+  }, [squadId, allMatches, athletes, refetch, schemaLegacy, schemaTactics, schemaLogistics]);
 
   /** Apaga todas as partidas do elenco atual (mantém os atletas). */
   const wipeMatches = useCallback(async () => {
@@ -703,8 +842,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     period, setPeriod, periodOn, findMatch, stats,
     liveMatch, events, loadEvents, session, isAdmin, signIn, signOut,
     upsertMatch, deleteMatch, addAthlete, updateAthletePositions, addSquad, addEvent,
-    updateEvent, deleteEvent, toggleClock,
+    updateEvent, deleteEvent, undoLastEvent, toggleClock,
     resetToScheduled, importBackup, wipeMatches, toast, toastMsg,
+    ask, tell, dialog, resolveDialog,
   };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

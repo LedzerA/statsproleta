@@ -23,7 +23,12 @@ export const PERIOD_PRESETS: { id: PeriodPreset; label: string }[] = [
 
 export function monthsAgoISO(n: number): string {
   const d = new Date();
+  // sem overflow de fim de mês: 31/05 − 3 meses deve dar 28/02, não 03/03
+  const dia = d.getDate();
+  d.setDate(1);
   d.setMonth(d.getMonth() - n);
+  const ultimo = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  d.setDate(Math.min(dia, ultimo));
   const off = d.getTimezoneOffset();
   return new Date(d.getTime() - off * 60000).toISOString().slice(0, 10);
 }

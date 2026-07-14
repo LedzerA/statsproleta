@@ -121,7 +121,7 @@ export default function Matches({ openNew }: { openNew?: boolean }) {
         role="button"
         tabIndex={0}
         onClick={open}
-        onKeyDown={(e) => { if (e.key === "Enter") open(); }}
+        onKeyDown={(e) => { if (e.key === "Enter" && e.target === e.currentTarget) open(); }}
       >
         <div className="mc-top">
           <div className="mc-date">{fmtDate(m.date)}</div>

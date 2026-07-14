@@ -34,7 +34,9 @@ export function resWord(r: Result): string {
 }
 
 export function uid(prefix: string): string {
-  return prefix + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36);
+  // 8 caracteres aleatórios (~2,8 trilhões de combinações) — seguro até para
+  // gerar centenas de ids no mesmo milissegundo (import de backup)
+  return prefix + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
 }
 
 export function todayISO(): string {

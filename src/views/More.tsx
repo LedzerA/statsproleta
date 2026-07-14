@@ -24,7 +24,7 @@ const stamp = () => new Date().toISOString().slice(0, 10);
 export default function More() {
   const {
     squad, squads, roster, matches, squadMatches, stats, session, isAdmin, schemaLegacy,
-    signOut, addSquad, importBackup, wipeMatches, toast,
+    signOut, addSquad, importBackup, wipeMatches, toast, ask, tell,
   } = useStore();
   const [login, setLogin] = useState(false);
   const [newSquad, setNewSquad] = useState("");
@@ -110,12 +110,13 @@ export default function More() {
     try {
       raw = JSON.parse(await file.text());
     } catch {
-      alert("Arquivo inválido. Selecione um backup .json exportado por este app (v1 ou v2).");
+      tell("Arquivo inválido. Selecione um backup .json exportado por este app (v1 ou v2).", "Importar backup");
       return;
     }
-    if (!confirm(
+    if (!await ask(
       `Importar este backup para o elenco ${squad?.name}?\n\n` +
-      "ATENÇÃO: os atletas e partidas atuais DESTE elenco serão substituídos pelos do arquivo."
+      "ATENÇÃO: os atletas e partidas atuais DESTE elenco serão substituídos pelos do arquivo.",
+      { danger: true, okLabel: "Substituir e importar", title: "Importar backup" }
     )) return;
     setImporting(true);
     try {
@@ -123,9 +124,9 @@ export default function More() {
       toast(`Backup importado ✓ (${res.athletes} atletas, ${res.matches} partidas)`);
     } catch (e: any) {
       console.error(e);
-      alert(e?.message === "formato"
+      tell(e?.message === "formato"
         ? "Arquivo inválido. Selecione um backup .json exportado por este app (v1 ou v2)."
-        : "Erro ao importar. Verifique a conexão e tente de novo.");
+        : "Erro ao importar — nada foi apagado. Verifique a conexão e tente de novo.", "Importar backup");
     } finally {
       setImporting(false);
     }
@@ -157,7 +158,7 @@ export default function More() {
             : res.reason === "server"
               ? "O navegador aprovou, mas o servidor recusou o registro. Me avise se continuar."
               : "Não foi possível ativar as notificações neste aparelho.";
-      alert(msg + (res.detail ? `\n\nDetalhe técnico: ${res.detail}` : ""));
+      tell(msg + (res.detail ? `\n\nDetalhe técnico: ${res.detail}` : ""), "Notificações");
     } finally { setPushBusy(false); }
   }
 
@@ -323,7 +324,7 @@ export default function More() {
                 Logado como <b>{session.user.email}</b>
                 {isAdmin ? " · admin ✓" : " · sem permissão de admin (peça para um admin te cadastrar)"}
               </p>
-              <button className="btn ghost block" onClick={() => { if (confirm("Sair da conta?")) signOut(); }}>
+              <button className="btn ghost block" onClick={async () => { if (await ask("Sair da conta?", { okLabel: "Sair" })) signOut(); }}>
                 Sair da conta
               </button>
             </>
@@ -349,9 +350,9 @@ export default function More() {
             <p>Apaga todas as partidas do elenco <b>{squad?.name}</b> (os atletas ficam). Baixe um backup antes.</p>
             <button
               className="btn danger block"
-              onClick={() => {
-                if (!confirm(`Apagar TODAS as partidas do elenco ${squad?.name}? Essa ação não pode ser desfeita.`)) return;
-                if (!confirm("Tem certeza mesmo? Última chance — os dados somem para todo mundo.")) return;
+              onClick={async () => {
+                if (!await ask(`Apagar TODAS as partidas do elenco ${squad?.name}? Essa ação não pode ser desfeita.`, { danger: true, okLabel: "Apagar tudo" })) return;
+                if (!await ask("Tem certeza mesmo? Última chance — os dados somem para todo mundo.", { danger: true, okLabel: "Apagar de vez" })) return;
                 wipeMatches();
               }}
             >

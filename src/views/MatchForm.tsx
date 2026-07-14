@@ -114,7 +114,12 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
   // sem bola e bola parada espelham a com bola até o usuário mexer nelas
   const [semManual, setSemManual] = useState<boolean>(() => {
     const t = match?.tactics;
-    return !!t && (t.com.formation !== t.sem.formation || t.com.slots.join() !== t.sem.slots.join());
+    if (!t) return false;
+    // arrasto no campinho também é personalização — sem isso os pontos da
+    // fase sem bola eram descartados na próxima edição
+    return t.com.formation !== t.sem.formation ||
+      t.com.slots.join() !== t.sem.slots.join() ||
+      JSON.stringify(t.com.coords ?? null) !== JSON.stringify(t.sem.coords ?? null);
   });
   const [bpManual, setBpManual] = useState<boolean>(() => !!match?.tactics?.bp);
   // titulares cuja posição foi ajustada à mão (ex.: ZC numa vaga ZG) — para
@@ -391,8 +396,10 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
       lineup: [...lineup],
       starters: st,
       positions: cleanPositions,
-      scorers: Object.entries(scorers).map(([a, g]) => ({ a, g })),
-      assists: Object.entries(assists).map(([a, n]) => ({ a, n })),
+      // só quem segue relacionado — remover um atleta dos chips leva os
+      // gols/assistências dele junto (senão vira artilheiro com 0 presenças)
+      scorers: Object.entries(scorers).filter(([a]) => lineup.includes(a)).map(([a, g]) => ({ a, g })),
+      assists: Object.entries(assists).filter(([a]) => lineup.includes(a)).map(([a, n]) => ({ a, n })),
       lineup_complete: complete,
       notes: match?.notes || "",
       venue: venue.trim() || null,
@@ -557,8 +564,11 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
             if (e.key !== "Enter") return;
             e.preventDefault();
             const first = busca.trim() ? grouped[0]?.athletes[0] : undefined;
-            if (first) { toggle(first.id); setBusca(""); }
-            else handleAddAthlete();
+            if (first) {
+              // nunca DESconvoca pelo Enter — quem já está relacionado só limpa a busca
+              if (!lineup.includes(first.id)) toggle(first.id);
+              setBusca("");
+            } else handleAddAthlete();
           }}
         />
         <button className="btn sm" onClick={handleAddAthlete}>Adicionar</button>

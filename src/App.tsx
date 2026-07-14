@@ -3,7 +3,7 @@ import { useRoute, navigate } from "./lib/router";
 import { TEAM } from "./config";
 import { fmtDate, fmtDateShort, pct } from "./lib/format";
 import { PERIOD_PRESETS, periodRange } from "./lib/period";
-import { FormDots, Spinner } from "./components/ui";
+import { FormDots, Modal, Spinner } from "./components/ui";
 import Home from "./views/Home";
 import Matches from "./views/Matches";
 import MatchDetail from "./views/MatchDetail";
@@ -25,7 +25,7 @@ const NAV = [
 export default function App() {
   const {
     loading, fatal, schemaLegacy, squads, squadId, setSquadId, squad, stats,
-    liveMatch, isAdmin, toastMsg, period, setPeriod,
+    liveMatch, isAdmin, toastMsg, period, setPeriod, dialog, resolveDialog,
   } = useStore();
   const route = useRoute();
 
@@ -205,6 +205,30 @@ export default function App() {
           </button>
         ))}
       </nav>
+
+      {dialog && (
+        <Modal
+          title={dialog.title}
+          onClose={() => resolveDialog(false)}
+          footer={
+            <>
+              {dialog.showCancel && (
+                <button className="btn ghost" style={{ flex: 1 }} onClick={() => resolveDialog(false)}>Cancelar</button>
+              )}
+              <button
+                className={`btn ${dialog.danger ? "danger" : "primary"}`}
+                style={{ flex: 2 }}
+                autoFocus
+                onClick={() => resolveDialog(true)}
+              >
+                {dialog.okLabel}
+              </button>
+            </>
+          }
+        >
+          <p style={{ whiteSpace: "pre-line", margin: "2px 0 6px" }}>{dialog.msg}</p>
+        </Modal>
+      )}
 
       <div className={`toast ${toastMsg ? "show" : ""}`}>{toastMsg}</div>
     </>
