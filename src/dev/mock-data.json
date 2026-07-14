@@ -27,14 +27,11 @@
  ],
  "athletes": [
   {
-   "id": "a16",
+   "id": "a42",
    "squad_id": "esporte",
-   "name": "Belaz",
+   "name": "PH",
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "positions": [
-    "ZG",
-    "LE"
-   ]
+   "positions": []
   },
   {
    "id": "a5",
@@ -170,9 +167,9 @@
    "positions": []
   },
   {
-   "id": "a42",
+   "id": "a4",
    "squad_id": "esporte",
-   "name": "PH",
+   "name": "Vini França",
    "created_at": "2026-07-10T22:46:13.282876+00:00",
    "positions": []
   },
@@ -427,11 +424,14 @@
    ]
   },
   {
-   "id": "a4",
+   "id": "a16",
    "squad_id": "esporte",
-   "name": "Vini França",
+   "name": "Belaz",
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "positions": []
+   "positions": [
+    "ZG",
+    "LE"
+   ]
   },
   {
    "id": "a19",
@@ -458,40 +458,6 @@
    "created_at": "2026-07-10T22:46:13.282876+00:00",
    "positions": [
     "LE"
-   ]
-  },
-  {
-   "id": "a25",
-   "squad_id": "esporte",
-   "name": "Detona",
-   "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "positions": [
-    "PD",
-    "SA",
-    "CA"
-   ]
-  },
-  {
-   "id": "a12",
-   "squad_id": "esporte",
-   "name": "Meloni",
-   "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "positions": [
-    "LD",
-    "PE",
-    "PD",
-    "SA",
-    "CA"
-   ]
-  },
-  {
-   "id": "a21",
-   "squad_id": "esporte",
-   "name": "Wez",
-   "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "positions": [
-    "MC",
-    "MEI"
    ]
   },
   {
@@ -570,6 +536,40 @@
    ]
   },
   {
+   "id": "a25",
+   "squad_id": "esporte",
+   "name": "Detona",
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": [
+    "PD",
+    "SA",
+    "CA"
+   ]
+  },
+  {
+   "id": "a12",
+   "squad_id": "esporte",
+   "name": "Meloni",
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": [
+    "LD",
+    "PE",
+    "PD",
+    "SA",
+    "CA"
+   ]
+  },
+  {
+   "id": "a21",
+   "squad_id": "esporte",
+   "name": "Wez",
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": [
+    "MC",
+    "MEI"
+   ]
+  },
+  {
    "id": "amrk3l61f578",
    "squad_id": "diverso",
    "name": "Led",
@@ -588,6 +588,118 @@
    "squad_id": "diverso",
    "name": "Macapá",
    "created_at": "2026-07-14T13:38:01.890048+00:00",
+   "positions": []
+  },
+  {
+   "id": "amrkp52984kk",
+   "squad_id": "diverso",
+   "name": "Hashi",
+   "created_at": "2026-07-14T13:38:03.502697+00:00",
+   "positions": []
+  },
+  {
+   "id": "amrkp568xr4",
+   "squad_id": "diverso",
+   "name": "Amaral",
+   "created_at": "2026-07-14T13:38:08.679383+00:00",
+   "positions": []
+  },
+  {
+   "id": "amrkp576b6du",
+   "squad_id": "diverso",
+   "name": "Siqueira",
+   "created_at": "2026-07-14T13:38:10.110297+00:00",
+   "positions": []
+  },
+  {
+   "id": "amrkp58qg1qi",
+   "squad_id": "diverso",
+   "name": "Romário",
+   "created_at": "2026-07-14T13:38:11.901342+00:00",
+   "positions": []
+  },
+  {
+   "id": "amrkp5adp7i2",
+   "squad_id": "diverso",
+   "name": "Brendon",
+   "created_at": "2026-07-14T13:38:14.036239+00:00",
+   "positions": []
+  },
+  {
+   "id": "amrkp5s0zf1",
+   "squad_id": "diverso",
+   "name": "Gzus",
+   "created_at": "2026-07-14T13:38:36.915185+00:00",
+   "positions": []
+  },
+  {
+   "id": "amrkp5t693sv",
+   "squad_id": "diverso",
+   "name": "Digão",
+   "created_at": "2026-07-14T13:38:38.388806+00:00",
+   "positions": []
+  },
+  {
+   "id": "amrkp5tyk3i",
+   "squad_id": "diverso",
+   "name": "Gustavo",
+   "created_at": "2026-07-14T13:38:39.406804+00:00",
+   "positions": []
+  },
+  {
+   "id": "amrkp5uvp2bk",
+   "squad_id": "diverso",
+   "name": "Detona",
+   "created_at": "2026-07-14T13:38:40.599696+00:00",
+   "positions": []
+  },
+  {
+   "id": "amrkp5w5a5wj",
+   "squad_id": "diverso",
+   "name": "Gui Dias",
+   "created_at": "2026-07-14T13:38:42.246515+00:00",
+   "positions": []
+  },
+  {
+   "id": "amrkp5wyo32r",
+   "squad_id": "diverso",
+   "name": "Berti",
+   "created_at": "2026-07-14T13:38:43.302489+00:00",
+   "positions": []
+  },
+  {
+   "id": "amrkp5y5k7cv",
+   "squad_id": "diverso",
+   "name": "Belaz",
+   "created_at": "2026-07-14T13:38:44.848939+00:00",
+   "positions": []
+  },
+  {
+   "id": "amrkp5z8m49w",
+   "squad_id": "diverso",
+   "name": "Jacomo",
+   "created_at": "2026-07-14T13:38:46.238314+00:00",
+   "positions": []
+  },
+  {
+   "id": "amrkp60jimq",
+   "squad_id": "diverso",
+   "name": "Jamison",
+   "created_at": "2026-07-14T13:38:48.19131+00:00",
+   "positions": []
+  },
+  {
+   "id": "amrkp62em5a3",
+   "squad_id": "diverso",
+   "name": "Wez",
+   "created_at": "2026-07-14T13:38:50.35149+00:00",
+   "positions": []
+  },
+  {
+   "id": "amrkp63vv6q9",
+   "squad_id": "diverso",
+   "name": "Alef",
+   "created_at": "2026-07-14T13:38:52.269325+00:00",
    "positions": []
   }
  ],
@@ -629,36 +741,37 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-14T03:31:49.392+00:00",
+   "updated_at": "2026-07-14T14:44:33.145+00:00",
    "starters": [
     "a13",
-    "a20",
-    "a28",
-    "a5",
     "a29",
+    "a28",
+    "a20",
     "a6",
-    "a3",
+    "a5",
     "a24",
-    "a11",
+    "a10",
+    "a3",
     "a12",
-    "a10"
+    "a11"
    ],
    "positions": {
-    "a3": "VOL",
-    "a5": "ZG",
+    "a3": "PE",
+    "a5": "VOL",
     "a6": "LE",
     "a7": "MEI",
     "a9": "MEI",
-    "a10": "CA",
-    "a11": "PE",
+    "a10": "MEI",
+    "a11": "CA",
     "a12": "PD",
     "a13": "GOL",
-    "a18": "ZG",
-    "a20": "ZG",
+    "a18": "LE",
+    "a20": "ZE",
     "a24": "MC",
-    "a28": "ZG",
+    "a28": "ZD",
     "a29": "LD",
-    "a30": "SA"
+    "a30": "SA",
+    "a51": "PE"
    },
    "venue": null,
    "kickoff": null,
@@ -666,55 +779,42 @@
    "archived": false,
    "clock": null,
    "tactics": {
+    "bp": null,
     "com": {
      "slots": [
       "a13",
-      "a20",
-      "a28",
-      "a5",
       "a29",
+      "a28",
+      "a20",
       "a6",
-      "a3",
+      "a5",
       "a24",
-      "a11",
+      "a10",
+      "a3",
       "a12",
-      "a10"
+      "a11"
      ],
      "coords": null,
-     "formation": "3-4-3"
+     "formation": "4-3-3"
     },
     "sem": {
      "slots": [
       "a13",
       "a29",
-      "a20",
       "a28",
+      "a20",
       "a6",
-      "a24",
       "a5",
-      "a11",
-      "a12",
+      "a24",
       "a10",
-      "a3"
+      "a3",
+      "a12",
+      "a11"
      ],
-     "coords": [
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      [
-       44.2,
-       72.2
-      ],
-      null
-     ],
-     "formation": "4-4-2"
-    }
+     "coords": null,
+     "formation": "4-3-3"
+    },
+    "cobradores": null
    },
    "meet_time": null,
    "ball_holder": null,
@@ -774,16 +874,16 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-14T03:32:23.049+00:00",
+   "updated_at": "2026-07-14T14:43:00.121917+00:00",
    "starters": [
-    "a14",
+    "a13",
+    "a3",
     "a20",
     "a18",
-    "a4",
-    "a3",
     "a6",
     "a1",
     "a10",
+    "a14",
     "a11",
     "a2",
     "a8"
@@ -792,19 +892,19 @@
     "a1": "VOL",
     "a2": "PD",
     "a3": "LD",
-    "a4": "ZG",
-    "a5": "ZG",
+    "a4": "ZG/VOL",
+    "a5": "VOL",
     "a6": "LE",
-    "a7": "MEI",
+    "a7": "MEI/VOL/PE",
     "a8": "CA",
     "a9": "MEI",
-    "a10": "MC",
+    "a10": "VOL",
     "a11": "PE",
-    "a13": "GK",
-    "a14": "GOL",
-    "a16": "ZG",
-    "a18": "ZG",
-    "a20": "ZG"
+    "a13": "GOL",
+    "a14": "MEI",
+    "a16": "LE/ZG",
+    "a18": "ZE",
+    "a20": "ZD"
    },
    "venue": null,
    "kickoff": null,
@@ -812,55 +912,42 @@
    "archived": false,
    "clock": null,
    "tactics": {
+    "bp": null,
     "com": {
      "slots": [
-      "a14",
+      "a13",
+      "a3",
       "a20",
       "a18",
-      "a4",
-      "a3",
       "a6",
       "a1",
       "a10",
+      "a14",
       "a11",
       "a2",
       "a8"
      ],
      "coords": null,
-     "formation": "3-4-3"
+     "formation": "4-2-3-1"
     },
     "sem": {
      "slots": [
-      "a14",
+      "a13",
       "a3",
       "a20",
       "a18",
       "a6",
       "a1",
-      "a4",
+      "a10",
+      "a14",
       "a11",
       "a2",
-      "a10",
       "a8"
      ],
-     "coords": [
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      [
-       43.9,
-       73.2
-      ],
-      null
-     ],
-     "formation": "4-4-2"
-    }
+     "coords": null,
+     "formation": "4-2-3-1"
+    },
+    "cobradores": null
    },
    "meet_time": null,
    "ball_holder": null,
@@ -891,7 +978,9 @@
     "a7",
     "a9",
     "a35",
-    "a30"
+    "a30",
+    "a13",
+    "a41"
    ],
    "scorers": [
     {
@@ -904,8 +993,9 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-14T00:34:24.537+00:00",
+   "updated_at": "2026-07-14T14:43:00.121917+00:00",
    "starters": [
+    "a13",
     "a12",
     "a28",
     "a4",
@@ -913,30 +1003,74 @@
     "a1",
     "a18",
     "a14",
-    "a2",
     "a3",
-    "a11",
-    "a20"
+    "a2",
+    "a11"
    ],
    "positions": {
     "a1": "VOL",
     "a2": "PD",
-    "a3": "LD",
-    "a4": "ZG",
+    "a3": "PE",
+    "a4": "ZE",
+    "a5": "MC/VOL/ZG",
     "a6": "LE",
+    "a7": "MEI/MC",
+    "a9": "MEI",
+    "a10": "MC/MEI/PE/PD",
     "a11": "CA",
-    "a12": "PD",
-    "a14": "GOL",
-    "a18": "ZG",
+    "a12": "LD",
+    "a13": "GOL",
+    "a14": "MEI",
+    "a18": "VOL",
     "a20": "ZG",
-    "a28": "ZG"
+    "a28": "ZD",
+    "a30": "CA/SA/PE",
+    "a35": "MEI/PE/PD",
+    "a41": "CA/PD"
    },
    "venue": null,
    "kickoff": null,
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null,
+   "tactics": {
+    "bp": null,
+    "com": {
+     "slots": [
+      "a13",
+      "a12",
+      "a28",
+      "a4",
+      "a6",
+      "a1",
+      "a18",
+      "a14",
+      "a3",
+      "a2",
+      "a11"
+     ],
+     "coords": null,
+     "formation": "4-2-3-1"
+    },
+    "sem": {
+     "slots": [
+      "a13",
+      "a12",
+      "a28",
+      "a4",
+      "a6",
+      "a1",
+      "a18",
+      "a14",
+      "a3",
+      "a2",
+      "a11"
+     ],
+     "coords": null,
+     "formation": "4-2-3-1"
+    },
+    "cobradores": null
+   },
    "meet_time": null,
    "ball_holder": null,
    "kit_holder": null
@@ -978,7 +1112,7 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-14T00:35:37.491+00:00",
+   "updated_at": "2026-07-14T14:43:00.121917+00:00",
    "starters": [
     "a13",
     "a3",
@@ -994,28 +1128,65 @@
    ],
    "positions": {
     "a1": "VOL",
-    "a2": "PE",
-    "a3": "PD",
-    "a4": "ZG",
+    "a2": "SA",
+    "a3": "LD",
+    "a4": "MC",
     "a6": "LE",
     "a7": "MEI",
     "a8": "CA",
     "a9": "MEI",
     "a13": "GOL",
-    "a17": "PD",
-    "a20": "LD",
+    "a17": "SA/CA",
+    "a20": "ZD",
     "a24": "MC",
-    "a29": "LD",
-    "a30": "SA",
-    "a31": "VOL",
-    "a36": "ZG"
+    "a29": "ZG/LD",
+    "a30": "SA/CA",
+    "a31": "MC",
+    "a36": "ZE"
    },
    "venue": null,
    "kickoff": null,
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null,
+   "tactics": {
+    "bp": null,
+    "com": {
+     "slots": [
+      "a13",
+      "a3",
+      "a20",
+      "a36",
+      "a6",
+      "a1",
+      "a4",
+      "a24",
+      "a7",
+      "a2",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "4-1-2-1-2"
+    },
+    "sem": {
+     "slots": [
+      "a13",
+      "a3",
+      "a20",
+      "a36",
+      "a6",
+      "a1",
+      "a4",
+      "a24",
+      "a7",
+      "a2",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "4-1-2-1-2"
+    },
+    "cobradores": null
+   },
    "meet_time": null,
    "ball_holder": null,
    "kit_holder": null
@@ -1062,7 +1233,7 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-14T14:43:00.121917+00:00",
    "starters": [
     "a13",
     "a12",
@@ -1076,13 +1247,67 @@
     "a3",
     "a8"
    ],
-   "positions": {},
+   "positions": {
+    "a1": "VOL",
+    "a2": "PE/PD/SA",
+    "a3": "SA",
+    "a4": "MC",
+    "a5": "MC/MEI",
+    "a6": "LE",
+    "a7": "MEI",
+    "a8": "CA",
+    "a9": "MEI",
+    "a10": "MC",
+    "a12": "LD",
+    "a13": "GOL",
+    "a16": "LE/ZG",
+    "a18": "VOL/ZG/LE",
+    "a20": "ZD",
+    "a29": "ZE"
+   },
    "venue": null,
    "kickoff": null,
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null,
+   "tactics": {
+    "bp": null,
+    "com": {
+     "slots": [
+      "a13",
+      "a12",
+      "a20",
+      "a29",
+      "a6",
+      "a1",
+      "a4",
+      "a10",
+      "a7",
+      "a3",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "4-1-2-1-2"
+    },
+    "sem": {
+     "slots": [
+      "a13",
+      "a12",
+      "a20",
+      "a29",
+      "a6",
+      "a1",
+      "a4",
+      "a10",
+      "a7",
+      "a3",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "4-1-2-1-2"
+    },
+    "cobradores": null
+   },
    "meet_time": null,
    "ball_holder": null,
    "kit_holder": null
@@ -1131,7 +1356,7 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-14T14:43:00.121917+00:00",
    "starters": [
     "a13",
     "a12",
@@ -1145,13 +1370,69 @@
     "a3",
     "a8"
    ],
-   "positions": {},
+   "positions": {
+    "a1": "VOL",
+    "a2": "PD/PE",
+    "a3": "SA",
+    "a4": "MC",
+    "a5": "VOL/MC",
+    "a6": "LE",
+    "a7": "MEI",
+    "a8": "CA",
+    "a9": "MEI",
+    "a10": "MC",
+    "a11": "PE/SA/CA",
+    "a12": "LD",
+    "a13": "GOL",
+    "a16": "LE/ZG",
+    "a18": "MC/VOL/ZG/LE",
+    "a28": "ZE",
+    "a29": "ZD",
+    "a30": "SA/CA"
+   },
    "venue": null,
    "kickoff": null,
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null,
+   "tactics": {
+    "bp": null,
+    "com": {
+     "slots": [
+      "a13",
+      "a12",
+      "a29",
+      "a28",
+      "a6",
+      "a1",
+      "a10",
+      "a4",
+      "a7",
+      "a3",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "4-1-2-1-2"
+    },
+    "sem": {
+     "slots": [
+      "a13",
+      "a12",
+      "a29",
+      "a28",
+      "a6",
+      "a1",
+      "a10",
+      "a4",
+      "a7",
+      "a3",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "4-1-2-1-2"
+    },
+    "cobradores": null
+   },
    "meet_time": null,
    "ball_holder": null,
    "kit_holder": null
@@ -1204,7 +1485,7 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-14T15:22:49.1914+00:00",
    "starters": [
     "a13",
     "a49",
@@ -1214,17 +1495,69 @@
     "a1",
     "a19",
     "a7",
+    "a17",
     "a3",
-    "a8",
-    "a17"
+    "a8"
    ],
-   "positions": {},
+   "positions": {
+    "a1": "VOL",
+    "a3": "PD",
+    "a4": "ZE",
+    "a5": "ZD",
+    "a6": "LE",
+    "a7": "MEI",
+    "a8": "CA",
+    "a9": "MEI",
+    "a10": "MC",
+    "a13": "GOL",
+    "a17": "PE",
+    "a19": "MC",
+    "a49": "LD",
+    "a50": "CA"
+   },
    "venue": null,
    "kickoff": null,
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null,
+   "tactics": {
+    "bp": null,
+    "com": {
+     "slots": [
+      "a13",
+      "a49",
+      "a5",
+      "a4",
+      "a6",
+      "a1",
+      "a19",
+      "a7",
+      "a17",
+      "a3",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "4-3-3"
+    },
+    "sem": {
+     "slots": [
+      "a13",
+      "a49",
+      "a5",
+      "a4",
+      "a6",
+      "a1",
+      "a19",
+      "a7",
+      "a17",
+      "a3",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "4-3-3"
+    },
+    "cobradores": null
+   },
    "meet_time": null,
    "ball_holder": null,
    "kit_holder": null
@@ -1281,7 +1614,7 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-14T14:43:00.121917+00:00",
    "starters": [
     "a13",
     "a12",
@@ -1291,17 +1624,69 @@
     "a1",
     "a7",
     "a5",
-    "a3",
     "a2",
+    "a3",
     "a8"
    ],
-   "positions": {},
+   "positions": {
+    "a1": "VOL",
+    "a2": "PE",
+    "a3": "PD",
+    "a5": "MC",
+    "a6": "LE",
+    "a7": "MC",
+    "a8": "CA",
+    "a9": "MEI/MC",
+    "a11": "CA/PE/SA",
+    "a12": "LD",
+    "a13": "GOL",
+    "a16": "ZE",
+    "a17": "PD/SA/LD",
+    "a28": "ZD"
+   },
    "venue": null,
    "kickoff": null,
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null,
+   "tactics": {
+    "bp": null,
+    "com": {
+     "slots": [
+      "a13",
+      "a12",
+      "a28",
+      "a16",
+      "a6",
+      "a1",
+      "a7",
+      "a5",
+      "a2",
+      "a3",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "4-3-3"
+    },
+    "sem": {
+     "slots": [
+      "a13",
+      "a12",
+      "a28",
+      "a16",
+      "a6",
+      "a1",
+      "a7",
+      "a5",
+      "a2",
+      "a3",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "4-3-3"
+    },
+    "cobradores": null
+   },
    "meet_time": null,
    "ball_holder": null,
    "kit_holder": null
@@ -1347,7 +1732,7 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-14T14:43:00.121917+00:00",
    "starters": [
     "a13",
     "a12",
@@ -1361,13 +1746,66 @@
     "a11",
     "a14"
    ],
-   "positions": {},
+   "positions": {
+    "a1": "VOL",
+    "a2": "PE/PD",
+    "a3": "ATA",
+    "a4": "ZE",
+    "a5": "ZD",
+    "a6": "LE",
+    "a7": "MC",
+    "a9": "MEI/SA/MC",
+    "a11": "ATA",
+    "a12": "LD",
+    "a13": "GOL",
+    "a14": "ATA",
+    "a17": "PD/PE/SA/LD",
+    "a19": "MC",
+    "a20": "ZG"
+   },
    "venue": null,
    "kickoff": null,
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null,
+   "tactics": {
+    "bp": null,
+    "com": {
+     "slots": [
+      "a13",
+      "a12",
+      "a5",
+      "a4",
+      "a6",
+      "a1",
+      "a19",
+      "a7",
+      "a3",
+      "a11",
+      "a14"
+     ],
+     "coords": null,
+     "formation": "4-3-3"
+    },
+    "sem": {
+     "slots": [
+      "a13",
+      "a12",
+      "a5",
+      "a4",
+      "a6",
+      "a1",
+      "a19",
+      "a7",
+      "a3",
+      "a11",
+      "a14"
+     ],
+     "coords": null,
+     "formation": "4-3-3"
+    },
+    "cobradores": null
+   },
    "meet_time": null,
    "ball_holder": null,
    "kit_holder": null
@@ -1411,7 +1849,7 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-14T00:54:15.575+00:00",
+   "updated_at": "2026-07-14T14:43:00.121917+00:00",
    "starters": [
     "a13",
     "a12",
@@ -1421,29 +1859,73 @@
     "a1",
     "a19",
     "a7",
-    "a3",
     "a2",
-    "a14"
+    "a3",
+    "a11"
    ],
    "positions": {
     "a1": "VOL",
-    "a2": "PD",
-    "a3": "LD",
-    "a4": "ZG",
-    "a5": "ZG",
+    "a2": "PE",
+    "a3": "PD",
+    "a4": "ZD",
+    "a5": "ZE",
     "a6": "LE",
     "a7": "MEI",
-    "a12": "PD",
+    "a9": "MEI/MC",
+    "a11": "CA",
+    "a12": "LD",
     "a13": "GOL",
-    "a14": "CA",
-    "a19": "MC"
+    "a14": "MEI/SA",
+    "a15": "ZG",
+    "a16": "LE/ZG",
+    "a17": "PE/PD/CA",
+    "a18": "VOL/ZG/LE",
+    "a19": "VOL",
+    "a20": "ZG/LD"
    },
    "venue": null,
    "kickoff": null,
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null,
+   "tactics": {
+    "bp": null,
+    "com": {
+     "slots": [
+      "a13",
+      "a12",
+      "a4",
+      "a5",
+      "a6",
+      "a1",
+      "a19",
+      "a7",
+      "a2",
+      "a3",
+      "a11"
+     ],
+     "coords": null,
+     "formation": "4-3-3"
+    },
+    "sem": {
+     "slots": [
+      "a13",
+      "a12",
+      "a4",
+      "a5",
+      "a6",
+      "a1",
+      "a19",
+      "a7",
+      "a2",
+      "a3",
+      "a11"
+     ],
+     "coords": null,
+     "formation": "4-3-3"
+    },
+    "cobradores": null
+   },
    "meet_time": null,
    "ball_holder": null,
    "kit_holder": null
@@ -1481,7 +1963,7 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-14T14:43:00.121917+00:00",
    "starters": [
     "a32",
     "a3",
@@ -1495,13 +1977,63 @@
     "a2",
     "a17"
    ],
-   "positions": {},
+   "positions": {
+    "a1": "ZD",
+    "a2": "ATA",
+    "a3": "LD",
+    "a15": "ZE",
+    "a17": "ATA",
+    "a19": "MC",
+    "a23": "VOL",
+    "a31": "MC",
+    "a32": "GOL",
+    "a46": "LE",
+    "a47": "MEI",
+    "a48": "ATA"
+   },
    "venue": null,
    "kickoff": null,
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null,
+   "tactics": {
+    "bp": null,
+    "com": {
+     "slots": [
+      "a32",
+      "a3",
+      "a1",
+      "a15",
+      "a46",
+      "a23",
+      "a31",
+      "a19",
+      "a47",
+      "a2",
+      "a17"
+     ],
+     "coords": null,
+     "formation": "4-1-2-1-2"
+    },
+    "sem": {
+     "slots": [
+      "a32",
+      "a3",
+      "a1",
+      "a15",
+      "a46",
+      "a23",
+      "a31",
+      "a19",
+      "a47",
+      "a2",
+      "a17"
+     ],
+     "coords": null,
+     "formation": "4-1-2-1-2"
+    },
+    "cobradores": null
+   },
    "meet_time": null,
    "ball_holder": null,
    "kit_holder": null
@@ -1560,7 +2092,7 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-14T14:43:00.121917+00:00",
    "starters": [
     "a32",
     "a3",
@@ -1574,13 +2106,67 @@
     "a11",
     "a8"
    ],
-   "positions": {},
+   "positions": {
+    "a1": "VOL",
+    "a2": "PD/PE/SA",
+    "a3": "LD",
+    "a4": "ZE",
+    "a5": "ZD",
+    "a6": "LE",
+    "a7": "MC",
+    "a8": "CA",
+    "a10": "MC",
+    "a11": "SA",
+    "a14": "MEI",
+    "a15": "ZG",
+    "a20": "ZG/LD",
+    "a23": "VOL/MC/MEI",
+    "a27": "PE/LE/MC",
+    "a32": "GOL"
+   },
    "venue": null,
    "kickoff": null,
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null,
+   "tactics": {
+    "bp": null,
+    "com": {
+     "slots": [
+      "a32",
+      "a3",
+      "a5",
+      "a4",
+      "a6",
+      "a1",
+      "a10",
+      "a7",
+      "a14",
+      "a11",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "4-1-2-1-2"
+    },
+    "sem": {
+     "slots": [
+      "a32",
+      "a3",
+      "a5",
+      "a4",
+      "a6",
+      "a1",
+      "a10",
+      "a7",
+      "a14",
+      "a11",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "4-1-2-1-2"
+    },
+    "cobradores": null
+   },
    "meet_time": null,
    "ball_holder": null,
    "kit_holder": null
@@ -1638,7 +2224,7 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-14T14:43:00.121917+00:00",
    "starters": [
     "a13",
     "a3",
@@ -1652,13 +2238,66 @@
     "a2",
     "a8"
    ],
-   "positions": {},
+   "positions": {
+    "a1": "VOL",
+    "a2": "SA",
+    "a3": "LD",
+    "a6": "LE",
+    "a7": "MC",
+    "a8": "CA",
+    "a9": "MEI/MC",
+    "a10": "MC",
+    "a13": "GOL",
+    "a14": "MEI",
+    "a15": "ZD",
+    "a16": "ZE",
+    "a23": "MC/MEI/VOL",
+    "a26": "SA/PE",
+    "a34": "LE/VOL/MC/PD"
+   },
    "venue": null,
    "kickoff": null,
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null,
+   "tactics": {
+    "bp": null,
+    "com": {
+     "slots": [
+      "a13",
+      "a3",
+      "a15",
+      "a16",
+      "a6",
+      "a1",
+      "a10",
+      "a7",
+      "a14",
+      "a2",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "4-1-2-1-2"
+    },
+    "sem": {
+     "slots": [
+      "a13",
+      "a3",
+      "a15",
+      "a16",
+      "a6",
+      "a1",
+      "a10",
+      "a7",
+      "a14",
+      "a2",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "4-1-2-1-2"
+    },
+    "cobradores": null
+   },
    "meet_time": null,
    "ball_holder": null,
    "kit_holder": null
@@ -1725,28 +2364,81 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-14T15:31:41.28+00:00",
    "starters": [
     "a14",
     "a12",
     "a15",
-    "a5",
-    "a27",
-    "a1",
     "a4",
+    "a5",
+    "a1",
     "a7",
+    "a33",
+    "a27",
     "a2",
-    "a8",
-    "a33"
+    "a8"
    ],
-   "positions": {},
-   "venue": null,
-   "kickoff": null,
-   "kit": null,
+   "positions": {
+    "a1": "VOL",
+    "a2": "PD",
+    "a3": "LD",
+    "a4": "ZE",
+    "a5": "LE",
+    "a7": "MC",
+    "a8": "CA",
+    "a12": "LD",
+    "a14": "GOL",
+    "a15": "ZD",
+    "a17": "ATA",
+    "a20": "ZG/LD",
+    "a23": "MC/MEI/VOL",
+    "a27": "PE",
+    "a33": "MEI"
+   },
+   "venue": "Av. Mariano Melliani, 270 — Ponte Grande",
+   "kickoff": "08:00",
+   "kit": "Verde antigo",
    "archived": false,
    "clock": null,
-   "tactics": null,
-   "meet_time": null,
+   "tactics": {
+    "bp": null,
+    "com": {
+     "slots": [
+      "a14",
+      "a12",
+      "a15",
+      "a4",
+      "a5",
+      "a1",
+      "a7",
+      "a33",
+      "a27",
+      "a2",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "4-3-3"
+    },
+    "sem": {
+     "slots": [
+      "a14",
+      "a12",
+      "a15",
+      "a4",
+      "a5",
+      "a1",
+      "a7",
+      "a33",
+      "a27",
+      "a2",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "4-3-3"
+    },
+    "cobradores": null
+   },
+   "meet_time": "07:30",
    "ball_holder": null,
    "kit_holder": null
   },
@@ -1827,7 +2519,7 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-14T15:22:49.1914+00:00",
    "starters": [
     "a14",
     "a3",
@@ -1837,18 +2529,75 @@
     "a1",
     "a10",
     "a19",
-    "a12",
     "a11",
+    "a12",
     "a8"
    ],
-   "positions": {},
-   "venue": null,
-   "kickoff": null,
-   "kit": null,
+   "positions": {
+    "a1": "VOL",
+    "a3": "LD",
+    "a4": "ZE",
+    "a5": "ZD",
+    "a6": "LE",
+    "a8": "CA",
+    "a9": "MEI/MC",
+    "a10": "MC",
+    "a11": "PE",
+    "a12": "PD",
+    "a14": "GOL",
+    "a15": "ZG",
+    "a16": "LE/ZG",
+    "a17": "PD/PE/SA",
+    "a18": "VOL/LE/ZG",
+    "a19": "MC",
+    "a22": "VOL/MC/LD",
+    "a24": "VOL/MC",
+    "a26": "PE/SA/CA"
+   },
+   "venue": "CDC Julio Botelho",
+   "kickoff": "14:00",
+   "kit": "Verde claro (Diverso)",
    "archived": false,
    "clock": null,
-   "tactics": null,
-   "meet_time": null,
+   "tactics": {
+    "bp": null,
+    "com": {
+     "slots": [
+      "a14",
+      "a3",
+      "a5",
+      "a4",
+      "a6",
+      "a1",
+      "a10",
+      "a19",
+      "a11",
+      "a12",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "4-3-3"
+    },
+    "sem": {
+     "slots": [
+      "a14",
+      "a3",
+      "a5",
+      "a4",
+      "a6",
+      "a1",
+      "a10",
+      "a19",
+      "a11",
+      "a12",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "4-3-3"
+    },
+    "cobradores": null
+   },
+   "meet_time": "13:30",
    "ball_holder": null,
    "kit_holder": null
   },
@@ -1882,7 +2631,7 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-14T15:22:49.1914+00:00",
    "starters": [
     "a14",
     "a3",
@@ -1892,18 +2641,70 @@
     "a1",
     "a22",
     "a7",
-    "a12",
     "a2",
+    "a12",
     "a11"
    ],
-   "positions": {},
-   "venue": null,
-   "kickoff": null,
-   "kit": null,
+   "positions": {
+    "a1": "VOL",
+    "a2": "PE",
+    "a3": "LD",
+    "a4": "ZE",
+    "a6": "LE",
+    "a7": "MEI",
+    "a11": "CA",
+    "a12": "PD",
+    "a14": "GOL",
+    "a15": "ZD",
+    "a16": "ZG/LE",
+    "a17": "PE/PD/SA/CA",
+    "a22": "VOL",
+    "a23": "VOL/MC/MEI"
+   },
+   "venue": "Campo da Ford — Presidente Altino, Osasco",
+   "kickoff": "20:30",
+   "kit": "Verde Novo",
    "archived": false,
    "clock": null,
-   "tactics": null,
-   "meet_time": null,
+   "tactics": {
+    "bp": null,
+    "com": {
+     "slots": [
+      "a14",
+      "a3",
+      "a15",
+      "a4",
+      "a6",
+      "a1",
+      "a22",
+      "a7",
+      "a2",
+      "a12",
+      "a11"
+     ],
+     "coords": null,
+     "formation": "4-3-3"
+    },
+    "sem": {
+     "slots": [
+      "a14",
+      "a3",
+      "a15",
+      "a4",
+      "a6",
+      "a1",
+      "a22",
+      "a7",
+      "a2",
+      "a12",
+      "a11"
+     ],
+     "coords": null,
+     "formation": "4-3-3"
+    },
+    "cobradores": null
+   },
+   "meet_time": "20:00",
    "ball_holder": null,
    "kit_holder": null
   },
@@ -1940,7 +2741,7 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-14T15:22:49.1914+00:00",
    "starters": [
     "a14",
     "a37",
@@ -1950,18 +2751,73 @@
     "a24",
     "a19",
     "a9",
-    "a2",
     "a26",
+    "a2",
     "a8"
    ],
-   "positions": {},
-   "venue": null,
-   "kickoff": null,
-   "kit": null,
+   "positions": {
+    "a1": "VOL/MC",
+    "a2": "PD",
+    "a5": "ZE",
+    "a6": "LE/PE",
+    "a8": "CA",
+    "a9": "MEI",
+    "a14": "GOL",
+    "a15": "ZD",
+    "a18": "LE",
+    "a19": "VOL",
+    "a22": "LD/MC",
+    "a23": "MC/MEI",
+    "a24": "VOL",
+    "a26": "PE",
+    "a27": "PE/CA",
+    "a34": "PD/PE",
+    "a37": "LD"
+   },
+   "venue": "Parque da Mooca — Rua Taquari, 573",
+   "kickoff": "10:00",
+   "kit": "Branco",
    "archived": false,
    "clock": null,
-   "tactics": null,
-   "meet_time": null,
+   "tactics": {
+    "bp": null,
+    "com": {
+     "slots": [
+      "a14",
+      "a37",
+      "a15",
+      "a5",
+      "a18",
+      "a24",
+      "a19",
+      "a9",
+      "a26",
+      "a2",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "4-3-3"
+    },
+    "sem": {
+     "slots": [
+      "a14",
+      "a37",
+      "a15",
+      "a5",
+      "a18",
+      "a24",
+      "a19",
+      "a9",
+      "a26",
+      "a2",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "4-3-3"
+    },
+    "cobradores": null
+   },
+   "meet_time": "09:30",
    "ball_holder": null,
    "kit_holder": null
   },
@@ -1991,7 +2847,8 @@
     "a9",
     "a16",
     "a1",
-    "a8"
+    "a8",
+    "a26"
    ],
    "scorers": [
     {
@@ -2017,9 +2874,29 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-14T15:25:09.888+00:00",
    "starters": [],
-   "positions": {},
+   "positions": {
+    "a1": "VOL/MC",
+    "a2": "PD",
+    "a3": "LD",
+    "a4": "ZE",
+    "a5": "ZE",
+    "a7": "MEI",
+    "a8": "CA",
+    "a9": "MEI",
+    "a10": "MC",
+    "a11": "CA",
+    "a12": "PD",
+    "a14": "GOL",
+    "a15": "ZD",
+    "a16": "ZG/LE",
+    "a17": "PE/PD/SA/CA",
+    "a22": "LD/MC",
+    "a23": "MC/MEI",
+    "a26": "PE",
+    "a32": "GOL"
+   },
    "venue": null,
    "kickoff": null,
    "kit": null,
@@ -2085,7 +2962,7 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-14T15:24:50.446+00:00",
    "starters": [
     "a14",
     "a3",
@@ -2095,18 +2972,73 @@
     "a1",
     "a10",
     "a19",
-    "a2",
     "a11",
+    "a2",
     "a8"
    ],
-   "positions": {},
-   "venue": null,
-   "kickoff": null,
-   "kit": null,
+   "positions": {
+    "a1": "VOL",
+    "a2": "PD",
+    "a3": "LD",
+    "a5": "ZD",
+    "a6": "LE",
+    "a8": "CA",
+    "a9": "MEI",
+    "a10": "VOL",
+    "a11": "PE",
+    "a14": "GOL",
+    "a16": "ZE",
+    "a18": "LE",
+    "a19": "MEI",
+    "a21": "VOL/MEI",
+    "a22": "LD/MC",
+    "a25": "ATA",
+    "a26": "PE"
+   },
+   "venue": "CDC Julio Botelho",
+   "kickoff": "14:00",
+   "kit": "Verde Novo",
    "archived": false,
    "clock": null,
-   "tactics": null,
-   "meet_time": null,
+   "tactics": {
+    "bp": null,
+    "com": {
+     "slots": [
+      "a14",
+      "a3",
+      "a5",
+      "a16",
+      "a6",
+      "a1",
+      "a10",
+      "a19",
+      "a11",
+      "a2",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "4-2-3-1"
+    },
+    "sem": {
+     "slots": [
+      "a14",
+      "a3",
+      "a5",
+      "a16",
+      "a6",
+      "a1",
+      "a10",
+      "a19",
+      "a11",
+      "a2",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "4-2-3-1"
+    },
+    "cobradores": null
+   },
+   "meet_time": "13:15",
    "ball_holder": null,
    "kit_holder": null
   },
@@ -2145,7 +3077,7 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-14T15:24:56.897+00:00",
    "starters": [
     "a13",
     "a3",
@@ -2155,18 +3087,75 @@
     "a1",
     "a10",
     "a19",
-    "a2",
     "a11",
+    "a2",
     "a8"
    ],
-   "positions": {},
-   "venue": null,
-   "kickoff": null,
-   "kit": null,
+   "positions": {
+    "a1": "VOL",
+    "a2": "PD",
+    "a3": "LD",
+    "a4": "ZE",
+    "a5": "ZD",
+    "a7": "MEI",
+    "a8": "CA",
+    "a9": "MEI",
+    "a10": "VOL",
+    "a11": "PE",
+    "a12": "LE",
+    "a13": "GOL",
+    "a16": "ZE",
+    "a19": "MEI",
+    "a21": "VOL/MEI",
+    "a22": "LD/MC",
+    "a25": "ATA",
+    "a26": "PE",
+    "a44": "PE"
+   },
+   "venue": "CDC Julio Botelho",
+   "kickoff": "21:00",
+   "kit": "Verde Novo",
    "archived": false,
    "clock": null,
-   "tactics": null,
-   "meet_time": null,
+   "tactics": {
+    "bp": null,
+    "com": {
+     "slots": [
+      "a13",
+      "a3",
+      "a5",
+      "a16",
+      "a12",
+      "a1",
+      "a10",
+      "a19",
+      "a11",
+      "a2",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "4-2-3-1"
+    },
+    "sem": {
+     "slots": [
+      "a13",
+      "a3",
+      "a5",
+      "a16",
+      "a12",
+      "a1",
+      "a10",
+      "a19",
+      "a11",
+      "a2",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "4-2-3-1"
+    },
+    "cobradores": null
+   },
+   "meet_time": "20:30",
    "ball_holder": null,
    "kit_holder": null
   },
@@ -2220,7 +3209,7 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-14T15:24:31.368+00:00",
    "starters": [
     "a14",
     "a15",
@@ -2234,14 +3223,89 @@
     "a2",
     "a25"
    ],
-   "positions": {},
-   "venue": null,
-   "kickoff": null,
-   "kit": null,
+   "positions": {
+    "a1": "VOL",
+    "a2": "ATA",
+    "a3": "LE",
+    "a4": "ZE",
+    "a7": "MEI",
+    "a9": "MEI",
+    "a10": "VOL",
+    "a14": "GOL",
+    "a15": "LD",
+    "a20": "ZD",
+    "a21": "VOL/MEI",
+    "a25": "ATA",
+    "a31": "MC",
+    "a32": "GOL",
+    "a34": "PD/PE",
+    "a35": "MEI/PE/PD"
+   },
+   "venue": "Campo do União Gleba — R. Soveral, 99",
+   "kickoff": "10:30",
+   "kit": "Diverso",
    "archived": false,
    "clock": null,
-   "tactics": null,
-   "meet_time": null,
+   "tactics": {
+    "bp": null,
+    "com": {
+     "slots": [
+      "a14",
+      "a15",
+      "a20",
+      "a4",
+      "a3",
+      "a1",
+      "a10",
+      "a7",
+      "a9",
+      "a2",
+      "a25"
+     ],
+     "coords": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      [
+       18,
+       60.3
+      ],
+      null,
+      [
+       65.3,
+       84.3
+      ],
+      [
+       36,
+       82.8
+      ]
+     ],
+     "formation": "4-4-2"
+    },
+    "sem": {
+     "slots": [
+      "a14",
+      "a15",
+      "a20",
+      "a4",
+      "a3",
+      "a1",
+      "a10",
+      "a7",
+      "a9",
+      "a2",
+      "a25"
+     ],
+     "coords": null,
+     "formation": "4-4-2"
+    },
+    "cobradores": null
+   },
+   "meet_time": "10:00",
    "ball_holder": null,
    "kit_holder": null
   },
@@ -2275,7 +3339,7 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-14T15:22:49.1914+00:00",
    "starters": [
     "a45",
     "a15",
@@ -2285,18 +3349,70 @@
     "a4",
     "a1",
     "a19",
-    "a12",
     "a2",
+    "a12",
     "a8"
    ],
-   "positions": {},
-   "venue": null,
-   "kickoff": null,
-   "kit": null,
+   "positions": {
+    "a1": "VOL",
+    "a2": "PE",
+    "a3": "LE",
+    "a4": "VOL",
+    "a5": "ZE",
+    "a8": "CA",
+    "a12": "PD",
+    "a15": "LD",
+    "a19": "MEI",
+    "a21": "VOL/MEI",
+    "a25": "CA/PD",
+    "a28": "ZD",
+    "a33": "MEI/PD",
+    "a45": "GOL"
+   },
+   "venue": "R. Ciriema, 120 — Ayrosa, Osasco",
+   "kickoff": "11:30",
+   "kit": "Verde antigo",
    "archived": false,
    "clock": null,
-   "tactics": null,
-   "meet_time": null,
+   "tactics": {
+    "bp": null,
+    "com": {
+     "slots": [
+      "a45",
+      "a15",
+      "a28",
+      "a5",
+      "a3",
+      "a4",
+      "a1",
+      "a19",
+      "a2",
+      "a12",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "4-2-3-1"
+    },
+    "sem": {
+     "slots": [
+      "a45",
+      "a15",
+      "a28",
+      "a5",
+      "a3",
+      "a4",
+      "a1",
+      "a19",
+      "a2",
+      "a12",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "4-2-3-1"
+    },
+    "cobradores": null
+   },
+   "meet_time": "11:00",
    "ball_holder": null,
    "kit_holder": null
   },
@@ -2332,27 +3448,111 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-14T15:24:13.385+00:00",
    "starters": [
     "a13",
     "a15",
+    "a10",
     "a5",
+    "a16",
     "a4",
     "a1",
-    "a16",
-    "a10",
     "a19",
     "a11",
     "a7",
     "a8"
    ],
-   "positions": {},
+   "positions": {
+    "a1": "VOL",
+    "a3": "LE",
+    "a4": "MC",
+    "a5": "ZE",
+    "a6": "LE",
+    "a7": "MC",
+    "a8": "CA",
+    "a10": "ZD",
+    "a11": "SA",
+    "a12": "PD",
+    "a13": "GOL",
+    "a14": "GOL",
+    "a15": "LD",
+    "a16": "LE",
+    "a18": "LE",
+    "a19": "MEI"
+   },
    "venue": null,
    "kickoff": null,
    "kit": null,
    "archived": false,
    "clock": null,
-   "tactics": null,
+   "tactics": {
+    "bp": null,
+    "com": {
+     "slots": [
+      "a13",
+      "a15",
+      "a10",
+      "a5",
+      "a16",
+      "a4",
+      "a1",
+      "a19",
+      "a11",
+      "a7",
+      "a8"
+     ],
+     "coords": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      [
+       72.8,
+       50.9
+      ],
+      [
+       49.7,
+       36.5
+      ],
+      [
+       50.3,
+       63.2
+      ],
+      [
+       37.4,
+       82.6
+      ],
+      [
+       30.3,
+       52.8
+      ],
+      [
+       64.6,
+       83.3
+      ]
+     ],
+     "formation": "4-2-3-1"
+    },
+    "sem": {
+     "slots": [
+      "a13",
+      "a15",
+      "a10",
+      "a5",
+      "a16",
+      "a4",
+      "a1",
+      "a19",
+      "a11",
+      "a7",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "4-2-3-1"
+    },
+    "cobradores": null
+   },
    "meet_time": null,
    "ball_holder": null,
    "kit_holder": null
@@ -2394,7 +3594,7 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-14T15:22:49.1914+00:00",
    "starters": [
     "a13",
     "a15",
@@ -2407,14 +3607,68 @@
     "a2",
     "a8"
    ],
-   "positions": {},
-   "venue": null,
-   "kickoff": null,
-   "kit": null,
+   "positions": {
+    "a1": "VOL",
+    "a2": "PD",
+    "a3": "LD/LE/MC/PD",
+    "a4": "ZE",
+    "a5": "ZD",
+    "a6": "LE/PE",
+    "a8": "CA",
+    "a9": "MEI/MC",
+    "a10": "MC",
+    "a13": "GOL",
+    "a15": "LD",
+    "a16": "LE",
+    "a21": "MC/VOL/MEI/PE",
+    "a24": "MC",
+    "a25": "CA/PD",
+    "a27": "PE/SA"
+   },
+   "venue": "Rua Taquari, 549 — Mooca",
+   "kickoff": "11:30",
+   "kit": "Diverso",
    "archived": false,
    "clock": null,
-   "tactics": null,
-   "meet_time": null,
+   "tactics": {
+    "bp": null,
+    "com": {
+     "slots": [
+      "a13",
+      "a15",
+      "a5",
+      "a4",
+      "a16",
+      "a1",
+      "a24",
+      "a10",
+      null,
+      "a2",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "4-3-3"
+    },
+    "sem": {
+     "slots": [
+      "a13",
+      "a15",
+      "a5",
+      "a4",
+      "a16",
+      "a1",
+      "a24",
+      "a10",
+      null,
+      "a2",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "4-3-3"
+    },
+    "cobradores": null
+   },
+   "meet_time": "11:00",
    "ball_holder": null,
    "kit_holder": null
   },
@@ -2463,7 +3717,7 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-14T15:22:49.1914+00:00",
    "starters": [
     "a14",
     "a3",
@@ -2473,18 +3727,75 @@
     "a1",
     "a10",
     "a7",
-    "a12",
     "a11",
+    "a12",
     "a8"
    ],
-   "positions": {},
-   "venue": null,
-   "kickoff": null,
-   "kit": null,
+   "positions": {
+    "a1": "VOL",
+    "a2": "PD/PE",
+    "a3": "LD",
+    "a4": "ZD",
+    "a6": "LE",
+    "a7": "MEI",
+    "a8": "CA",
+    "a10": "VOL",
+    "a11": "PE",
+    "a12": "PD",
+    "a13": "GOL",
+    "a14": "GOL",
+    "a16": "ZE",
+    "a18": "VOL/LE/ZG",
+    "a21": "MEI",
+    "a22": "VOL/LD/LE",
+    "a24": "VOL",
+    "a25": "CA/PD/SA",
+    "a27": "PE/SA"
+   },
+   "venue": "CDC Julio Botelho",
+   "kickoff": "12:30",
+   "kit": "Diverso",
    "archived": false,
    "clock": null,
-   "tactics": null,
-   "meet_time": null,
+   "tactics": {
+    "bp": null,
+    "com": {
+     "slots": [
+      "a14",
+      "a3",
+      "a4",
+      "a16",
+      "a6",
+      "a1",
+      "a10",
+      "a7",
+      "a11",
+      "a12",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "4-3-3"
+    },
+    "sem": {
+     "slots": [
+      "a14",
+      "a3",
+      "a4",
+      "a16",
+      "a6",
+      "a1",
+      "a10",
+      "a7",
+      "a11",
+      "a12",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "4-3-3"
+    },
+    "cobradores": null
+   },
+   "meet_time": "12:00",
    "ball_holder": null,
    "kit_holder": null
   },
@@ -2535,7 +3846,7 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-14T15:23:08.739+00:00",
    "starters": [
     "a13",
     "a15",
@@ -2543,20 +3854,75 @@
     "a4",
     "a6",
     "a1",
-    "a21",
     "a7",
+    "a21",
+    "a11",
     "a2",
-    "a8",
-    "a11"
+    "a8"
    ],
-   "positions": {},
-   "venue": null,
-   "kickoff": null,
-   "kit": null,
+   "positions": {
+    "a1": "VOL",
+    "a2": "PD",
+    "a3": "LD",
+    "a4": "ZE",
+    "a5": "ZD",
+    "a6": "LE",
+    "a7": "MC",
+    "a8": "CA",
+    "a9": "MEI/MC",
+    "a11": "PE",
+    "a12": "PD",
+    "a13": "GOL",
+    "a15": "LD",
+    "a17": "PE/PD/SA/CA",
+    "a20": "ZD",
+    "a21": "MEI",
+    "a22": "VOL/LD/LE"
+   },
+   "venue": "Parque do Tatuapé — R. Monte Serrat (metrô Carrão)",
+   "kickoff": "11:30",
+   "kit": "Branco",
    "archived": false,
    "clock": null,
-   "tactics": null,
-   "meet_time": null,
+   "tactics": {
+    "bp": null,
+    "com": {
+     "slots": [
+      "a13",
+      "a15",
+      "a5",
+      "a4",
+      "a6",
+      "a1",
+      "a7",
+      "a21",
+      "a11",
+      "a2",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "4-3-3"
+    },
+    "sem": {
+     "slots": [
+      "a13",
+      "a15",
+      "a5",
+      "a4",
+      "a6",
+      "a1",
+      "a7",
+      "a21",
+      "a11",
+      "a2",
+      "a8"
+     ],
+     "coords": null,
+     "formation": "4-3-3"
+    },
+    "cobradores": null
+   },
+   "meet_time": "10:50",
    "ball_holder": null,
    "kit_holder": null
   },
@@ -2603,28 +3969,83 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-11T15:05:04.158+00:00",
+   "updated_at": "2026-07-14T15:22:49.1914+00:00",
    "starters": [
     "a13",
     "a3",
     "a5",
     "a4",
     "a16",
+    "a1",
     "a7",
     "a21",
-    "a2",
     "a10",
-    "a12",
-    "a1"
+    "a2",
+    "a12"
    ],
-   "positions": {},
-   "venue": null,
-   "kickoff": null,
-   "kit": null,
+   "positions": {
+    "a1": "VOL",
+    "a2": "PD",
+    "a3": "LD",
+    "a4": "ZE",
+    "a5": "ZD",
+    "a6": "LE/PE",
+    "a7": "MC",
+    "a10": "PE",
+    "a12": "CA",
+    "a13": "GOL",
+    "a16": "LE",
+    "a17": "PD/PE",
+    "a20": "ZG",
+    "a21": "MEI",
+    "a22": "MC/VOL/LD",
+    "a24": "VOL",
+    "a25": "CA/PD"
+   },
+   "venue": "Parque da Mooca — Rua Taquari, 549",
+   "kickoff": "11:30",
+   "kit": "Diverso",
    "archived": false,
    "clock": null,
-   "tactics": null,
-   "meet_time": null,
+   "tactics": {
+    "bp": null,
+    "com": {
+     "slots": [
+      "a13",
+      "a3",
+      "a5",
+      "a4",
+      "a16",
+      "a1",
+      "a7",
+      "a21",
+      "a10",
+      "a2",
+      "a12"
+     ],
+     "coords": null,
+     "formation": "4-3-3"
+    },
+    "sem": {
+     "slots": [
+      "a13",
+      "a3",
+      "a5",
+      "a4",
+      "a16",
+      "a1",
+      "a7",
+      "a21",
+      "a10",
+      "a2",
+      "a12"
+     ],
+     "coords": null,
+     "formation": "4-3-3"
+    },
+    "cobradores": null
+   },
+   "meet_time": "10:50",
    "ball_holder": null,
    "kit_holder": null
   },
@@ -2805,53 +4226,258 @@
    "status": "agendada",
    "goals_for": 0,
    "goals_against": 0,
-   "lineup": [],
+   "lineup": [
+    "amrkp4y1z5pl",
+    "amrkp52984kk",
+    "amrkp568xr4",
+    "amrkp576b6du",
+    "amrkp58qg1qi",
+    "amrkp5s0zf1",
+    "amrkp5t693sv",
+    "amrkp5tyk3i",
+    "amrkp5uvp2bk",
+    "amrkp5w5a5wj",
+    "amrkp5wyo32r",
+    "amrkp5y5k7cv",
+    "amrkp60jimq",
+    "amrkp62em5a3",
+    "amrkp63vv6q9",
+    "amrkp5adp7i2",
+    "amrk3l61f578",
+    "amrkp5z8m49w",
+    "amrkp510b47c"
+   ],
    "scorers": [],
    "assists": [],
    "lineup_complete": true,
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-13T22:20:01.210397+00:00",
-   "updated_at": "2026-07-14T13:37:38.441+00:00",
-   "starters": [],
-   "positions": {},
+   "updated_at": "2026-07-14T15:28:08.71+00:00",
+   "starters": [
+    "amrkp4y1z5pl",
+    "amrkp5z8m49w",
+    "amrkp52984kk",
+    "amrkp568xr4",
+    "amrkp576b6du",
+    "amrkp58qg1qi",
+    "amrkp5adp7i2",
+    "amrkp5s0zf1",
+    "amrkp5t693sv",
+    "amrkp5tyk3i",
+    "amrkp5uvp2bk"
+   ],
+   "positions": {
+    "amrkp568xr4": "ZE",
+    "amrkp5s0zf1": "MC",
+    "amrkp5tyk3i": "SA",
+    "amrkp60jimq": "VOL",
+    "amrk3l61f578": "SA",
+    "amrkp4y1z5pl": "GOL",
+    "amrkp510b47c": "LD",
+    "amrkp52984kk": "ZD",
+    "amrkp576b6du": "LE",
+    "amrkp58qg1qi": "VOL",
+    "amrkp5adp7i2": "VOL",
+    "amrkp5t693sv": "MEI",
+    "amrkp5uvp2bk": "CA",
+    "amrkp5w5a5wj": "GOL",
+    "amrkp5wyo32r": "ZG",
+    "amrkp5y5k7cv": "LE",
+    "amrkp5z8m49w": "LD",
+    "amrkp62em5a3": "MEI",
+    "amrkp63vv6q9": "CA"
+   },
    "venue": "CDC Júlio Botelho",
    "kickoff": "21:00",
-   "kit": null,
+   "kit": "Verde Diverso",
    "archived": false,
    "clock": null,
-   "tactics": null,
+   "tactics": {
+    "bp": {
+     "slots": [
+      "amrkp4y1z5pl",
+      "amrkp5z8m49w",
+      "amrkp52984kk",
+      "amrkp568xr4",
+      "amrkp576b6du",
+      "amrkp58qg1qi",
+      "amrkp5adp7i2",
+      "amrkp5s0zf1",
+      "amrkp5t693sv",
+      "amrkp5tyk3i",
+      "amrkp5uvp2bk"
+     ],
+     "coords": [
+      null,
+      [
+       65.3,
+       77.3
+      ],
+      [
+       50.6,
+       93.1
+      ],
+      [
+       59.2,
+       96.7
+      ],
+      [
+       27.2,
+       92.4
+      ],
+      [
+       66.5,
+       90.7
+      ],
+      [
+       36.2,
+       52.6
+      ],
+      [
+       65.9,
+       52.2
+      ],
+      [
+       36.8,
+       78.8
+      ],
+      [
+       39.3,
+       97
+      ],
+      [
+       3,
+       97
+      ]
+     ],
+     "formation": "4-1-2-1-2"
+    },
+    "com": {
+     "slots": [
+      "amrkp4y1z5pl",
+      "amrkp5z8m49w",
+      "amrkp52984kk",
+      "amrkp568xr4",
+      "amrkp576b6du",
+      "amrkp58qg1qi",
+      "amrkp5adp7i2",
+      "amrkp5s0zf1",
+      "amrkp5t693sv",
+      "amrkp5tyk3i",
+      "amrkp5uvp2bk"
+     ],
+     "coords": [
+      null,
+      [
+       87.8,
+       34
+      ],
+      [
+       61.5,
+       27.1
+      ],
+      [
+       36.7,
+       26.5
+      ],
+      [
+       14.6,
+       32.5
+      ],
+      [
+       50.2,
+       39.4
+      ],
+      [
+       35.4,
+       50.5
+      ],
+      [
+       66.4,
+       53.9
+      ],
+      null,
+      [
+       33.9,
+       80.5
+      ],
+      [
+       64.9,
+       82.9
+      ]
+     ],
+     "formation": "4-1-2-1-2"
+    },
+    "sem": {
+     "slots": [
+      "amrkp4y1z5pl",
+      "amrkp5z8m49w",
+      "amrkp52984kk",
+      "amrkp568xr4",
+      "amrkp576b6du",
+      "amrkp58qg1qi",
+      "amrkp5adp7i2",
+      "amrkp5s0zf1",
+      "amrkp5tyk3i",
+      "amrkp5t693sv",
+      "amrkp5uvp2bk"
+     ],
+     "coords": [
+      null,
+      [
+       83.2,
+       28.4
+      ],
+      [
+       61.5,
+       28.4
+      ],
+      [
+       37.3,
+       28.6
+      ],
+      [
+       18.3,
+       28.8
+      ],
+      [
+       62.4,
+       43.5
+      ],
+      [
+       36.7,
+       42.9
+      ],
+      [
+       84.8,
+       44.4
+      ],
+      [
+       12.5,
+       44.8
+      ],
+      [
+       39.7,
+       60.2
+      ],
+      [
+       61.2,
+       59.8
+      ]
+     ],
+     "formation": "4-4-2"
+    },
+    "cobradores": {
+     "falta": "amrkp5t693sv",
+     "penalti": "amrkp5uvp2bk",
+     "escanteio_d": "amrkp5uvp2bk",
+     "escanteio_e": "amrkp5uvp2bk"
+    }
+   },
    "meet_time": "20:30",
-   "ball_holder": null,
-   "kit_holder": null
-  },
-  {
-   "id": "mmrjsf87d34z",
-   "squad_id": "diverso",
-   "date": "2026-07-18",
-   "opponent": "Safari",
-   "status": "agendada",
-   "goals_for": 0,
-   "goals_against": 0,
-   "lineup": [],
-   "scorers": [],
-   "assists": [],
-   "lineup_complete": true,
-   "notes": "Time mesclado com o Veterano",
-   "started_at": null,
-   "created_at": "2026-07-13T22:22:09.998588+00:00",
-   "updated_at": "2026-07-14T13:23:19.404+00:00",
-   "starters": [],
-   "positions": {},
-   "venue": "Parque Municipal do Tatuapé (Sampaio Moreira)",
-   "kickoff": "07:00",
-   "kit": "Diverso",
-   "archived": false,
-   "clock": null,
-   "tactics": null,
-   "meet_time": "06:30",
-   "ball_holder": "Não sei",
-   "kit_holder": "Não sei"
+   "ball_holder": "Quartinho do JB",
+   "kit_holder": "Belaz"
   },
   {
    "id": "mmrjschd23nt",
@@ -3113,6 +4739,34 @@
    "meet_time": null,
    "ball_holder": null,
    "kit_holder": null
+  },
+  {
+   "id": "mmrjsf87d34z",
+   "squad_id": "diverso",
+   "date": "2026-07-18",
+   "opponent": "Safari",
+   "status": "agendada",
+   "goals_for": 0,
+   "goals_against": 0,
+   "lineup": [],
+   "scorers": [],
+   "assists": [],
+   "lineup_complete": true,
+   "notes": "Time mesclado com o Veterano",
+   "started_at": null,
+   "created_at": "2026-07-13T22:22:09.998588+00:00",
+   "updated_at": "2026-07-14T13:23:19.404+00:00",
+   "starters": [],
+   "positions": {},
+   "venue": "Parque Municipal do Tatuapé (Sampaio Moreira)",
+   "kickoff": "07:00",
+   "kit": "Diverso",
+   "archived": false,
+   "clock": null,
+   "tactics": null,
+   "meet_time": "06:30",
+   "ball_holder": "Não sei",
+   "kit_holder": "Não sei"
   },
   {
    "id": "mmrjsci4x4r5",

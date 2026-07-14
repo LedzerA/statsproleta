@@ -269,56 +269,73 @@ export async function renderLineupArt(
   ctx.fillStyle = "#3d2f05";
   ctx.fillText(word, W / 2, 377);
 
-  /* confronto */
-  const colL = W * 0.27, colR = W * 0.73, colW = W * 0.42;
+  /* confronto centrado (nome longo de adversário encolhe, sem desequilibrar) */
   ctx.fillStyle = CREME_3;
-  const sizeL = fitFont(ctx, TEAM.short.toUpperCase(), 62, colW, (px) => zilla(700, px));
-  ctx.font = zilla(700, sizeL);
-  ctx.fillText(TEAM.short.toUpperCase(), colL, 496);
-  const opp = m.opponent.toUpperCase();
-  const sizeR = fitFont(ctx, opp, 62, colW, (px) => zilla(700, px));
-  ctx.font = zilla(700, sizeR);
-  ctx.fillText(opp, colR, 496);
-  ctx.fillStyle = "rgba(242, 235, 214, .55)";
-  ctx.font = zilla(500, 56);
-  ctx.fillText("×", W / 2, 494);
+  const versus = `${TEAM.short.toUpperCase()}  ×  ${m.opponent.toUpperCase()}`;
+  const vs = fitFont(ctx, versus, 56, 940, (px) => zilla(700, px));
+  ctx.font = zilla(700, vs);
+  ctx.fillText(versus, W / 2, 476);
 
-  /* informações do jogo em blocos grandes (rótulo verde + valor creme), na
-     ordem combinada: apresentação → bola rolando → uniforme → bolas */
-  const blocks: { label: string; value: string }[] = [
-    { label: "📅 DATA", value: fmtDate(m.date) },
-  ];
-  if (m.venue) blocks.push({ label: "📍 LOCAL", value: m.venue });
-  if (m.meet_time) blocks.push({ label: "🕒 APRESENTAÇÃO", value: m.meet_time });
-  if (m.kickoff) blocks.push({ label: "⏰ BOLA ROLANDO", value: m.kickoff });
+  /* divisor curto entre o confronto e as informações */
+  ctx.strokeStyle = "rgba(242, 235, 214, .3)";
+  ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(W / 2 - 80, 528); ctx.lineTo(W / 2 + 80, 528); ctx.stroke();
+
+  /* grade de informações: data e local em linha cheia; apresentação/bola
+     rolando e uniforme/bolas lado a lado. O conjunto centraliza na área
+     entre o divisor e o fecho — nada de bloco espremido nem buraco. */
+  interface Cell { label: string; value: string }
+  const rows: Cell[][] = [[{ label: "📅 DATA", value: fmtDate(m.date) }]];
+  if (m.venue) rows.push([{ label: "📍 LOCAL", value: m.venue }]);
+  const par1: Cell[] = [];
+  if (m.meet_time) par1.push({ label: "🕒 APRESENTAÇÃO", value: m.meet_time });
+  if (m.kickoff) par1.push({ label: "⏰ BOLA ROLANDO", value: m.kickoff });
+  if (par1.length) rows.push(par1);
+  const par2: Cell[] = [];
   if (m.kit || m.kit_holder) {
-    blocks.push({
+    par2.push({
       label: "👕 UNIFORME",
       value: m.kit_holder ? `${m.kit ? `${m.kit} · ` : ""}com ${m.kit_holder}` : m.kit!,
     });
   }
-  if (m.ball_holder) blocks.push({ label: "⚽ BOLAS", value: `com ${m.ball_holder}` });
+  if (m.ball_holder) par2.push({ label: "⚽ BOLAS", value: `com ${m.ball_holder}` });
+  if (par2.length) rows.push(par2);
 
-  let y = blocks.length >= 6 ? 566 : blocks.length === 5 ? 588 : blocks.length === 4 ? 606 : 645;
-  const step = blocks.length >= 6 ? 106 : blocks.length === 5 ? 116 : blocks.length === 4 ? 132 : 152;
-  for (const b of blocks) {
+  ctx.font = zilla(600, 42);
+  const localLines = m.venue ? wrapText(ctx, m.venue, 900, 2).length : 1;
+  const rowH = (r: Cell[]) => (r[0].label.includes("LOCAL") && localLines > 1 ? 178 : 132);
+  const total = rows.reduce((s, r) => s + rowH(r), 0);
+  let y = 584 + Math.max(0, (592 - total) / 2);
+
+  const cell = (c: Cell, cx: number, maxW: number) => {
     ctx.fillStyle = VERDE_300;
-    ctx.font = inter(700, 24);
-    ctx.fillText(b.label, W / 2, y);
+    ctx.font = inter(700, 22);
+    ctx.fillText(c.label, cx, y);
     ctx.fillStyle = CREME_3;
-    ctx.font = zilla(600, 44);
-    const lines = wrapText(ctx, b.value, 920, 2);
-    let yy = y + 48;
-    for (const line of lines) {
-      ctx.fillText(line, W / 2, yy);
-      yy += 50;
+    ctx.font = zilla(600, 42);
+    const lines = wrapText(ctx, c.value, maxW, 2);
+    if (lines.length === 1) {
+      const size = fitFont(ctx, lines[0], 42, maxW, (px) => zilla(600, px));
+      ctx.font = zilla(600, size);
+      ctx.fillText(lines[0], cx, y + 50);
+    } else {
+      ctx.fillText(lines[0], cx, y + 50);
+      ctx.fillText(lines[1], cx, y + 96);
     }
-    y += step + (lines.length - 1) * 44;
+  };
+  for (const r of rows) {
+    if (r.length === 2) {
+      cell(r[0], W * 0.29, 420);
+      cell(r[1], W * 0.71, 420);
+    } else {
+      cell(r[0], W / 2, 900);
+    }
+    y += rowH(r);
   }
 
-  ctx.fillStyle = "rgba(242, 235, 214, .65)";
-  ctx.font = inter(600, 26);
-  ctx.fillText("Bora, Proleta! 💪", W / 2, Math.max(y + 10, 1200));
+  ctx.fillStyle = "rgba(242, 235, 214, .68)";
+  ctx.font = inter(600, 27);
+  ctx.fillText("Bora, Proleta! 💪", W / 2, 1216);
 
   /* rodapé */
   ctx.fillStyle = "rgba(95, 212, 143, .8)";
@@ -327,6 +344,54 @@ export async function renderLineupArt(
   ctx.fillText(`📊  acompanhe ao vivo:  ${site}`, W / 2, 1290);
 
   return canvas;
+}
+
+/** Desenha uma fileira de chips centrada (quebra em até `maxRows` linhas;
+    excedente vira "+N"). Retorna o y logo abaixo da última linha. */
+function chipRows(
+  ctx: CanvasRenderingContext2D, items: string[], top: number, maxRows: number
+): number {
+  const font = 24, h = 38, padX = 16, gap = 9, maxW = 950;
+  ctx.font = zilla(600, font);
+  const fit = (t: string) => {
+    let s = t;
+    while (ctx.measureText(s).width > 280 && s.length > 3) s = s.slice(0, -2) + "…";
+    return s;
+  };
+  let fila = [...items.map(fit)];
+  const linhas: string[][] = [];
+  while (fila.length && linhas.length < maxRows) {
+    const linha: string[] = [];
+    let w = 0;
+    while (fila.length) {
+      const cw = ctx.measureText(fila[0]).width + padX * 2;
+      if (linha.length && w + gap + cw > maxW) break;
+      // última linha e ainda vai sobrar gente: reserva espaço para o "+N"
+      if (linhas.length === maxRows - 1 && fila.length > 1 && w + gap + cw > maxW - 90) break;
+      linha.push(fila.shift()!);
+      w += (linha.length > 1 ? gap : 0) + cw;
+    }
+    if (fila.length && linhas.length === maxRows - 1) linha.push(`+${fila.length}`);
+    linhas.push(linha);
+    if (linha[linha.length - 1]?.startsWith("+")) fila = [];
+  }
+  let y = top;
+  for (const linha of linhas) {
+    const ws = linha.map((t) => ctx.measureText(t).width + padX * 2);
+    const totalW = ws.reduce((a, b) => a + b, 0) + gap * (linha.length - 1);
+    let x = (W - totalW) / 2;
+    linha.forEach((t, i) => {
+      roundedRect(ctx, x, y, ws[i], h, h / 2);
+      ctx.fillStyle = "rgba(242, 235, 214, .12)";
+      ctx.fill();
+      ctx.fillStyle = CREME;
+      ctx.font = zilla(600, font);
+      ctx.fillText(t, x + ws[i] / 2, y + h / 2 + 1);
+      x += ws[i] + gap;
+    });
+    y += h + gap;
+  }
+  return y;
 }
 
 const PHASE_ART: Record<"com" | "sem" | "bp", { label: string; bg: string; fg: string }> = {
@@ -433,6 +498,9 @@ export async function renderTacticsArt(
   /* jogadores */
   const px2 = (x: number) => ix + (x / 100) * iw;
   const py2 = (y: number) => iy + ih - (y / 100) * ih;
+  /* duas passadas: primeiro as bolinhas, depois todas as pílulas de nome por
+     cima — jogadores próximos (coordenadas arrastadas) não escondem nomes */
+  const ocupadas: { id: string; cx: number; cy: number }[] = [];
   f.slots.forEach((s, i) => {
     const id = phase.slots[i];
     const c = phase.coords?.[i];
@@ -441,32 +509,34 @@ export async function renderTacticsArt(
       ctx.strokeStyle = "rgba(242, 235, 214, .45)";
       ctx.lineWidth = 2.5;
       ctx.setLineDash([9, 7]);
-      ctx.beginPath(); ctx.arc(cx, cy, 30, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(cx, cy, 26, 0, Math.PI * 2); ctx.stroke();
       ctx.setLineDash([]);
       ctx.fillStyle = "rgba(242, 235, 214, .55)";
-      ctx.font = inter(700, 18);
+      ctx.font = inter(700, 15);
       ctx.fillText(s.pos, cx, cy + 1);
       return;
     }
-    ctx.beginPath(); ctx.arc(cx, cy, 30, 0, Math.PI * 2);
+    ctx.beginPath(); ctx.arc(cx, cy, 26, 0, Math.PI * 2);
     ctx.fillStyle = "#f7f2e0"; ctx.fill();
     ctx.lineWidth = 3; ctx.strokeStyle = "#0f2019"; ctx.stroke();
     ctx.fillStyle = "#14532d";
-    ctx.font = inter(700, 18);
+    ctx.font = inter(700, 16);
     // posição ajustada pontualmente vale mais que o rótulo da vaga
     const lbl = (m.positions?.[id] || s.pos).split("/")[0].trim().toUpperCase() || s.pos;
     ctx.fillText(lbl, cx, cy + 1);
-    let nome = nameOf(id).split(" ")[0];
-    ctx.font = zilla(600, 28);
-    while (ctx.measureText(nome).width > 150 && nome.length > 3) nome = nome.slice(0, -2) + "…";
-    ctx.fillStyle = CREME_3;
-    /* leve sombra para o nome não sumir na linha do campo */
-    ctx.save();
-    ctx.shadowColor = "rgba(6, 42, 28, .9)";
-    ctx.shadowBlur = 8;
-    ctx.fillText(nome, cx, cy + 52);
-    ctx.restore();
+    ocupadas.push({ id, cx, cy });
   });
+  for (const { id, cx, cy } of ocupadas) {
+    let nome = nameOf(id).split(" ")[0];
+    ctx.font = zilla(600, 24);
+    while (ctx.measureText(nome).width > 128 && nome.length > 3) nome = nome.slice(0, -2) + "…";
+    const tw = ctx.measureText(nome).width;
+    roundedRect(ctx, cx - tw / 2 - 9, cy + 31, tw + 18, 27, 13.5);
+    ctx.fillStyle = "rgba(6, 42, 28, .72)";
+    ctx.fill();
+    ctx.fillStyle = CREME_3;
+    ctx.fillText(nome, cx, cy + 45);
+  }
 
   /* embaixo do campo: banco (com/sem bola) ou cobradores (bola parada) */
   if (phaseKey !== "bp") {
@@ -476,35 +546,23 @@ export async function renderTacticsArt(
     );
     if (bench.length > 0) {
       ctx.fillStyle = VERDE_300;
-      ctx.font = inter(700, 22);
-      ctx.fillText(`BANCO (${bench.length})`, W / 2, 1178);
-      ctx.fillStyle = CREME;
-      ctx.font = zilla(600, 27);
-      let by = 1212;
-      for (const line of wrapText(ctx, bench.map(nameOf).join(", "), 940, 2)) {
-        ctx.fillText(line, W / 2, by);
-        by += 36;
-      }
+      ctx.font = inter(700, 21);
+      ctx.fillText(`BANCO (${bench.length})`, W / 2, 1172);
+      chipRows(ctx, bench.map((id) => nameOf(id).split(" ")[0]), 1188, 2);
     }
   } else if (m.tactics?.cobradores) {
     const cb = m.tactics.cobradores;
     const partes = [
-      cb.penalti && `🥅 Pênalti: ${nameOf(cb.penalti).split(" ")[0]}`,
-      cb.falta && `🎯 Falta: ${nameOf(cb.falta).split(" ")[0]}`,
-      cb.escanteio_e && `⛳ Esc. esq.: ${nameOf(cb.escanteio_e).split(" ")[0]}`,
-      cb.escanteio_d && `⛳ Esc. dir.: ${nameOf(cb.escanteio_d).split(" ")[0]}`,
+      cb.penalti && `🥅 Pênalti · ${nameOf(cb.penalti).split(" ")[0]}`,
+      cb.falta && `🎯 Falta · ${nameOf(cb.falta).split(" ")[0]}`,
+      cb.escanteio_e && `⛳ Esc. esq. · ${nameOf(cb.escanteio_e).split(" ")[0]}`,
+      cb.escanteio_d && `⛳ Esc. dir. · ${nameOf(cb.escanteio_d).split(" ")[0]}`,
     ].filter(Boolean) as string[];
     if (partes.length > 0) {
       ctx.fillStyle = VERDE_300;
-      ctx.font = inter(700, 22);
-      ctx.fillText("COBRADORES", W / 2, 1178);
-      ctx.fillStyle = CREME;
-      ctx.font = zilla(600, 27);
-      let by = 1212;
-      for (const line of wrapText(ctx, partes.join("   ·   "), 940, 2)) {
-        ctx.fillText(line, W / 2, by);
-        by += 36;
-      }
+      ctx.font = inter(700, 21);
+      ctx.fillText("COBRADORES", W / 2, 1172);
+      chipRows(ctx, partes, 1188, 2);
     }
   }
 
