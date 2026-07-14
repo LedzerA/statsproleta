@@ -27,412 +27,547 @@
  ],
  "athletes": [
   {
-   "id": "a1",
-   "squad_id": "esporte",
-   "name": "Bibico",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
-  },
-  {
-   "id": "a2",
-   "squad_id": "esporte",
-   "name": "Dudu",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
-  },
-  {
-   "id": "a3",
-   "squad_id": "esporte",
-   "name": "Rosalvo",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
-  },
-  {
    "id": "a4",
    "squad_id": "esporte",
    "name": "Vini França",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "a5",
    "squad_id": "esporte",
    "name": "Hashi",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "a6",
    "squad_id": "esporte",
    "name": "Caio",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
-  },
-  {
-   "id": "a7",
-   "squad_id": "esporte",
-   "name": "André",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "a8",
    "squad_id": "esporte",
    "name": "Fabiano",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "a9",
    "squad_id": "esporte",
    "name": "Digão",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
-  },
-  {
-   "id": "a10",
-   "squad_id": "esporte",
-   "name": "Wellington",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
-  },
-  {
-   "id": "a11",
-   "squad_id": "esporte",
-   "name": "Rennan",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
-  },
-  {
-   "id": "a12",
-   "squad_id": "esporte",
-   "name": "Meloni",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "a13",
    "squad_id": "esporte",
    "name": "Renan",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
-  },
-  {
-   "id": "a14",
-   "squad_id": "esporte",
-   "name": "Eloy",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
-  },
-  {
-   "id": "a15",
-   "squad_id": "esporte",
-   "name": "Macapá",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
-  },
-  {
-   "id": "a16",
-   "squad_id": "esporte",
-   "name": "Belaz",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
-  },
-  {
-   "id": "a17",
-   "squad_id": "esporte",
-   "name": "Rafael",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "a18",
    "squad_id": "esporte",
    "name": "Siqueira",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
-  },
-  {
-   "id": "a19",
-   "squad_id": "esporte",
-   "name": "Luis E.",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
-  },
-  {
-   "id": "a20",
-   "squad_id": "esporte",
-   "name": "Albano",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
-  },
-  {
-   "id": "a21",
-   "squad_id": "esporte",
-   "name": "Wez",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "a22",
    "squad_id": "esporte",
    "name": "Gzus",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "a23",
    "squad_id": "esporte",
    "name": "Lima",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "a24",
    "squad_id": "esporte",
    "name": "Brendon",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
-  },
-  {
-   "id": "a25",
-   "squad_id": "esporte",
-   "name": "Detona",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "a26",
    "squad_id": "esporte",
    "name": "Euller",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
-  },
-  {
-   "id": "a27",
-   "squad_id": "esporte",
-   "name": "Edu",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
-  },
-  {
-   "id": "a28",
-   "squad_id": "esporte",
-   "name": "Rufus",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "a29",
    "squad_id": "esporte",
    "name": "Leone",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
-  },
-  {
-   "id": "a30",
-   "squad_id": "esporte",
-   "name": "Pelota",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
-  },
-  {
-   "id": "a31",
-   "squad_id": "esporte",
-   "name": "Romario",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "a32",
    "squad_id": "esporte",
    "name": "W. Felipe",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
-  },
-  {
-   "id": "a33",
-   "squad_id": "esporte",
-   "name": "Gui Dantas",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "a34",
    "squad_id": "esporte",
    "name": "Barone",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "a35",
    "squad_id": "esporte",
    "name": "Igor",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
-  },
-  {
-   "id": "a36",
-   "squad_id": "esporte",
-   "name": "Amaral",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "a37",
    "squad_id": "esporte",
    "name": "Diego",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "a38",
    "squad_id": "esporte",
    "name": "Leodan",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "a39",
    "squad_id": "esporte",
    "name": "Lingo",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "a40",
    "squad_id": "esporte",
    "name": "Lucas Vini",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "a41",
    "squad_id": "esporte",
    "name": "Xande",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "a42",
    "squad_id": "esporte",
    "name": "PH",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "a43",
    "squad_id": "esporte",
    "name": "Salvador",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
-  },
-  {
-   "id": "a44",
-   "squad_id": "esporte",
-   "name": "Bruninho",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
-  },
-  {
-   "id": "a45",
-   "squad_id": "esporte",
-   "name": "Goleiro de Aluguel",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "a46",
    "squad_id": "esporte",
    "name": "Kauã",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "a47",
    "squad_id": "esporte",
    "name": "Beto",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "a48",
    "squad_id": "esporte",
    "name": "Alef",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "a49",
    "squad_id": "esporte",
    "name": "Lin",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "a50",
    "squad_id": "esporte",
    "name": "Led",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "a51",
    "squad_id": "esporte",
    "name": "Valts",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "amrdsdpcn4zq",
    "squad_id": "veterano",
    "name": "Guilherme",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "amrdsdsen3su",
    "squad_id": "veterano",
    "name": "Jacomo",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "amrdse11a2t5",
    "squad_id": "veterano",
    "name": "Albano",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "amrdse3fj5ff",
    "squad_id": "veterano",
    "name": "Amaral",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "amrdse5592tl",
    "squad_id": "veterano",
    "name": "Luan",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "amrdse7fn687",
    "squad_id": "veterano",
    "name": "Fabão",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "amrdsgr6o4dy",
    "squad_id": "veterano",
    "name": "Fabiano",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "amrdsgtqi45k",
    "squad_id": "veterano",
    "name": "André",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "amrdsgvsu2dx",
    "squad_id": "veterano",
    "name": "Meloni",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "amrdsh60j124",
    "squad_id": "veterano",
    "name": "Gui Dantas",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "v_78a39788",
    "squad_id": "veterano",
    "name": "Fabricio",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "v_5a681924",
    "squad_id": "veterano",
    "name": "Felipe",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "v_144e9d3b",
    "squad_id": "veterano",
    "name": "Chipilo",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "v_22494c72",
    "squad_id": "veterano",
    "name": "Côco",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "v_725bbf8b",
    "squad_id": "veterano",
    "name": "Carlinhos",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "v_dc1d67d1",
    "squad_id": "veterano",
    "name": "Sergio",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
   },
   {
    "id": "v_a5d80dd8",
    "squad_id": "veterano",
    "name": "Bato",
-   "created_at": "2026-07-10T22:46:13.282876+00:00"
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": []
+  },
+  {
+   "id": "a36",
+   "squad_id": "esporte",
+   "name": "Amaral",
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": [
+    "ZG"
+   ]
+  },
+  {
+   "id": "a45",
+   "squad_id": "esporte",
+   "name": "Goleiro de Aluguel",
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": [
+    "GOL"
+   ]
+  },
+  {
+   "id": "a33",
+   "squad_id": "esporte",
+   "name": "Gui Dantas",
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": [
+    "MEI"
+   ]
+  },
+  {
+   "id": "a15",
+   "squad_id": "esporte",
+   "name": "Macapá",
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": [
+    "ZG"
+   ]
+  },
+  {
+   "id": "a20",
+   "squad_id": "esporte",
+   "name": "Albano",
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": [
+    "LD",
+    "ZG"
+   ]
+  },
+  {
+   "id": "a30",
+   "squad_id": "esporte",
+   "name": "Pelota",
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": [
+    "SA"
+   ]
+  },
+  {
+   "id": "a17",
+   "squad_id": "esporte",
+   "name": "Rafael",
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": [
+    "PD"
+   ]
+  },
+  {
+   "id": "a31",
+   "squad_id": "esporte",
+   "name": "Romario",
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": [
+    "VOL"
+   ]
+  },
+  {
+   "id": "a28",
+   "squad_id": "esporte",
+   "name": "Rufus",
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": [
+    "ZG"
+   ]
+  },
+  {
+   "id": "a16",
+   "squad_id": "esporte",
+   "name": "Belaz",
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": [
+    "ZG",
+    "LE"
+   ]
+  },
+  {
+   "id": "a19",
+   "squad_id": "esporte",
+   "name": "Luis E.",
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": [
+    "MEI"
+   ]
+  },
+  {
+   "id": "a14",
+   "squad_id": "esporte",
+   "name": "Eloy",
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": [
+    "GOL"
+   ]
+  },
+  {
+   "id": "a27",
+   "squad_id": "esporte",
+   "name": "Edu",
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": [
+    "LE"
+   ]
+  },
+  {
+   "id": "a44",
+   "squad_id": "esporte",
+   "name": "Bruninho",
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": [
+    "PE"
+   ]
+  },
+  {
+   "id": "a1",
+   "squad_id": "esporte",
+   "name": "Bibico",
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": [
+    "VOL"
+   ]
+  },
+  {
+   "id": "a2",
+   "squad_id": "esporte",
+   "name": "Dudu",
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": [
+    "PE",
+    "PD",
+    "SA"
+   ]
+  },
+  {
+   "id": "a11",
+   "squad_id": "esporte",
+   "name": "Rennan",
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": [
+    "PE",
+    "SA",
+    "CA"
+   ]
+  },
+  {
+   "id": "a7",
+   "squad_id": "esporte",
+   "name": "André",
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": [
+    "MC",
+    "MEI"
+   ]
+  },
+  {
+   "id": "a3",
+   "squad_id": "esporte",
+   "name": "Rosalvo",
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": [
+    "LD",
+    "LE",
+    "VOL",
+    "MC",
+    "PE",
+    "PD"
+   ]
+  },
+  {
+   "id": "a10",
+   "squad_id": "esporte",
+   "name": "Wellington",
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": [
+    "MC",
+    "MEI",
+    "PE"
+   ]
+  },
+  {
+   "id": "a25",
+   "squad_id": "esporte",
+   "name": "Detona",
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": [
+    "PD",
+    "SA",
+    "CA"
+   ]
+  },
+  {
+   "id": "a12",
+   "squad_id": "esporte",
+   "name": "Meloni",
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": [
+    "LD",
+    "PE",
+    "PD",
+    "SA",
+    "CA"
+   ]
+  },
+  {
+   "id": "a21",
+   "squad_id": "esporte",
+   "name": "Wez",
+   "created_at": "2026-07-10T22:46:13.282876+00:00",
+   "positions": [
+    "MC",
+    "MEI"
+   ]
   }
  ],
  "matches": [
@@ -503,7 +638,6 @@
    "goals_for": 5,
    "goals_against": 3,
    "lineup": [
-    "a13",
     "a3",
     "a20",
     "a18",
@@ -518,7 +652,8 @@
     "a16",
     "a5",
     "a9",
-    "a7"
+    "a7",
+    "a13"
    ],
    "scorers": [
     {
@@ -548,9 +683,8 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-14T00:32:07.05+00:00",
    "starters": [
-    "a13",
     "a3",
     "a20",
     "a18",
@@ -560,9 +694,27 @@
     "a14",
     "a2",
     "a11",
-    "a8"
+    "a8",
+    "a4"
    ],
-   "positions": {},
+   "positions": {
+    "a1": "VOL",
+    "a2": "PD",
+    "a3": "LD",
+    "a4": "ZG",
+    "a5": "ZG",
+    "a6": "LE",
+    "a7": "MEI",
+    "a8": "CA",
+    "a9": "MEI",
+    "a10": "MC",
+    "a11": "PE",
+    "a13": "GK",
+    "a14": "GOL",
+    "a16": "ZG",
+    "a18": "ZG",
+    "a20": "ZG"
+   },
    "venue": null,
    "kickoff": null,
    "kit": null,
@@ -578,7 +730,6 @@
    "goals_for": 1,
    "goals_against": 4,
    "lineup": [
-    "a13",
     "a12",
     "a28",
     "a4",
@@ -595,7 +746,6 @@
     "a7",
     "a9",
     "a35",
-    "a41",
     "a30"
    ],
    "scorers": [
@@ -609,9 +759,8 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-14T00:34:24.537+00:00",
    "starters": [
-    "a13",
     "a12",
     "a28",
     "a4",
@@ -621,9 +770,22 @@
     "a14",
     "a2",
     "a3",
-    "a11"
+    "a11",
+    "a20"
    ],
-   "positions": {},
+   "positions": {
+    "a1": "VOL",
+    "a2": "PD",
+    "a3": "LD",
+    "a4": "ZG",
+    "a6": "LE",
+    "a11": "CA",
+    "a12": "PD",
+    "a14": "GOL",
+    "a18": "ZG",
+    "a20": "ZG",
+    "a28": "ZG"
+   },
    "venue": null,
    "kickoff": null,
    "kit": null,
@@ -667,7 +829,7 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-14T00:35:37.491+00:00",
    "starters": [
     "a13",
     "a3",
@@ -681,7 +843,24 @@
     "a2",
     "a8"
    ],
-   "positions": {},
+   "positions": {
+    "a1": "VOL",
+    "a2": "PE",
+    "a3": "PD",
+    "a4": "ZG",
+    "a6": "LE",
+    "a7": "MEI",
+    "a8": "CA",
+    "a9": "MEI",
+    "a13": "GOL",
+    "a17": "PD",
+    "a20": "LD",
+    "a24": "MC",
+    "a29": "LD",
+    "a30": "SA",
+    "a31": "VOL",
+    "a36": "ZG"
+   },
    "venue": null,
    "kickoff": null,
    "kit": null,
@@ -1039,13 +1218,13 @@
     "a7",
     "a3",
     "a2",
+    "a14",
     "a11",
     "a15",
     "a20",
     "a16",
     "a18",
     "a9",
-    "a14",
     "a17"
    ],
    "scorers": [
@@ -1059,7 +1238,7 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-14T00:54:15.575+00:00",
    "starters": [
     "a13",
     "a12",
@@ -1071,9 +1250,21 @@
     "a7",
     "a3",
     "a2",
-    "a11"
+    "a14"
    ],
-   "positions": {},
+   "positions": {
+    "a1": "VOL",
+    "a2": "PD",
+    "a3": "LD",
+    "a4": "ZG",
+    "a5": "ZG",
+    "a6": "LE",
+    "a7": "MEI",
+    "a12": "PD",
+    "a13": "GOL",
+    "a14": "CA",
+    "a19": "MC"
+   },
    "venue": null,
    "kickoff": null,
    "kit": null,
@@ -2552,16 +2743,52 @@
    "status": "agendada",
    "goals_for": 0,
    "goals_against": 0,
-   "lineup": [],
+   "lineup": [
+    "a13",
+    "a22",
+    "a5",
+    "a4",
+    "a16",
+    "a24",
+    "a7",
+    "a21",
+    "a11",
+    "a2",
+    "a8"
+   ],
    "scorers": [],
    "assists": [],
    "lineup_complete": true,
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-13T22:20:06.871272+00:00",
-   "updated_at": "2026-07-13T22:20:07.144+00:00",
-   "starters": [],
-   "positions": {},
+   "updated_at": "2026-07-13T22:55:04.701+00:00",
+   "starters": [
+    "a13",
+    "a22",
+    "a5",
+    "a4",
+    "a16",
+    "a24",
+    "a7",
+    "a21",
+    "a11",
+    "a2",
+    "a8"
+   ],
+   "positions": {
+    "a2": "PD",
+    "a4": "ZG",
+    "a5": "ZG",
+    "a7": "MC",
+    "a8": "CA",
+    "a11": "PE",
+    "a13": "GK",
+    "a16": "LE",
+    "a21": "MEI",
+    "a22": "LD",
+    "a24": "VOL"
+   },
    "venue": "Parque da Mooca",
    "kickoff": "09:30",
    "kit": null,
