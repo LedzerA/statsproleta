@@ -163,7 +163,7 @@ export default function MatchDetail({ id }: { id: string }) {
           });
           if (m.tactics.bp) {
             imgs.push({
-              label: `Bola parada · ${m.tactics.bp.formation}`,
+              label: "Bola parada",
               url: png(await renderTacticsArt(m, "bp", athleteName, squadName)),
               file: `proleta-bola-parada-${m.date}.png`,
             });
@@ -235,8 +235,8 @@ export default function MatchDetail({ id }: { id: string }) {
 
   const infoBits = [
     m.venue && `📍 ${m.venue}`,
-    m.kickoff && `🕒 ${m.kickoff}`,
-    m.status === "agendada" && m.meet_time && `⏰ Apresentação ${m.meet_time}`,
+    m.status === "agendada" && m.meet_time && `🕒 Apresentação ${m.meet_time}`,
+    m.kickoff && `⏰ ${m.status === "agendada" ? "Bola rolando " : ""}${m.kickoff}`,
     m.kit && `👕 ${m.kit}${m.status === "agendada" && m.kit_holder ? ` (com ${m.kit_holder})` : ""}`,
     m.status === "agendada" && !m.kit && m.kit_holder && `👕 Uniforme com ${m.kit_holder}`,
     m.status === "agendada" && m.ball_holder && `⚽ Bolas com ${m.ball_holder}`,
@@ -546,18 +546,19 @@ export default function MatchDetail({ id }: { id: string }) {
   );
 }
 
-/** Legenda da convocação para o WhatsApp: confronto, data/horário, local e a
-    logística (apresentação, bolas e uniforme) — só as linhas preenchidas. */
+/** Legenda da convocação para o WhatsApp — mesma ordem da arte:
+    apresentação → bola rolando → uniforme → bolas (só as linhas preenchidas). */
 function convocacaoCaption(m: Match): string {
   const lines = [
     `📋 *Convocação · ${TEAM.short} × ${m.opponent}*`,
-    `🗓 ${fmtDate(m.date)}${m.kickoff ? `  ·  ⏰ Jogo às ${m.kickoff}` : ""}`,
+    `🗓 ${fmtDate(m.date)}`,
   ];
   if (m.venue) lines.push(`📍 ${m.venue}`);
   if (m.meet_time) lines.push(`🕒 Apresentação: ${m.meet_time}`);
-  if (m.ball_holder) lines.push(`⚽ Bolas com: ${m.ball_holder}`);
+  if (m.kickoff) lines.push(`⏰ Bola rolando: ${m.kickoff}`);
   if (m.kit_holder) lines.push(`👕 Uniforme${m.kit ? ` ${m.kit}` : ""} com: ${m.kit_holder}`);
   else if (m.kit) lines.push(`👕 Uniforme: ${m.kit}`);
+  if (m.ball_holder) lines.push(`⚽ Bolas com: ${m.ball_holder}`);
   return lines.join("\n");
 }
 

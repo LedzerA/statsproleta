@@ -221,12 +221,13 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
       a.name.localeCompare(b.name, "pt"));
   }, [roster, lineup, scorers, assists, positions, suggested]);
 
-  /* mantém sem bola e bola parada coerentes após mudanças na com bola */
+  /* mantém sem bola e bola parada coerentes após mudanças na com bola;
+     bola parada não tem formação própria — segue a da com bola */
   function syncFrom(com: TacticsPhase): FormTactics {
     return {
       com,
       sem: semManual ? reconcileSem(tactics.sem, com) : remapPhase(com, tactics.sem.formation),
-      bp: bpManual ? reconcileSem(tactics.bp, com) : remapPhase(com, tactics.bp.formation),
+      bp: bpManual ? reconcileSem(tactics.bp, com) : remapPhase(com, com.formation),
     };
   }
 
@@ -577,14 +578,16 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
             <button type="button" className={`chip ${phase === "bp" ? "on" : ""}`} onClick={() => setPhase("bp")}>
               🎯 Bola parada
             </button>
-            <select
-              className="pos-sel formation-sel"
-              value={active.formation}
-              onChange={(e) => setFormation(phase, e.target.value)}
-              aria-label="Formação"
-            >
-              {FORMATIONS.map((f) => <option key={f.name} value={f.name}>{f.name}</option>)}
-            </select>
+            {phase !== "bp" && (
+              <select
+                className="pos-sel formation-sel"
+                value={active.formation}
+                onChange={(e) => setFormation(phase, e.target.value)}
+                aria-label="Formação"
+              >
+                {FORMATIONS.map((f) => <option key={f.name} value={f.name}>{f.name}</option>)}
+              </select>
+            )}
           </div>
           <Pitch
             formation={activeF}

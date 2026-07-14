@@ -283,15 +283,14 @@ export async function renderLineupArt(
   ctx.font = zilla(500, 56);
   ctx.fillText("×", W / 2, 494);
 
-  /* informações do jogo em blocos grandes (rótulo verde + valor creme) */
+  /* informações do jogo em blocos grandes (rótulo verde + valor creme), na
+     ordem combinada: apresentação → bola rolando → uniforme → bolas */
   const blocks: { label: string; value: string }[] = [
-    {
-      label: "DATA · HORÁRIO",
-      value: `${fmtDate(m.date)}${m.kickoff ? `  ·  ${m.kickoff}` : ""}`,
-    },
+    { label: "📅 DATA", value: fmtDate(m.date) },
   ];
   if (m.venue) blocks.push({ label: "📍 LOCAL", value: m.venue });
   if (m.meet_time) blocks.push({ label: "🕒 APRESENTAÇÃO", value: m.meet_time });
+  if (m.kickoff) blocks.push({ label: "⏰ BOLA ROLANDO", value: m.kickoff });
   if (m.kit || m.kit_holder) {
     blocks.push({
       label: "👕 UNIFORME",
@@ -300,8 +299,8 @@ export async function renderLineupArt(
   }
   if (m.ball_holder) blocks.push({ label: "⚽ BOLAS", value: `com ${m.ball_holder}` });
 
-  let y = blocks.length >= 5 ? 588 : blocks.length === 4 ? 606 : 645;
-  const step = blocks.length >= 5 ? 116 : blocks.length === 4 ? 132 : 152;
+  let y = blocks.length >= 6 ? 566 : blocks.length === 5 ? 588 : blocks.length === 4 ? 606 : 645;
+  const step = blocks.length >= 6 ? 106 : blocks.length === 5 ? 116 : blocks.length === 4 ? 132 : 152;
   for (const b of blocks) {
     ctx.fillStyle = VERDE_300;
     ctx.font = inter(700, 24);
@@ -386,10 +385,10 @@ export async function renderTacticsArt(
   const meta = [squadName, fmtDate(m.date)].filter(Boolean).join("  ·  ");
   ctx.fillText(meta.toUpperCase(), W / 2, 300);
 
-  /* selo da fase */
+  /* selo da fase (bola parada não é uma formação — fica sem o nome) */
   const pa = PHASE_ART[phaseKey];
   ctx.font = inter(700, 30);
-  const word = `${pa.label}  ·  ${f.name}`;
+  const word = phaseKey === "bp" ? pa.label : `${pa.label}  ·  ${f.name}`;
   const pw = ctx.measureText(word).width + 76;
   ctx.fillStyle = pa.bg;
   roundedRect(ctx, (W - pw) / 2, 344, pw, 62, 31);
