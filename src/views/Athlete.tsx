@@ -1,10 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useStore } from "../state/store";
 import { navigate } from "../lib/router";
 import { compute, matchGoalkeepers } from "../lib/stats";
 import { dec, fmtDate, fmtDateShort, pct, result, sortMatches } from "../lib/format";
 import { inPeriod, periodRange } from "../lib/period";
-import { POSITIONS, athletePositions } from "../lib/positions";
+import { POSITIONS, athletePositions, posRank } from "../lib/positions";
 import { athleteMarcos } from "../lib/records";
 import { Modal, ResultBadge } from "../components/ui";
 import { LineChart } from "../components/LineChart";
@@ -13,6 +13,9 @@ export default function Athlete({ id }: { id: string }) {
   const { athletes, allMatches, squads, period, periodOn, isAdmin, updateAthletePositions } = useStore();
   const athlete = athletes.find((a) => a.id === id);
   const [editPos, setEditPos] = useState<string[] | null>(null);
+  // filtro da lista de partidas pela posição em que ele atuou
+  const [fPos, setFPos] = useState<string | null>(null);
+  useEffect(() => { setFPos(null); }, [id]);
 
   const data = useMemo(() => {
     if (!athlete) return null;
@@ -63,6 +66,29 @@ export default function Athlete({ id }: { id: string }) {
     }
     return { jogos, gols, assist };
   }, [data, id]);
+
+  /* posições em que ele atuou nas partidas listadas (composta "LE/ZG" conta
+     nas duas) + quantas vezes — vira a régua de filtro da lista */
+  const posJogadas = useMemo(() => {
+    if (!data) return [];
+    const map = new Map<string, number>();
+    for (const m of data.played) {
+      const raw = m.positions?.[id];
+      if (!raw) continue;
+      for (const part of raw.split("/")) {
+        const p = part.trim().toUpperCase();
+        if (p) map.set(p, (map.get(p) || 0) + 1);
+      }
+    }
+    return [...map.entries()].sort((a, b) => posRank(a[0]) - posRank(b[0]) || b[1] - a[1]);
+  }, [data, id]);
+
+  const shown = useMemo(() => {
+    if (!data) return [];
+    if (!fPos) return data.played;
+    return data.played.filter((m) =>
+      (m.positions?.[id] || "").toUpperCase().split("/").map((s) => s.trim()).includes(fPos));
+  }, [data, id, fPos]);
 
   if (!athlete || !data) {
     return (
@@ -247,19 +273,36 @@ export default function Athlete({ id }: { id: string }) {
           <h3>
             Partidas{" "}
             <span className="sub" style={{ display: "inline" }}>
-              · {data.played.length}{periodOn ? " no período" : ""}
+              · {fPos ? `${shown.length} de ${data.played.length}` : data.played.length}
+              {periodOn ? " no período" : ""}{fPos ? ` · de ${fPos}` : ""}
             </span>
           </h3>
         </div>
-        {data.played.length === 0 ? (
+        {posJogadas.length > 1 && (
+          <div className="chips" style={{ padding: "10px 18px 2px" }}>
+            {posJogadas.map(([p, n]) => (
+              <button
+                key={p}
+                className={`chip ${fPos === p ? "on" : ""}`}
+                onClick={() => setFPos(fPos === p ? null : p)}
+                title={`Partidas em que atuou de ${p}`}
+              >
+                {p} · {n}
+              </button>
+            ))}
+          </div>
+        )}
+        {shown.length === 0 ? (
           <div className="ga-empty" style={{ padding: "14px 18px" }}>
-            {periodOn
-              ? "Nenhuma partida deste atleta no período selecionado no topo."
-              : "Nenhuma partida registrada com este atleta."}
+            {fPos
+              ? `Nenhuma partida de ${fPos} no recorte atual.`
+              : periodOn
+                ? "Nenhuma partida deste atleta no período selecionado no topo."
+                : "Nenhuma partida registrada com este atleta."}
           </div>
         ) : (
           <div className="mini-matches">
-            {data.played.map((m) => {
+            {shown.map((m) => {
               const g = (m.scorers || []).find((s) => s.a === id)?.g || 0;
               const a = (m.assists || []).find((s) => s.a === id)?.n || 0;
               const contrib = [
@@ -267,11 +310,13 @@ export default function Athlete({ id }: { id: string }) {
                 a > 0 && `🅰️${a > 1 ? ` ${a}` : ""}`,
                 (m.starters || []).includes(id) && "★",
               ].filter(Boolean).join(" ");
+              const pos = m.positions?.[id] || "";
               return (
                 <button key={m.id} className="mini-match" onClick={() => navigate(`#/partida/${m.id}`)}>
                   <span className="mm-date">{fmtDate(m.date).slice(0, 5)}</span>
                   <span className="mm-score num">{m.goals_for} × {m.goals_against}</span>
                   <span className="mm-opp">{m.opponent}</span>
+                  {pos && <span className="mm-pos">{pos}</span>}
                   {contrib && <span className="mm-contrib">{contrib}</span>}
                   <ResultBadge r={result(m)} />
                 </button>
@@ -280,7 +325,7 @@ export default function Athlete({ id }: { id: string }) {
           </div>
         )}
       </div>
-      <div className="legend">★ = titular na partida · ⚽ gols · 🅰️ assistências.</div>
+      <div className="legend">★ = titular na partida · ⚽ gols · 🅰️ assistências · a sigla verde é a posição naquele jogo.</div>
     </>
   );
 }
