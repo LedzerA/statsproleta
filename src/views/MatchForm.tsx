@@ -431,18 +431,6 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
         </>
       }
     >
-      <div className="field-row">
-        <div className="field" style={{ flex: 1 }}>
-          <label>Data</label>
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-        </div>
-        {!schemaLegacy && (
-          <div className="field" style={{ width: 110 }}>
-            <label>Horário</label>
-            <input type="time" value={kickoff} onChange={(e) => setKickoff(e.target.value)} />
-          </div>
-        )}
-      </div>
       <div className="field">
         <label>Adversário</label>
         <input
@@ -451,39 +439,55 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
           onChange={(e) => setOpponent(e.target.value)}
         />
       </div>
+      <div className="field-row">
+        <div className="field" style={{ flex: 1 }}>
+          <label>Data</label>
+          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+        </div>
+        {!schemaLegacy && (
+          <div className="field" style={{ width: 110 }}>
+            <label>Bola rolando</label>
+            <input type="time" value={kickoff} onChange={(e) => setKickoff(e.target.value)} />
+          </div>
+        )}
+      </div>
       {!schemaLegacy && (
         <div className="field-row">
-          <div className="field" style={{ flex: 1.4 }}>
+          <div className="field" style={{ flex: 1 }}>
             <label>Local</label>
             <input type="text" value={venue} placeholder="Ex.: Parque da Mooca"
               autoComplete="off" onChange={(e) => setVenue(e.target.value)} />
           </div>
+          {schemaLogistics && (
+            <div className="field" style={{ width: 110 }}>
+              <label>Apresentação</label>
+              <input type="time" value={meetTime} onChange={(e) => setMeetTime(e.target.value)} />
+            </div>
+          )}
+        </div>
+      )}
+      {!schemaLegacy && (
+        <div className="field-row">
           <div className="field" style={{ flex: 1 }}>
             <label>Uniforme</label>
             <input type="text" value={kit} placeholder="Ex.: Verde"
               autoComplete="off" onChange={(e) => setKit(e.target.value)} />
           </div>
+          {schemaLogistics && (
+            <div className="field" style={{ flex: 1.4 }}>
+              <label>Uniforme com</label>
+              <input type="text" value={kitHolder} placeholder="Quem leva o jogo de camisas"
+                autoComplete="off" onChange={(e) => setKitHolder(e.target.value)} />
+            </div>
+          )}
         </div>
       )}
       {!schemaLegacy && schemaLogistics && (
-        <>
-          <div className="field-row">
-            <div className="field" style={{ width: 110 }}>
-              <label>Apresentação</label>
-              <input type="time" value={meetTime} onChange={(e) => setMeetTime(e.target.value)} />
-            </div>
-            <div className="field" style={{ flex: 1 }}>
-              <label>Bolas com</label>
-              <input type="text" value={ballHolder} placeholder="Quem leva as bolas"
-                autoComplete="off" onChange={(e) => setBallHolder(e.target.value)} />
-            </div>
-          </div>
-          <div className="field">
-            <label>Uniforme com</label>
-            <input type="text" value={kitHolder} placeholder="Quem leva o jogo de camisas"
-              autoComplete="off" onChange={(e) => setKitHolder(e.target.value)} />
-          </div>
-        </>
+        <div className="field">
+          <label>Bolas com</label>
+          <input type="text" value={ballHolder} placeholder="Quem leva as bolas da partida"
+            autoComplete="off" onChange={(e) => setBallHolder(e.target.value)} />
+        </div>
       )}
 
       {!scheduling && (
@@ -618,7 +622,8 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
           <div className="st-list">
             {activeF.slots.map((s, i) => {
               const occ = active.slots[i];
-              const editPos = phase === "com" && !!occ;
+              // posição editável nas fases com/sem bola (bola parada só espelha)
+              const editPos = phase !== "bp" && !!occ;
               const cur = occ && posManual.has(occ) ? positions[occ] || s.pos : s.pos;
               return (
                 <div className="st-row slot" key={`${active.formation}-${i}`}>
