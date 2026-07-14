@@ -160,6 +160,13 @@ export default function MatchDetail({ id }: { id: string }) {
             url: png(await renderTacticsArt(m, "sem", athleteName, squadName)),
             file: `proleta-sem-bola-${m.date}.png`,
           });
+          if (m.tactics.bp) {
+            imgs.push({
+              label: `Bola parada · ${m.tactics.bp.formation}`,
+              url: png(await renderTacticsArt(m, "bp", athleteName, squadName)),
+              file: `proleta-bola-parada-${m.date}.png`,
+            });
+          }
         }
       } else {
         imgs.push({
@@ -200,10 +207,33 @@ export default function MatchDetail({ id }: { id: string }) {
     downloadArt(item);
   }
 
+  /** Compartilha a arte com a legenda da convocação (apresentação, bolas,
+      uniforme). Sem suporte a arquivos no menu de compartilhar (desktop),
+      baixa o PNG e abre o WhatsApp com a legenda pronta para colar. */
+  async function shareWhatsApp(item: { label: string; url: string; file: string }) {
+    if (!m) return;
+    const caption = convocacaoCaption(m);
+    try {
+      const blob = await (await fetch(item.url)).blob();
+      const file = new File([blob], item.file, { type: "image/png" });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], text: caption });
+        return;
+      }
+    } catch (e) {
+      if ((e as any)?.name === "AbortError") return; // usuário desistiu no menu
+    }
+    downloadArt(item);
+    window.open(`https://wa.me/?text=${encodeURIComponent(caption)}`, "_blank");
+  }
+
   const infoBits = [
     m.venue && `📍 ${m.venue}`,
     m.kickoff && `🕒 ${m.kickoff}`,
-    m.kit && `👕 ${m.kit}`,
+    m.status === "agendada" && m.meet_time && `⏰ Apresentação ${m.meet_time}`,
+    m.kit && `👕 ${m.kit}${m.status === "agendada" && m.kit_holder ? ` (com ${m.kit_holder})` : ""}`,
+    m.status === "agendada" && !m.kit && m.kit_holder && `👕 Uniforme com ${m.kit_holder}`,
+    m.status === "agendada" && m.ball_holder && `⚽ Bolas com ${m.ball_holder}`,
   ].filter(Boolean) as string[];
 
   // escalação tática: fase ativa (bola parada só existe quando personalizada)
@@ -471,13 +501,19 @@ export default function MatchDetail({ id }: { id: string }) {
               <img src={item.url} alt={item.label} style={{ width: "100%", borderRadius: 10, display: "block" }} />
               <div className="row-gap" style={{ margin: "8px 0 16px" }}>
                 <button className="btn ghost" style={{ flex: 1 }} onClick={() => downloadArt(item)}>↓ Baixar</button>
-                <button className="btn primary" style={{ flex: 2 }} onClick={() => shareArt(item)}>Compartilhar</button>
+                {artKind === "convocacao" && (
+                  <button className="btn wa" style={{ flex: 1.4 }} onClick={() => shareWhatsApp(item)}>WhatsApp</button>
+                )}
+                <button className="btn primary" style={{ flex: artKind === "convocacao" ? 1.4 : 2 }} onClick={() => shareArt(item)}>
+                  Compartilhar
+                </button>
               </div>
             </div>
           ))}
           <p className="muted" style={{ fontSize: 13, marginTop: 2 }}>
-            No celular, “Compartilhar” abre direto o WhatsApp / Instagram.
-            Se o aparelho não suportar, o botão baixa o PNG.
+            {artKind === "convocacao"
+              ? "O botão WhatsApp envia a arte já com a legenda: apresentação, bolas e uniforme. No computador, ele baixa o PNG e abre o WhatsApp com a legenda pronta para colar."
+              : "No celular, “Compartilhar” abre direto o WhatsApp / Instagram. Se o aparelho não suportar, o botão baixa o PNG."}
           </p>
         </Modal>
       )}
@@ -495,6 +531,21 @@ export default function MatchDetail({ id }: { id: string }) {
       )}
     </>
   );
+}
+
+/** Legenda da convocação para o WhatsApp: confronto, data/horário, local e a
+    logística (apresentação, bolas e uniforme) — só as linhas preenchidas. */
+function convocacaoCaption(m: Match): string {
+  const lines = [
+    `📋 *Convocação · ${TEAM.short} × ${m.opponent}*`,
+    `🗓 ${fmtDate(m.date)}${m.kickoff ? `  ·  ⏰ Jogo às ${m.kickoff}` : ""}`,
+  ];
+  if (m.venue) lines.push(`📍 ${m.venue}`);
+  if (m.meet_time) lines.push(`🕒 Apresentação: ${m.meet_time}`);
+  if (m.ball_holder) lines.push(`⚽ Bolas com: ${m.ball_holder}`);
+  if (m.kit_holder) lines.push(`👕 Uniforme${m.kit ? ` ${m.kit}` : ""} com: ${m.kit_holder}`);
+  else if (m.kit) lines.push(`👕 Uniforme: ${m.kit}`);
+  return lines.join("\n");
 }
 
 /** Ordena lances por período → minuto → instante de registro (crescente).

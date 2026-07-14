@@ -85,6 +85,9 @@ export interface Match {
   venue: string | null; // local
   kickoff: string | null; // horário ("11:30")
   kit: string | null; // uniforme
+  meet_time: string | null; // horário de apresentação ("10:30") — atualização 5
+  ball_holder: string | null; // com quem estão as bolas da partida
+  kit_holder: string | null; // com quem está o uniforme (jogo de camisas)
   archived: boolean;
   clock: Clock | null;
   started_at: string | null;

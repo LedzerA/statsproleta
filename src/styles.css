@@ -439,6 +439,8 @@ table.stats .muted { color: rgba(50, 75, 64, .55); }
 .btn:active { transform: translateY(1px); }
 .btn.primary { background: var(--verde-500); border-color: transparent; color: #062915; }
 .btn.primary:hover { background: var(--verde-400); }
+.btn.wa { background: #25d366; border-color: transparent; color: #062915; }
+.btn.wa:hover { background: #3adf79; }
 .btn.ghost { background: transparent; color: var(--carvao); border: 1px solid rgba(15, 32, 25, .2); }
 .btn.ghost:hover { background: rgba(15, 32, 25, .06); }
 .btn.ghost-light { background: transparent; color: var(--creme); border: 1px solid var(--linha-forte); }

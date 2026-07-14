@@ -33,7 +33,7 @@ const COBRANCAS: { k: keyof SetPieceTakers; label: string }[] = [
 ];
 
 export default function MatchForm({ match, schedule, onClose }: Props) {
-  const { roster, squadMatches, squadId, schemaLegacy, schemaTactics, upsertMatch, addAthlete, toast } = useStore();
+  const { roster, squadMatches, squadId, schemaLegacy, schemaTactics, schemaLogistics, upsertMatch, addAthlete, toast } = useStore();
   const isEdit = !!match;
   const scheduling = schedule || match?.status === "agendada";
 
@@ -42,6 +42,9 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
   const [venue, setVenue] = useState(match?.venue || "");
   const [kickoff, setKickoff] = useState(match?.kickoff || "");
   const [kit, setKit] = useState(match?.kit || "");
+  const [meetTime, setMeetTime] = useState(match?.meet_time || "");
+  const [ballHolder, setBallHolder] = useState(match?.ball_holder || "");
+  const [kitHolder, setKitHolder] = useState(match?.kit_holder || "");
   const [gf, setGf] = useState(match?.goals_for ?? 0);
   const [ga, setGa] = useState(match?.goals_against ?? 0);
 
@@ -335,6 +338,9 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
       venue: venue.trim() || null,
       kickoff: kickoff.trim() || null,
       kit: kit.trim() || null,
+      meet_time: meetTime.trim() || null,
+      ball_holder: ballHolder.trim() || null,
+      kit_holder: kitHolder.trim() || null,
       archived: match?.archived === true,
       clock: match?.clock || null,
       started_at: match?.started_at || null,
@@ -398,6 +404,26 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
               autoComplete="off" onChange={(e) => setKit(e.target.value)} />
           </div>
         </div>
+      )}
+      {!schemaLegacy && schemaLogistics && (
+        <>
+          <div className="field-row">
+            <div className="field" style={{ width: 110 }}>
+              <label>Apresentação</label>
+              <input type="time" value={meetTime} onChange={(e) => setMeetTime(e.target.value)} />
+            </div>
+            <div className="field" style={{ flex: 1 }}>
+              <label>Bolas com</label>
+              <input type="text" value={ballHolder} placeholder="Quem leva as bolas"
+                autoComplete="off" onChange={(e) => setBallHolder(e.target.value)} />
+            </div>
+          </div>
+          <div className="field">
+            <label>Uniforme com</label>
+            <input type="text" value={kitHolder} placeholder="Quem leva o jogo de camisas"
+              autoComplete="off" onChange={(e) => setKitHolder(e.target.value)} />
+          </div>
+        </>
       )}
 
       {!scheduling && (

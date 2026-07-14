@@ -369,11 +369,17 @@ export async function renderLineupArt(
   return canvas;
 }
 
-/** Arte do campinho tático de uma fase (com/sem bola): formação, jogadores
-    nas vagas (com os ajustes arrastados no app) e o confronto no cabeçalho. */
+const PHASE_ART: Record<"com" | "sem" | "bp", { label: string; bg: string; fg: string }> = {
+  com: { label: "COM BOLA", bg: "#2fbf6b", fg: "#08240f" },
+  sem: { label: "SEM BOLA", bg: "#e6b94b", fg: "#3d2f05" },
+  bp: { label: "BOLA PARADA", bg: CREME, fg: "#0b4529" },
+};
+
+/** Arte do campinho tático de uma fase (com/sem bola/bola parada): formação,
+    jogadores nas vagas (com os ajustes arrastados no app) e o confronto. */
 export async function renderTacticsArt(
   m: Match,
-  phaseKey: "com" | "sem",
+  phaseKey: "com" | "sem" | "bp",
   nameOf: (id: string) => string,
   squadName: string | null
 ): Promise<HTMLCanvasElement> {
@@ -386,7 +392,7 @@ export async function renderTacticsArt(
     ]);
   } catch { /* segue com a fonte substituta */ }
 
-  const phase: TacticsPhase = m.tactics![phaseKey];
+  const phase: TacticsPhase = m.tactics![phaseKey]!;
   const f = getFormation(phase.formation);
 
   const canvas = document.createElement("canvas");
@@ -420,13 +426,14 @@ export async function renderTacticsArt(
   ctx.fillText(meta.toUpperCase(), W / 2, 300);
 
   /* selo da fase */
+  const pa = PHASE_ART[phaseKey];
   ctx.font = inter(700, 30);
-  const word = `${phaseKey === "com" ? "COM BOLA" : "SEM BOLA"}  ·  ${f.name}`;
+  const word = `${pa.label}  ·  ${f.name}`;
   const pw = ctx.measureText(word).width + 76;
-  ctx.fillStyle = phaseKey === "com" ? "#2fbf6b" : "#e6b94b";
+  ctx.fillStyle = pa.bg;
   roundedRect(ctx, (W - pw) / 2, 344, pw, 62, 31);
   ctx.fill();
-  ctx.fillStyle = phaseKey === "com" ? "#08240f" : "#3d2f05";
+  ctx.fillStyle = pa.fg;
   ctx.fillText(word, W / 2, 377);
 
   /* confronto */

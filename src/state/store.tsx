@@ -32,6 +32,10 @@ function loadPeriod(): Period {
    banco não tiver sido atualizado, elas são removidas das escritas */
 const V21_FIELDS = ["starters", "positions", "venue", "kickoff", "kit", "archived", "clock"] as const;
 
+/* colunas da atualização 5 (logística da convocação): apresentação, bolas e
+   uniforme com quem — removidas das escritas enquanto o banco não as tiver */
+const LOGISTICS_FIELDS = ["meet_time", "ball_holder", "kit_holder"] as const;
+
 function normPhase(p: any): TacticsPhase | null {
   if (!p || typeof p !== "object" || typeof p.formation !== "string" || !Array.isArray(p.slots)) return null;
   const coords = Array.isArray(p.coords)
@@ -101,6 +105,9 @@ function normalizeMatch(r: any): Match {
     venue: r.venue ?? null,
     kickoff: r.kickoff ?? null,
     kit: r.kit ?? null,
+    meet_time: r.meet_time ?? null,
+    ball_holder: r.ball_holder ?? null,
+    kit_holder: r.kit_holder ?? null,
     archived: r.archived === true,
     clock: r.clock ?? null,
     started_at: r.started_at ?? null,
@@ -114,6 +121,8 @@ interface StoreValue {
   schemaLegacy: boolean;
   /** true quando o banco tem a coluna matches.tactics (atualização 4). */
   schemaTactics: boolean;
+  /** true quando o banco tem as colunas de logística (atualização 5). */
+  schemaLogistics: boolean;
   squads: Squad[];
   squadId: string;
   setSquadId: (id: string) => void;
@@ -222,6 +231,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [toastMsg, setToastMsg] = useState("");
   const [schemaLegacy, setSchemaLegacy] = useState(false);
   const [schemaTactics, setSchemaTactics] = useState(false);
+  const [schemaLogistics, setSchemaLogistics] = useState(false);
   const toastTimer = useRef<number>(0);
   const ownEvents = useRef<Set<string>>(new Set());
 
@@ -257,6 +267,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     sb.from("matches").select("tactics").limit(1).then(({ error }) => {
       setSchemaTactics(!error);
       if (error) console.warn("Banco sem a atualização 4 — rode supabase/atualizacao-4.sql (as formações táticas não serão salvas):", error.message);
+    });
+    sb.from("matches").select("meet_time").limit(1).then(({ error }) => {
+      setSchemaLogistics(!error);
+      if (error) console.warn("Banco sem a atualização 5 — rode supabase/atualizacao-5.sql (apresentação, bolas e uniforme não serão salvos):", error.message);
     });
   }, []);
 
@@ -440,9 +454,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const row: any = { ...m, updated_at: new Date().toISOString() };
     if (schemaLegacy) for (const f of V21_FIELDS) delete row[f];
     if (schemaLegacy || !schemaTactics) delete row.tactics;
+    if (schemaLegacy || !schemaLogistics) for (const f of LOGISTICS_FIELDS) delete row[f];
     const { error } = await sb.from("matches").upsert(row);
     if (error) { console.error(error); toast("Erro ao salvar. Verifique a conexão."); }
-  }, [toast, schemaLegacy, schemaTactics]);
+  }, [toast, schemaLegacy, schemaTactics, schemaLogistics]);
 
   const deleteMatch = useCallback(async (id: string) => {
     setAllMatches((old) => old.filter((m) => m.id !== id));
@@ -503,6 +518,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const row: any = { ...m, updated_at: now };
       if (schemaLegacy) for (const f of V21_FIELDS) delete row[f];
       if (schemaLegacy || !schemaTactics) delete row.tactics;
+      if (schemaLegacy || !schemaLogistics) for (const f of LOGISTICS_FIELDS) delete row[f];
       return row;
     });
     const { error } = await sb.from("matches").upsert(rows);
@@ -512,7 +528,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       return { matches: 0, spots: 0 };
     }
     return { matches: cheias.length, spots };
-  }, [allMatches, athletes, squadId, schemaLegacy, schemaTactics, toast]);
+  }, [allMatches, athletes, squadId, schemaLegacy, schemaTactics, schemaLogistics, toast]);
 
   const addSquad = useCallback(async (name: string) => {
     const s: Squad = { id: uid("s"), name: name.trim(), position: squads.length + 1 };
@@ -680,6 +696,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       venue: m.venue ?? null,
       kickoff: m.kickoff ?? null,
       kit: m.kit ?? null,
+      meet_time: m.meet_time ?? null,
+      ball_holder: m.ball_holder ?? null,
+      kit_holder: m.kit_holder ?? null,
       archived: m.archived === true,
       clock: m.clock ?? null,
       started_at: null,
@@ -698,13 +717,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       r = await sb.from("matches").insert(newMatches.map((m) => {
         const row: any = { ...m };
         if (schemaLegacy || !schemaTactics) delete row.tactics;
+        if (schemaLegacy || !schemaLogistics) for (const f of LOGISTICS_FIELDS) delete row[f];
         return row;
       }));
       if (r.error) throw r.error;
     }
     await refetch();
     return { athletes: newAthletes.length, matches: newMatches.length };
-  }, [squadId, refetch, schemaLegacy, schemaTactics]);
+  }, [squadId, refetch, schemaLegacy, schemaTactics, schemaLogistics]);
 
   /** Apaga todas as partidas do elenco atual (mantém os atletas). */
   const wipeMatches = useCallback(async () => {
@@ -722,7 +742,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(async () => { await sb.auth.signOut(); }, []);
 
   const value: StoreValue = {
-    loading, fatal, schemaLegacy, schemaTactics, squads, squadId, setSquadId, squad,
+    loading, fatal, schemaLegacy, schemaTactics, schemaLogistics, squads, squadId, setSquadId, squad,
     roster, athletes, athleteName, matches, squadMatches, allMatches,
     period, setPeriod, periodOn, findMatch, stats,
     liveMatch, events, loadEvents, session, isAdmin, signIn, signOut,
