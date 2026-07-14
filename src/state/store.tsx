@@ -34,14 +34,23 @@ const V21_FIELDS = ["starters", "positions", "venue", "kickoff", "kit", "archive
 
 function normPhase(p: any): TacticsPhase | null {
   if (!p || typeof p !== "object" || typeof p.formation !== "string" || !Array.isArray(p.slots)) return null;
-  return { formation: p.formation, slots: p.slots.map((x: any) => (typeof x === "string" && x ? x : null)) };
+  const coords = Array.isArray(p.coords)
+    ? p.coords.map((c: any) =>
+        Array.isArray(c) && c.length === 2 && typeof c[0] === "number" && typeof c[1] === "number"
+          ? ([c[0], c[1]] as [number, number]) : null)
+    : null;
+  return {
+    formation: p.formation,
+    slots: p.slots.map((x: any) => (typeof x === "string" && x ? x : null)),
+    coords,
+  };
 }
 
 function normTactics(t: any): Tactics | null {
   const com = normPhase(t?.com);
   if (!com) return null;
   const sem = normPhase(t?.sem);
-  return { com, sem: sem || { formation: com.formation, slots: [...com.slots] } };
+  return { com, sem: sem || { formation: com.formation, slots: [...com.slots], coords: null } };
 }
 
 /* táticas de um backup importado: os ids dos atletas mudam, as vagas seguem */
@@ -51,6 +60,7 @@ function remapTactics(t: any, idMap: Map<string, string>): Tactics | null {
   const remap = (p: TacticsPhase): TacticsPhase => ({
     formation: p.formation,
     slots: p.slots.map((id) => (id && idMap.get(id)) || null),
+    coords: p.coords ?? null, // ajustes de vaga não dependem de id
   });
   return { com: remap(base.com), sem: remap(base.sem) };
 }

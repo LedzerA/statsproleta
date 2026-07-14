@@ -7,7 +7,7 @@ import {
 } from "../lib/format";
 import { Modal } from "../components/ui";
 import { Pitch } from "../components/Pitch";
-import { renderLineupArt, renderResultArt } from "../lib/art";
+import { renderLineupArt, renderResultArt, renderTacticsArt } from "../lib/art";
 import { getFormation } from "../lib/formations";
 import { posRank, sortLineup } from "../lib/positions";
 import MatchForm from "./MatchForm";
@@ -53,7 +53,7 @@ export default function MatchDetail({ id }: { id: string }) {
   const [subPicker, setSubPicker] = useState(false);
   const [editEv, setEditEv] = useState<MatchEvent | null>(null);
   const [busy, setBusy] = useState(false);
-  const [art, setArt] = useState<string | null>(null);
+  const [art, setArt] = useState<{ label: string; url: string; file: string }[] | null>(null);
   const [artBusy, setArtBusy] = useState(false);
   const [tacPhase, setTacPhase] = useState<"com" | "sem">("com");
 
@@ -115,29 +115,52 @@ export default function MatchDetail({ id }: { id: string }) {
     setArtBusy(true);
     try {
       const squadName = squads.find((s) => s.id === m.squad_id)?.name || null;
-      const canvas = m.status === "agendada"
-        ? await renderLineupArt(m, athleteName, squadName)
-        : await renderResultArt(m, athleteName, squadName);
-      setArt(canvas.toDataURL("image/png"));
+      const png = (c: HTMLCanvasElement) => c.toDataURL("image/png");
+      const imgs: { label: string; url: string; file: string }[] = [];
+      if (m.status === "agendada") {
+        imgs.push({
+          label: "Convocação",
+          url: png(await renderLineupArt(m, athleteName, squadName)),
+          file: `proleta-convocacao-${m.date}.png`,
+        });
+        if (m.tactics && m.tactics.com.slots.some(Boolean)) {
+          imgs.push({
+            label: `Com bola · ${m.tactics.com.formation}`,
+            url: png(await renderTacticsArt(m, "com", athleteName, squadName)),
+            file: `proleta-com-bola-${m.date}.png`,
+          });
+          imgs.push({
+            label: `Sem bola · ${m.tactics.sem.formation}`,
+            url: png(await renderTacticsArt(m, "sem", athleteName, squadName)),
+            file: `proleta-sem-bola-${m.date}.png`,
+          });
+        }
+      } else {
+        imgs.push({
+          label: "Resultado",
+          url: png(await renderResultArt(m, athleteName, squadName)),
+          file: `proleta-resultado-${m.date}.png`,
+        });
+      }
+      setArt(imgs);
     } catch (e) {
       console.error(e);
       toast("Não foi possível gerar a arte.");
     } finally { setArtBusy(false); }
   }
 
-  function downloadArt() {
-    if (!art || !m) return;
+  function downloadArt(item: { url: string; file: string }) {
     const a = document.createElement("a");
-    a.href = art;
-    a.download = `proleta-${artKind}-${m.date}.png`;
+    a.href = item.url;
+    a.download = item.file;
     a.click();
   }
 
-  async function shareArt() {
-    if (!art || !m) return;
+  async function shareArt(item: { label: string; url: string; file: string }) {
+    if (!m) return;
     try {
-      const blob = await (await fetch(art)).blob();
-      const file = new File([blob], `proleta-${artKind}-${m.date}.png`, { type: "image/png" });
+      const blob = await (await fetch(item.url)).blob();
+      const file = new File([blob], item.file, { type: "image/png" });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
           files: [file],
@@ -148,7 +171,7 @@ export default function MatchDetail({ id }: { id: string }) {
         return;
       }
     } catch { /* cancelado ou sem suporte — cai para o download */ }
-    downloadArt();
+    downloadArt(item);
   }
 
   const infoBits = [
@@ -182,8 +205,10 @@ export default function MatchDetail({ id }: { id: string }) {
       {(m.status === "encerrada" || m.status === "agendada") && (
         <button className="btn ghost-light block" style={{ marginBottom: 14 }} disabled={artBusy} onClick={makeArt}>
           {artBusy
-            ? "Gerando arte…"
-            : m.status === "agendada" ? "🖼️ Gerar arte da convocação" : "🖼️ Gerar arte do resultado"}
+            ? "Gerando artes…"
+            : m.status === "agendada"
+              ? m.tactics ? "🖼️ Gerar artes da convocação" : "🖼️ Gerar arte da convocação"
+              : "🖼️ Gerar arte do resultado"}
         </button>
       )}
 
@@ -310,6 +335,7 @@ export default function MatchDetail({ id }: { id: string }) {
                 <Pitch
                   formation={getFormation(m.tactics[tacPhase].formation)}
                   slots={m.tactics[tacPhase].slots}
+                  coords={m.tactics[tacPhase].coords}
                   nameOf={athleteName}
                 />
               </>
@@ -382,17 +408,25 @@ export default function MatchDetail({ id }: { id: string }) {
       )}
       {art && (
         <Modal
-          title={artKind === "convocacao" ? "🖼️ Arte da convocação" : "🖼️ Arte do resultado"}
+          title={artKind === "convocacao"
+            ? art.length > 1 ? "🖼️ Artes da convocação" : "🖼️ Arte da convocação"
+            : "🖼️ Arte do resultado"}
           onClose={() => setArt(null)}
           footer={
-            <>
-              <button className="btn ghost" style={{ flex: 1 }} onClick={downloadArt}>↓ Baixar</button>
-              <button className="btn primary" style={{ flex: 2 }} onClick={shareArt}>Compartilhar</button>
-            </>
+            <button className="btn ghost" style={{ flex: 1 }} onClick={() => setArt(null)}>Fechar</button>
           }
         >
-          <img src={art} alt="Arte do resultado" style={{ width: "100%", borderRadius: 10, display: "block" }} />
-          <p className="muted" style={{ fontSize: 13, marginTop: 10 }}>
+          {art.map((item) => (
+            <div key={item.file} className="art-item">
+              {art.length > 1 && <div className="esc-label">{item.label}</div>}
+              <img src={item.url} alt={item.label} style={{ width: "100%", borderRadius: 10, display: "block" }} />
+              <div className="row-gap" style={{ margin: "8px 0 16px" }}>
+                <button className="btn ghost" style={{ flex: 1 }} onClick={() => downloadArt(item)}>↓ Baixar</button>
+                <button className="btn primary" style={{ flex: 2 }} onClick={() => shareArt(item)}>Compartilhar</button>
+              </div>
+            </div>
+          ))}
+          <p className="muted" style={{ fontSize: 13, marginTop: 2 }}>
             No celular, “Compartilhar” abre direto o WhatsApp / Instagram.
             Se o aparelho não suportar, o botão baixa o PNG.
           </p>

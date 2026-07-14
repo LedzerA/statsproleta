@@ -68,6 +68,7 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
             const id = p.slots[i];
             return id && inLineup.has(id) ? id : null;
           }),
+          coords: p.coords ? f.slots.map((_, i) => p.coords![i] || null) : null,
         };
       };
       return { com: fit(match.tactics.com), sem: fit(match.tactics.sem) };
@@ -75,7 +76,10 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
     const st = (match?.starters || []).map((id) => ({ id, pos: match?.positions?.[id] || suggested[id] }));
     const f = inferFormation(st.map((x) => x.pos));
     const slots = autoSlots(f, st);
-    return { com: { formation: f.name, slots }, sem: { formation: f.name, slots: [...slots] } };
+    return {
+      com: { formation: f.name, slots, coords: null },
+      sem: { formation: f.name, slots: [...slots], coords: null },
+    };
   });
   const [phase, setPhase] = useState<PhaseKey>("com");
   // a fase sem bola espelha a com bola até o usuário mexer nela de propósito
@@ -179,10 +183,28 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
   function clearLineup() {
     setLineup([]);
     setTactics((t) => ({
-      com: { ...t.com, slots: t.com.slots.map(() => null) },
-      sem: { ...t.sem, slots: t.sem.slots.map(() => null) },
+      com: { ...t.com, slots: t.com.slots.map(() => null), coords: null },
+      sem: { ...t.sem, slots: t.sem.slots.map(() => null), coords: null },
     }));
     setSemManual(false);
+  }
+
+  /** Arrasto no campinho: só muda o ponto da vaga na fase ativa. */
+  function moveSlot(i: number, x: number, y: number) {
+    const base = tactics[phase];
+    const coords = base.coords
+      ? [...base.coords]
+      : getFormation(base.formation).slots.map(() => null as [number, number] | null);
+    coords[i] = [x, y];
+    if (phase === "com") setTactics({ ...tactics, com: { ...base, coords } });
+    else { setSemManual(true); setTactics({ ...tactics, sem: { ...base, coords } }); }
+  }
+
+  function resetCoords() {
+    const base = tactics[phase];
+    setTactics(phase === "com"
+      ? { ...tactics, com: { ...base, coords: null } }
+      : { ...tactics, sem: { ...base, coords: null } });
   }
 
   function setFormation(ph: PhaseKey, name: string) {
@@ -243,6 +265,8 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
     const comSlots = tactics.com.slots.map((id) => (id && lineup.includes(id) ? id : null));
     const st = comSlots.filter((x): x is string => !!x);
     const semSlots = tactics.sem.slots.map((id) => (id && st.includes(id) ? id : null));
+    const fitCoords = (p: TacticsPhase, f: ReturnType<typeof getFormation>) =>
+      p.coords && p.coords.some(Boolean) ? f.slots.map((_, i) => p.coords![i] || null) : null;
     // posição por relacionado; titular herda o rótulo da vaga (com bola)
     const cleanPositions: Record<string, string> = {};
     for (const id of lineup) {
@@ -272,7 +296,10 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
       clock: match?.clock || null,
       started_at: match?.started_at || null,
       tactics: st.length
-        ? { com: { formation: comF.name, slots: comSlots }, sem: { formation: semF.name, slots: semSlots } }
+        ? {
+            com: { formation: comF.name, slots: comSlots, coords: fitCoords(tactics.com, comF) },
+            sem: { formation: semF.name, slots: semSlots, coords: fitCoords(tactics.sem, semF) },
+          }
         : null,
     };
     await upsertMatch(rec);
@@ -411,7 +438,16 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
               {FORMATIONS.map((f) => <option key={f.name} value={f.name}>{f.name}</option>)}
             </select>
           </div>
-          <Pitch formation={activeF} slots={active.slots} nameOf={nameOf} />
+          <Pitch formation={activeF} slots={active.slots} coords={active.coords} nameOf={nameOf} onMove={moveSlot} />
+          <div className="pitch-hint">
+            Arraste os jogadores no campinho para ajustar o posicionamento — formação e posição não mudam.
+            {active.coords?.some(Boolean) && (
+              <>
+                {" "}
+                <button type="button" className="linklike" onClick={resetCoords}>Restaurar pontos da formação</button>
+              </>
+            )}
+          </div>
           {phase === "sem" && !semManual && (
             <div className="tot-line">Sem bola está espelhando a com bola — mexa nas vagas para personalizar.</div>
           )}

@@ -44,6 +44,10 @@ export interface Clock {
 export interface TacticsPhase {
   formation: string; // ex.: "4-3-3"
   slots: (string | null)[]; // atletaId por vaga (null = vaga livre)
+  /** Ajuste fino da vaga no campinho, arrastado pelo admin: [x, y] em % do
+      campo (x 0→100 esq→dir, y 0→100 fundo→ataque). null/ausente = posição
+      padrão da formação. Não muda a posição (rótulo) nem a formação. */
+  coords?: ([number, number] | null)[] | null;
 }
 
 /** Escalação tática com bola / sem bola — mesmos 11, distribuição diferente. */

@@ -1,7 +1,8 @@
 import { TEAM } from "../config";
 import { fmtDate, resWord, result } from "./format";
+import { getFormation } from "./formations";
 import { sortLineup } from "./positions";
-import type { Match } from "./types";
+import type { Match, TacticsPhase } from "./types";
 
 /* Gera a arte do resultado (1080×1350, formato de post) no navegador.
    Usa as mesmas fontes e cores do app; nada sai do aparelho. */
@@ -358,6 +359,145 @@ export async function renderLineupArt(
     ctx.font = inter(600, 27);
     ctx.fillText("Escalação a definir — bora, Proleta! 💪", W / 2, y + 20);
   }
+
+  /* rodapé */
+  ctx.fillStyle = "rgba(95, 212, 143, .8)";
+  ctx.font = inter(600, 23);
+  const site = `${location.host}${location.pathname}`.replace(/\/$/, "");
+  ctx.fillText(`📊  acompanhe ao vivo:  ${site}`, W / 2, 1290);
+
+  return canvas;
+}
+
+/** Arte do campinho tático de uma fase (com/sem bola): formação, jogadores
+    nas vagas (com os ajustes arrastados no app) e o confronto no cabeçalho. */
+export async function renderTacticsArt(
+  m: Match,
+  phaseKey: "com" | "sem",
+  nameOf: (id: string) => string,
+  squadName: string | null
+): Promise<HTMLCanvasElement> {
+  try {
+    await Promise.all([
+      document.fonts.load(zilla(700, 46), "A"),
+      document.fonts.load(zilla(600, 31), "A"),
+      document.fonts.load(inter(700, 30), "A"),
+      document.fonts.load(inter(600, 26), "A"),
+    ]);
+  } catch { /* segue com a fonte substituta */ }
+
+  const phase: TacticsPhase = m.tactics![phaseKey];
+  const f = getFormation(phase.formation);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext("2d")!;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+
+  const bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, "#0b4529");
+  bg.addColorStop(1, "#062a1c");
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  /* escudo + cabeçalho */
+  ctx.beginPath(); ctx.arc(W / 2, 148, 56, 0, Math.PI * 2);
+  ctx.fillStyle = CREME; ctx.fill();
+  ctx.lineWidth = 6; ctx.strokeStyle = "#0b4529"; ctx.beginPath();
+  ctx.arc(W / 2, 148, 47, 0, Math.PI * 2); ctx.stroke();
+  ctx.fillStyle = "#0b4529";
+  ctx.font = zilla(700, 44);
+  ctx.fillText("PA", W / 2, 151);
+
+  ctx.fillStyle = CREME_3;
+  ctx.font = zilla(700, 46);
+  ctx.fillText(TEAM.name.toUpperCase(), W / 2, 254);
+  ctx.fillStyle = VERDE_300;
+  ctx.font = inter(600, 26);
+  const meta = [squadName, fmtDate(m.date)].filter(Boolean).join("  ·  ");
+  ctx.fillText(meta.toUpperCase(), W / 2, 300);
+
+  /* selo da fase */
+  ctx.font = inter(700, 30);
+  const word = `${phaseKey === "com" ? "COM BOLA" : "SEM BOLA"}  ·  ${f.name}`;
+  const pw = ctx.measureText(word).width + 76;
+  ctx.fillStyle = phaseKey === "com" ? "#2fbf6b" : "#e6b94b";
+  roundedRect(ctx, (W - pw) / 2, 344, pw, 62, 31);
+  ctx.fill();
+  ctx.fillStyle = phaseKey === "com" ? "#08240f" : "#3d2f05";
+  ctx.fillText(word, W / 2, 377);
+
+  /* confronto */
+  ctx.fillStyle = CREME;
+  const versus = `${TEAM.short.toUpperCase()}  ×  ${m.opponent.toUpperCase()}`;
+  const vs = fitFont(ctx, versus, 40, 900, (px) => zilla(600, px));
+  ctx.font = zilla(600, vs);
+  ctx.fillText(versus, W / 2, 460);
+
+  /* campo */
+  const fh = 720, fw = 540;
+  const fx = (W - fw) / 2, fy = 510;
+  roundedRect(ctx, fx, fy, fw, fh, 20);
+  ctx.fillStyle = "#1c5e34";
+  ctx.fill();
+  ctx.save();
+  roundedRect(ctx, fx, fy, fw, fh, 20);
+  ctx.clip();
+  ctx.fillStyle = "rgba(255,255,255,.05)";
+  for (const i of [0, 2, 4, 6]) ctx.fillRect(fx, fy + (i * fh) / 7, fw, fh / 7);
+  ctx.restore();
+
+  const pad = 14; // margem entre a moldura e as linhas do campo
+  const ix = fx + pad, iy = fy + pad, iw = fw - 2 * pad, ih = fh - 2 * pad;
+  ctx.strokeStyle = "rgba(242, 235, 214, .5)";
+  ctx.lineWidth = 3;
+  ctx.strokeRect(ix, iy, iw, ih);
+  ctx.beginPath(); ctx.moveTo(ix, iy + ih / 2); ctx.lineTo(ix + iw, iy + ih / 2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(ix + iw / 2, iy + ih / 2, iw * 0.16, 0, Math.PI * 2); ctx.stroke();
+  /* áreas (mesmas proporções do campinho do app) */
+  const gaW = iw * 0.458, gaH = ih * 0.14, pqW = iw * 0.229, pqH = ih * 0.051;
+  ctx.strokeRect(ix + (iw - gaW) / 2, iy + ih - gaH, gaW, gaH);
+  ctx.strokeRect(ix + (iw - pqW) / 2, iy + ih - pqH, pqW, pqH);
+  ctx.strokeRect(ix + (iw - gaW) / 2, iy, gaW, gaH);
+  ctx.strokeRect(ix + (iw - pqW) / 2, iy, pqW, pqH);
+
+  /* jogadores */
+  const px2 = (x: number) => ix + (x / 100) * iw;
+  const py2 = (y: number) => iy + ih - (y / 100) * ih;
+  f.slots.forEach((s, i) => {
+    const id = phase.slots[i];
+    const c = phase.coords?.[i];
+    const cx = px2(c ? c[0] : s.x), cy = py2(c ? c[1] : s.y);
+    if (!id) {
+      ctx.strokeStyle = "rgba(242, 235, 214, .45)";
+      ctx.lineWidth = 2.5;
+      ctx.setLineDash([9, 7]);
+      ctx.beginPath(); ctx.arc(cx, cy, 30, 0, Math.PI * 2); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = "rgba(242, 235, 214, .55)";
+      ctx.font = inter(700, 18);
+      ctx.fillText(s.pos, cx, cy + 1);
+      return;
+    }
+    ctx.beginPath(); ctx.arc(cx, cy, 30, 0, Math.PI * 2);
+    ctx.fillStyle = "#f7f2e0"; ctx.fill();
+    ctx.lineWidth = 3; ctx.strokeStyle = "#0f2019"; ctx.stroke();
+    ctx.fillStyle = "#14532d";
+    ctx.font = inter(700, 18);
+    ctx.fillText(s.pos, cx, cy + 1);
+    let nome = nameOf(id).split(" ")[0];
+    ctx.font = zilla(600, 28);
+    while (ctx.measureText(nome).width > 150 && nome.length > 3) nome = nome.slice(0, -2) + "…";
+    ctx.fillStyle = CREME_3;
+    /* leve sombra para o nome não sumir na linha do campo */
+    ctx.save();
+    ctx.shadowColor = "rgba(6, 42, 28, .9)";
+    ctx.shadowBlur = 8;
+    ctx.fillText(nome, cx, cy + 52);
+    ctx.restore();
+  });
 
   /* rodapé */
   ctx.fillStyle = "rgba(95, 212, 143, .8)";

@@ -135,13 +135,19 @@ export function inferFormation(poss: (string | undefined | null)[]): Formation {
 }
 
 /** Reorganiza os ocupantes de uma fase em outra formação (ou na mesma),
-    casando cada um pela posição da vaga que ocupa hoje. */
+    casando cada um pela posição da vaga que ocupa hoje. Os ajustes finos de
+    vaga (coords) só sobrevivem quando a formação não muda — em outra
+    formação as vagas são outras. */
 export function remapPhase(p: TacticsPhase, formationName: string): TacticsPhase {
   const from = getFormation(p.formation);
   const to = getFormation(formationName);
   const players: TaggedPlayer[] = [];
   p.slots.forEach((id, i) => { if (id) players.push({ id, pos: from.slots[i]?.pos }); });
-  return { formation: to.name, slots: autoSlots(to, players) };
+  return {
+    formation: to.name,
+    slots: autoSlots(to, players),
+    coords: to.name === from.name ? p.coords ?? null : null,
+  };
 }
 
 /** Mantém a fase sem bola com os MESMOS 11 da com bola: tira quem saiu do
@@ -161,5 +167,5 @@ export function reconcileSem(sem: TacticsPhase, com: TacticsPhase): TacticsPhase
     const i = bestFreeSlot(semF, slots, pos);
     if (i >= 0) slots[i] = id;
   }
-  return { formation: semF.name, slots };
+  return { formation: semF.name, slots, coords: sem.coords ?? null };
 }
