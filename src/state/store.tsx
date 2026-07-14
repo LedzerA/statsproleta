@@ -7,7 +7,6 @@ import { sb } from "../lib/supabase";
 import { TEAM } from "../config";
 import type { Assist, Athlete, EventPayload, EventType, Match, MatchEvent, Scorer, SetPieceTakers, Squad, Tactics, TacticsPhase } from "../lib/types";
 import { compute, type SquadStats } from "../lib/stats";
-import { lastPosition } from "../lib/positions";
 import { clockSeconds, result, uid } from "../lib/format";
 import { PERIOD_ALL, PERIOD_PRESETS, inPeriod, periodRange, type Period } from "../lib/period";
 
@@ -153,9 +152,6 @@ interface StoreValue {
   addAthlete: (name: string) => Promise<Athlete | null>;
   /** Salva as posições do perfil do atleta (precisa da atualização 3 no banco). */
   updateAthletePositions: (id: string, positions: string[]) => Promise<void>;
-  /** Preenche as posições em falta nas partidas encerradas do elenco atual
-      com a última posição que cada atleta jogou (fallback: perfil). */
-  fillMissingPositions: () => Promise<{ matches: number; spots: number }>;
   addSquad: (name: string) => Promise<void>;
   addEvent: (
     m: Match,
@@ -490,46 +486,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     } else toast("Posições salvas ✓");
   }, [toast]);
 
-  /** Preenche as posições em falta nas partidas ENCERRADAS do elenco atual:
-      para cada relacionado sem posição, usa a última em que ele jogou até a
-      data da partida (sem histórico anterior, a primeira seguinte; sem nada,
-      a primeira do perfil). Grava tudo em um upsert só. */
-  const fillMissingPositions = useCallback(async () => {
-    const src = allMatches.filter((m) => m.squad_id === squadId);
-    const perfil = new Map(athletes.map((a) => [a.id, a.positions?.[0] || ""]));
-    const cheias: Match[] = [];
-    let spots = 0;
-    for (const m of src) {
-      if (m.status !== "encerrada") continue;
-      const faltam = (m.lineup || []).filter((id) => !m.positions?.[id]);
-      if (!faltam.length) continue;
-      const positions = { ...m.positions };
-      let mudou = false;
-      for (const id of faltam) {
-        const p = lastPosition(id, src, m) || perfil.get(id);
-        if (p) { positions[id] = p; spots++; mudou = true; }
-      }
-      if (mudou) cheias.push({ ...m, positions });
-    }
-    if (!cheias.length) return { matches: 0, spots: 0 };
-    setAllMatches((old) => old.map((m) => cheias.find((c) => c.id === m.id) || m));
-    const now = new Date().toISOString();
-    const rows = cheias.map((m) => {
-      const row: any = { ...m, updated_at: now };
-      if (schemaLegacy) for (const f of V21_FIELDS) delete row[f];
-      if (schemaLegacy || !schemaTactics) delete row.tactics;
-      if (schemaLegacy || !schemaLogistics) for (const f of LOGISTICS_FIELDS) delete row[f];
-      return row;
-    });
-    const { error } = await sb.from("matches").upsert(rows);
-    if (error) {
-      console.error(error);
-      toast("Erro ao salvar. Verifique a conexão.");
-      return { matches: 0, spots: 0 };
-    }
-    return { matches: cheias.length, spots };
-  }, [allMatches, athletes, squadId, schemaLegacy, schemaTactics, schemaLogistics, toast]);
-
   const addSquad = useCallback(async (name: string) => {
     const s: Squad = { id: uid("s"), name: name.trim(), position: squads.length + 1 };
     if (!s.name) return;
@@ -746,7 +702,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     roster, athletes, athleteName, matches, squadMatches, allMatches,
     period, setPeriod, periodOn, findMatch, stats,
     liveMatch, events, loadEvents, session, isAdmin, signIn, signOut,
-    upsertMatch, deleteMatch, addAthlete, updateAthletePositions, fillMissingPositions, addSquad, addEvent,
+    upsertMatch, deleteMatch, addAthlete, updateAthletePositions, addSquad, addEvent,
     updateEvent, deleteEvent, toggleClock,
     resetToScheduled, importBackup, wipeMatches, toast, toastMsg,
   };

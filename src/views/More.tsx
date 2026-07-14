@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useStore } from "../state/store";
+import { navigate } from "../lib/router";
 import { VAPID_PUBLIC_KEY } from "../config";
 import { pushSupported, subscribePush, unsubscribePush, getSubscription } from "../lib/push";
 import { renderWrappedArt } from "../lib/art";
-import { dec, fmtDate, pct, resWord, result, sortMatches } from "../lib/format";
+import { dec, fmtDate, fmtDateShort, pct, resWord, result, sortMatches } from "../lib/format";
+import type { Match } from "../lib/types";
 import { inPeriod, lastSemesterRange } from "../lib/period";
 import { bestStreaks, hatTricks } from "../lib/records";
 import { compute } from "../lib/stats";
@@ -22,14 +24,13 @@ const stamp = () => new Date().toISOString().slice(0, 10);
 export default function More() {
   const {
     squad, squads, roster, matches, squadMatches, stats, session, isAdmin, schemaLegacy,
-    signOut, addSquad, importBackup, wipeMatches, fillMissingPositions, toast,
+    signOut, addSquad, importBackup, wipeMatches, toast,
   } = useStore();
   const [login, setLogin] = useState(false);
   const [newSquad, setNewSquad] = useState("");
   const [pushOn, setPushOn] = useState(false);
   const [pushBusy, setPushBusy] = useState(false);
   const [importing, setImporting] = useState(false);
-  const [filling, setFilling] = useState(false);
   const [retroArt, setRetroArt] = useState<string | null>(null);
   const [retroBusy, setRetroBusy] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -88,30 +89,21 @@ export default function More() {
     downloadRetro();
   }
 
-  // relacionados sem posição salva nas partidas encerradas do elenco atual
-  const pend = useMemo(() => {
-    let partidas = 0, lacunas = 0;
-    for (const m of squadMatches) {
-      if (m.status !== "encerrada") continue;
-      const n = (m.lineup || []).filter((id) => !m.positions?.[id]).length;
-      if (n > 0) { partidas++; lacunas += n; }
+  /* partidas encerradas com dado incompleto — lista clicável para ir editando
+     manualmente (relacionado sem posição, sem titulares, escalação parcial) */
+  const pendentes = useMemo(() => {
+    const out: { m: Match; flags: string[] }[] = [];
+    for (const m of sortMatches(squadMatches)) {
+      if (m.status !== "encerrada" || m.archived) continue;
+      const semPos = (m.lineup || []).filter((id) => !m.positions?.[id]).length;
+      const flags: string[] = [];
+      if (m.lineup_complete === false) flags.push("escalação parcial");
+      if (!(m.starters || []).length) flags.push("sem titulares");
+      if (semPos > 0) flags.push(`${semPos} sem posição`);
+      if (flags.length) out.push({ m, flags });
     }
-    return { partidas, lacunas };
+    return out.reverse(); // recentes primeiro
   }, [squadMatches]);
-
-  async function runFill() {
-    if (!confirm(
-      `Preencher ${pend.lacunas} posição(ões) em ${pend.partidas} partida(s) encerrada(s) do elenco ${squad?.name}?\n\n` +
-      "Cada atleta recebe a última posição em que jogou (sem histórico, a do perfil). Dá para ajustar depois partida a partida."
-    )) return;
-    setFilling(true);
-    try {
-      const r = await fillMissingPositions();
-      toast(r.matches
-        ? `Posições preenchidas ✓ ${r.spots} atleta(s) em ${r.matches} partida(s)`
-        : "Nada preenchido — os atletas pendentes não têm histórico nem posição no perfil.");
-    } finally { setFilling(false); }
-  }
 
   async function handleImportFile(file: File) {
     let raw: unknown;
@@ -286,19 +278,26 @@ export default function More() {
 
         {isAdmin && !schemaLegacy && (
           <div className="data-card">
-            <h3>🧩 Posições nas partidas antigas</h3>
-            {pend.lacunas > 0 ? (
-              <p>
-                <b>{pend.lacunas}</b> relacionado(s) sem posição salva em <b>{pend.partidas}</b> partida(s)
-                encerrada(s) de <b>{squad?.name}</b>. Preenche tudo de uma vez com a última posição em que
-                cada atleta jogou (sem histórico, usa a do perfil).
-              </p>
+            <h3>🧩 Dados incompletos</h3>
+            {pendentes.length === 0 ? (
+              <p>Todas as partidas encerradas de <b>{squad?.name}</b> estão completas ✓</p>
             ) : (
-              <p>Todas as partidas encerradas de <b>{squad?.name}</b> têm posição salva para cada relacionado ✓</p>
+              <>
+                <p>
+                  <b>{pendentes.length}</b> partida{pendentes.length > 1 ? "s" : ""} de <b>{squad?.name}</b> com
+                  pendências — toque para abrir e editar.
+                </p>
+                <div className="pend-list">
+                  {pendentes.map(({ m, flags }) => (
+                    <button key={m.id} className="pend-row" onClick={() => navigate(`#/partida/${m.id}`)}>
+                      <span className="pend-when num">{fmtDateShort(m.date)}</span>
+                      <span className="pend-opp">vs {m.opponent}</span>
+                      <span className="pend-flags">{flags.join(" · ")}</span>
+                    </button>
+                  ))}
+                </div>
+              </>
             )}
-            <button className="btn block" disabled={!pend.lacunas || filling} onClick={runFill}>
-              {filling ? "Preenchendo…" : "Preencher posições em falta"}
-            </button>
           </div>
         )}
 
