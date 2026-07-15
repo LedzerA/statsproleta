@@ -159,7 +159,11 @@ interface StoreValue {
     type: EventType,
     opts?: { scorerId?: string; assistId?: string; inId?: string; outId?: string }
   ) => Promise<void>;
-  updateEvent: (ev: MatchEvent, patch: { minute?: number | null; period?: number }) => Promise<void>;
+  updateEvent: (
+    m: Match,
+    ev: MatchEvent,
+    patch: { minute?: number | null; period?: number; scorerId?: string | null; assistId?: string | null }
+  ) => Promise<void>;
   deleteEvent: (ev: MatchEvent) => Promise<void>;
   /** Desfaz o último lance (gols/pênaltis/sub): apaga o evento e reverte o placar. */
   undoLastEvent: (m: Match) => Promise<void>;
@@ -462,26 +466,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setEvents((old) => ({ ...old, [matchId]: (data as MatchEvent[]) || [] }));
   }, []);
 
-  /** Corrige um lance já registrado: tempo (minuto) e período. Não altera o
-      placar — para trocar autor/gol use "Editar partida". */
-  const updateEvent = useCallback(async (ev: MatchEvent, patch: { minute?: number | null; period?: number }) => {
-    const minute = patch.minute !== undefined ? patch.minute : ev.minute;
-    const period = patch.period ?? ev.payload?.period;
-    const payload: EventPayload = {
-      ...ev.payload,
-      period,
-      seconds: minute != null ? minute * 60 : undefined,
-    };
-    const upd: MatchEvent = { ...ev, minute, payload };
-    setEvents((old) => ({
-      ...old,
-      [ev.match_id]: (old[ev.match_id] || []).map((x) => (x.id === ev.id ? upd : x)),
-    }));
-    const { error } = await sb.from("match_events").update({ minute, payload }).eq("id", ev.id);
-    if (error) { console.error(error); toast("Erro ao editar o lance."); loadEvents(ev.match_id); }
-    else toast("Lance atualizado ✓");
-  }, [toast, loadEvents]);
-
   /** Remove um lance da linha do tempo. Não mexe no placar. */
   const deleteEvent = useCallback(async (ev: MatchEvent) => {
     setEvents((old) => ({
@@ -514,6 +498,87 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
     return true;
   }, [toast, schemaLegacy, schemaTactics, schemaLogistics, refetch]);
+
+  /** Corrige um lance já registrado: tempo (minuto/período) e, em gol do
+      Proleta, autor e assistência — os totais da partida (scorers/assists)
+      acompanham a troca, então funciona também em partida encerrada (as
+      estatísticas recalculam). O placar nunca muda por aqui. */
+  const updateEvent = useCallback(async (
+    m: Match,
+    ev: MatchEvent,
+    patch: { minute?: number | null; period?: number; scorerId?: string | null; assistId?: string | null }
+  ) => {
+    const minute = patch.minute !== undefined ? patch.minute : ev.minute;
+    const period = patch.period ?? ev.payload?.period;
+    const payload: EventPayload = {
+      ...ev.payload,
+      period,
+      seconds: minute != null ? minute * 60 : undefined,
+    };
+    const upd: MatchEvent = { ...ev, minute, payload };
+
+    let updMatch: Match | null = null;
+    if (ev.type === "gol_pro" && (patch.scorerId !== undefined || patch.assistId !== undefined)) {
+      const newScorer = patch.scorerId !== undefined ? patch.scorerId : ev.athlete_id;
+      const newAssist = patch.assistId !== undefined ? patch.assistId : ev.assist_id;
+      if (newScorer !== ev.athlete_id || newAssist !== ev.assist_id) {
+        const mm: Match = { ...m };
+        if (newScorer !== ev.athlete_id) {
+          let sc = [...(m.scorers || [])];
+          if (ev.athlete_id) {
+            sc = sc.map((x) => (x.a === ev.athlete_id ? { ...x, g: x.g - 1 } : x)).filter((x) => x.g > 0);
+          }
+          if (newScorer) {
+            const i = sc.findIndex((x) => x.a === newScorer);
+            if (i >= 0) sc[i] = { ...sc[i], g: sc[i].g + 1 }; else sc.push({ a: newScorer, g: 1 });
+            if (!mm.lineup.includes(newScorer)) mm.lineup = [...mm.lineup, newScorer];
+          }
+          mm.scorers = sc;
+        }
+        if (newAssist !== ev.assist_id) {
+          let as = [...(m.assists || [])];
+          if (ev.assist_id) {
+            as = as.map((x) => (x.a === ev.assist_id ? { ...x, n: x.n - 1 } : x)).filter((x) => x.n > 0);
+          }
+          if (newAssist) {
+            const i = as.findIndex((x) => x.a === newAssist);
+            if (i >= 0) as[i] = { ...as[i], n: as[i].n + 1 }; else as.push({ a: newAssist, n: 1 });
+            if (!mm.lineup.includes(newAssist)) mm.lineup = [...mm.lineup, newAssist];
+          }
+          mm.assists = as;
+        }
+        updMatch = mm;
+      }
+      upd.athlete_id = newScorer ?? null;
+      upd.assist_id = newAssist ?? null;
+      // lances migrados do app antigo não têm title: o texto é derivado na
+      // exibição a partir de athlete_id/assist_id, nada a reescrever aqui
+      if (payload.title) {
+        const scorer = newScorer ? athleteName(newScorer) : undefined;
+        const assist = newAssist ? athleteName(newAssist) : undefined;
+        const gf = payload.goals_for ?? m.goals_for;
+        const ga = payload.goals_against ?? m.goals_against;
+        payload.scorer = scorer;
+        payload.assist = assist;
+        payload.body = `${scorer || "Gol"}${assist ? ` (assist. ${assist})` : ""} — ${TEAM.short} ${gf} × ${ga} ${m.opponent}`;
+      }
+    }
+
+    setEvents((old) => ({
+      ...old,
+      [ev.match_id]: (old[ev.match_id] || []).map((x) => (x.id === ev.id ? upd : x)),
+    }));
+    if (updMatch && !(await upsertMatch(updMatch))) {
+      // partida não gravou (upsertMatch já reconciliou) — desfaz o lance otimista
+      loadEvents(ev.match_id);
+      return;
+    }
+    const { error } = await sb.from("match_events")
+      .update({ minute, athlete_id: upd.athlete_id, assist_id: upd.assist_id, payload })
+      .eq("id", ev.id);
+    if (error) { console.error(error); toast("Erro ao editar o lance."); loadEvents(ev.match_id); }
+    else toast("Lance atualizado ✓");
+  }, [athleteName, upsertMatch, toast, loadEvents]);
 
   const deleteMatch = useCallback(async (id: string) => {
     setAllMatches((old) => old.filter((m) => m.id !== id));

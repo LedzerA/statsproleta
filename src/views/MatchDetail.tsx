@@ -561,8 +561,9 @@ export default function MatchDetail({ id, editar }: { id: string; editar?: boole
       {editEv && (
         <EventEditModal
           ev={editEv}
+          match={m}
           onClose={() => setEditEv(null)}
-          onSave={(patch) => { updateEvent(editEv, patch); setEditEv(null); }}
+          onSave={(patch) => { updateEvent(m, editEv, patch); setEditEv(null); }}
           onDelete={async () => {
             if (await ask("Excluir este lance da linha do tempo?\n\nO placar não muda — se for um gol, ajuste o resultado em “Editar partida”.", { danger: true, okLabel: "Excluir lance" })) {
               deleteEvent(editEv); setEditEv(null);
@@ -636,22 +637,33 @@ function TimelineItem({ ev, athleteName, onEdit }: {
         {body && <span className="tl-body">{body}</span>}
       </span>
       {onEdit && (
-        <button className="tl-edit" onClick={onEdit} aria-label="Editar lance" title="Editar tempo do lance">✎</button>
+        <button className="tl-edit" onClick={onEdit} aria-label="Editar lance" title="Editar lance">✎</button>
       )}
     </li>
   );
 }
 
-/** Corrige o tempo (período + minuto) de um lance já registrado. */
-function EventEditModal({ ev, onClose, onSave, onDelete }: {
+/** Corrige um lance já registrado: tempo (período + minuto) e, em gol do
+    Proleta, autor e assistência (funciona também em partida encerrada). */
+function EventEditModal({ ev, match, onClose, onSave, onDelete }: {
   ev: MatchEvent;
+  match: Match;
   onClose: () => void;
-  onSave: (patch: { minute: number | null; period: number }) => void;
+  onSave: (patch: { minute: number | null; period: number; scorerId?: string | null; assistId?: string | null }) => void;
   onDelete: () => void;
 }) {
+  const { roster } = useStore();
+  const isGoal = ev.type === "gol_pro";
   const [period, setPeriod] = useState<number>(ev.payload?.period ?? 1);
   const [minute, setMinute] = useState<string>(ev.minute != null ? String(ev.minute) : "");
+  const [scorer, setScorer] = useState<string | undefined>(ev.athlete_id || undefined);
+  const [assist, setAssist] = useState<string | undefined>(ev.assist_id || undefined);
+  const [showAll, setShowAll] = useState(match.lineup.length === 0);
   const label = ev.payload?.title || EVENT_LABEL[ev.type] || ev.type;
+  const options = (showAll ? roster : roster.filter((a) => match.lineup.includes(a.id)))
+    .slice().sort((a, b) =>
+      posRank(match.positions?.[a.id]) - posRank(match.positions?.[b.id]) ||
+      a.name.localeCompare(b.name, "pt"));
   return (
     <Modal
       title="✎ Editar lance"
@@ -660,7 +672,11 @@ function EventEditModal({ ev, onClose, onSave, onDelete }: {
         <>
           <button className="btn danger" style={{ flex: 1 }} onClick={onDelete}>Excluir</button>
           <button className="btn primary" style={{ flex: 2 }}
-            onClick={() => onSave({ minute: minute === "" ? null : Math.max(0, parseInt(minute) || 0), period })}>
+            onClick={() => onSave({
+              minute: minute === "" ? null : Math.max(0, parseInt(minute) || 0),
+              period,
+              ...(isGoal ? { scorerId: scorer ?? null, assistId: assist ?? null } : {}),
+            })}>
             Salvar
           </button>
         </>
@@ -674,13 +690,40 @@ function EventEditModal({ ev, onClose, onSave, onDelete }: {
       </div>
       <div className="subhead"><div className="t">Minuto</div></div>
       <input
-        type="number" className="fb-num" min={0} placeholder="min" autoFocus
+        type="number" className="fb-num" min={0} placeholder="min" autoFocus={!isGoal}
         value={minute}
         onChange={(e) => setMinute(e.target.value)}
         style={{ width: 120 }}
       />
+      {isGoal && (
+        <>
+          <div className="subhead"><div className="t">Quem marcou?</div></div>
+          <div className="chips">
+            {options.map((a) => (
+              <button key={a.id} className={`chip ${scorer === a.id ? "on" : ""}`}
+                onClick={() => setScorer(scorer === a.id ? undefined : a.id)}>{a.name}</button>
+            ))}
+          </div>
+          <div className="subhead"><div className="t">Assistência (opcional)</div></div>
+          <div className="chips">
+            {options.filter((a) => a.id !== scorer).map((a) => (
+              <button key={a.id} className={`chip ${assist === a.id ? "on" : ""}`}
+                onClick={() => setAssist(assist === a.id ? undefined : a.id)}>{a.name}</button>
+            ))}
+          </div>
+          {!showAll && (
+            <p style={{ marginTop: 14 }}>
+              <button className="linklike" onClick={() => setShowAll(true)}>
+                Não está na lista? Mostrar o elenco completo
+              </button>
+            </p>
+          )}
+        </>
+      )}
       <p className="muted" style={{ fontSize: 13, marginTop: 12 }}>
-        Só o tempo do lance é ajustado — o placar não muda. Para trocar o autor de um gol, use “Editar partida”.
+        {isGoal
+          ? "Trocar autor ou assistência atualiza os gols e assistências da partida (e as estatísticas) — o placar não muda."
+          : "Só o tempo do lance é ajustado — o placar não muda."}
       </p>
     </Modal>
   );
@@ -734,7 +777,7 @@ function GoalPicker({ match, onCancel, onConfirm }: {
         </p>
       )}
       <p className="muted" style={{ fontSize: 13, marginTop: 10 }}>
-        Sem marcador definido? Confirme sem selecionar — dá para corrigir depois editando a partida.
+        Sem marcador definido? Confirme sem selecionar — dá para corrigir depois no ✎ do lance, mesmo com a partida encerrada.
       </p>
     </Modal>
   );
