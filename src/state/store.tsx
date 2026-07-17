@@ -4,7 +4,9 @@ import {
 import type { ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { sb } from "../lib/supabase";
-import { TEAM } from "../config";
+import { TEAM, VAPID_PUBLIC_KEY } from "../config";
+import { getSubscription, pushSupported, subscribePush, unsubscribePush } from "../lib/push";
+import { lastPosition } from "../lib/positions";
 import type { Assist, Athlete, EventPayload, EventType, Match, MatchEvent, Scorer, SetPieceTakers, Squad, Tactics, TacticsPhase } from "../lib/types";
 import { compute, type SquadStats } from "../lib/stats";
 import { clockSeconds, result, uid } from "../lib/format";
@@ -147,6 +149,12 @@ interface StoreValue {
   isAdmin: boolean;
   signIn: (email: string, pass: string) => Promise<void>;
   signOut: () => Promise<void>;
+  /** Push: estado e ação compartilhados entre o cabeçalho e a aba Mais. */
+  pushOn: boolean;
+  pushBusy: boolean;
+  /** Navegador suporta push e a chave VAPID está configurada. */
+  pushReady: boolean;
+  togglePush: () => Promise<void>;
   /** Grava a partida; false = a escrita falhou (estado já reconciliado). */
   upsertMatch: (m: Match) => Promise<boolean>;
   deleteMatch: (id: string) => Promise<void>;
@@ -655,6 +663,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       } else if (type === "fim_jogo") {
         upd.status = "encerrada";
         upd.clock = { base: secs, period, running: false, at: now };
+        // relacionado sem posição registrada herda a última em que jogou
+        // (ou a primeira do perfil) — evita partida com "N sem posição"
+        const pos = { ...(m.positions || {}) };
+        let changed = false;
+        for (const id of upd.lineup) {
+          if (pos[id]) continue;
+          const p = lastPosition(id, allMatches, { id: m.id, date: m.date })
+            || athletes.find((a) => a.id === id)?.positions?.[0];
+          if (p) { pos[id] = p; changed = true; }
+        }
+        if (changed) upd.positions = pos;
       } else if (type === "gol_pro") {
         upd.goals_for = m.goals_for + 1;
         if (opts?.scorerId) {
@@ -716,7 +735,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const { error } = await sb.from("match_events").insert(ev);
       if (error) { console.error(error); toast("Erro ao registrar evento."); loadEvents(m.id); }
     },
-    [athleteName, upsertMatch, toast, loadEvents]
+    [athleteName, athletes, allMatches, upsertMatch, toast, loadEvents]
   );
 
   /** Desfaz o ÚLTIMO lance registrado (gols, pênaltis e substituições):
@@ -901,11 +920,44 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(async () => { await sb.auth.signOut(); }, []);
 
+  const [pushOn, setPushOn] = useState(false);
+  const [pushBusy, setPushBusy] = useState(false);
+  useEffect(() => { getSubscription().then((s) => setPushOn(!!s)); }, []);
+
+  const togglePush = useCallback(async () => {
+    if (pushBusy) return;
+    setPushBusy(true);
+    try {
+      if (pushOn) {
+        await unsubscribePush();
+        setPushOn(false);
+        toast("Notificações desativadas");
+        return;
+      }
+      const res = await subscribePush(squadId);
+      setPushOn(res.ok);
+      if (res.ok) { toast("Notificações ativadas ✓ Você receberá os lances ao vivo."); return; }
+      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+      const msg =
+        res.reason === "denied"
+          ? "Permissão negada no navegador. Toque no cadeado ao lado do endereço → Notificações → Permitir, e tente de novo."
+          : res.reason === "unsupported"
+            ? isIOS
+              ? "No iPhone, primeiro adicione o app à tela de início (menu compartilhar) e abra por lá."
+              : "Este navegador não suporta notificações push."
+            : res.reason === "server"
+              ? "O navegador aprovou, mas o servidor recusou o registro. Me avise se continuar."
+              : "Não foi possível ativar as notificações neste aparelho.";
+      await tell(msg + (res.detail ? `\n\nDetalhe técnico: ${res.detail}` : ""), "Notificações");
+    } finally { setPushBusy(false); }
+  }, [pushOn, pushBusy, squadId, toast, tell]);
+
   const value: StoreValue = {
     loading, fatal, schemaLegacy, schemaTactics, schemaLogistics, squads, squadId, setSquadId, squad,
     roster, athletes, athleteName, matches, squadMatches, allMatches,
     period, setPeriod, periodOn, findMatch, stats,
     liveMatch, events, loadEvents, session, isAdmin, signIn, signOut,
+    pushOn, pushBusy, pushReady: pushSupported && !!VAPID_PUBLIC_KEY, togglePush,
     upsertMatch, deleteMatch, addAthlete, updateAthletePositions, addSquad, addEvent,
     updateEvent, deleteEvent, undoLastEvent, toggleClock,
     resetToScheduled, importBackup, wipeMatches, toast, toastMsg,

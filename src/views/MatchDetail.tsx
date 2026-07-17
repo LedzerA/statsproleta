@@ -260,6 +260,8 @@ export default function MatchDetail({ id, editar }: { id: string; editar?: boole
   const tac = m.tactics && m.tactics.com.slots.some(Boolean) ? m.tactics : null;
   const tacCur = tac ? ((tacPhase === "bp" ? tac.bp : tac[tacPhase]) || tac.com) : null;
   const cobradores = tac?.cobradores || null;
+  // segredo tático: antes da bola rolar, escalação e formações só para admins
+  const escalaOculta = m.status === "agendada" && !isAdmin;
 
   return (
     <>
@@ -290,7 +292,7 @@ export default function MatchDetail({ id, editar }: { id: string; editar?: boole
         {infoBits.length > 0 && <div className="sh-info">{infoBits.join("   ·   ")}</div>}
       </div>
 
-      {(m.status === "encerrada" || m.status === "agendada") && (
+      {(m.status === "encerrada" || (isAdmin && m.status === "agendada")) && (
         <div className="row-gap" style={{ marginBottom: 14 }}>
           <button className="btn ghost-light block" style={{ flex: 2 }} disabled={artBusy} onClick={makeArt}>
             {artBusy
@@ -421,12 +423,28 @@ export default function MatchDetail({ id, editar }: { id: string; editar?: boole
         </div>
       )}
 
-      {m.lineup.length > 0 && (
+      {m.lineup.length > 0 && escalaOculta && (
+        <div className="panel">
+          <div className="panel-head"><h3>Escalação</h3></div>
+          <div className="detail-body">
+            <p className="muted" style={{ margin: 0 }}>
+              🔒 Segredo tático: a escalação e as formações serão reveladas quando a bola rolar.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {m.lineup.length > 0 && !escalaOculta && (
         <div className="panel">
           <div className="panel-head">
             <h3>Escalação <span className="sub" style={{ display: "inline" }}>· {m.lineup.length} relacionados</span></h3>
           </div>
           <div className="detail-body">
+            {isAdmin && m.status === "agendada" && (
+              <p className="muted" style={{ marginTop: 0 }}>
+                🔒 Só admins veem isto por enquanto — o público vê a partir do início da partida.
+              </p>
+            )}
             {tac && tacCur && (
               <>
                 <div className="phase-tabs">

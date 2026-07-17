@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useStore } from "../state/store";
 import { navigate } from "../lib/router";
 import { VAPID_PUBLIC_KEY } from "../config";
-import { pushSupported, subscribePush, unsubscribePush, getSubscription } from "../lib/push";
+import { pushSupported } from "../lib/push";
 import { renderWrappedArt } from "../lib/art";
 import { dec, fmtDate, fmtDateShort, pct, resWord, result, sortMatches } from "../lib/format";
 import type { Match } from "../lib/types";
@@ -10,6 +10,7 @@ import { inPeriod, lastSemesterRange } from "../lib/period";
 import { bestStreaks, hatTricks } from "../lib/records";
 import { compute } from "../lib/stats";
 import { Modal } from "../components/ui";
+import LoginModal from "../components/LoginModal";
 
 function download(filename: string, text: string, type = "application/json") {
   const blob = new Blob(["﻿" + text], { type });
@@ -25,11 +26,10 @@ export default function More() {
   const {
     squad, squads, roster, matches, squadMatches, stats, session, isAdmin, schemaLegacy,
     signOut, addSquad, importBackup, wipeMatches, toast, ask, tell,
+    pushOn, pushBusy, pushReady, togglePush,
   } = useStore();
   const [login, setLogin] = useState(false);
   const [newSquad, setNewSquad] = useState("");
-  const [pushOn, setPushOn] = useState(false);
-  const [pushBusy, setPushBusy] = useState(false);
   const [importing, setImporting] = useState(false);
   const [retroArt, setRetroArt] = useState<string | null>(null);
   const [retroBusy, setRetroBusy] = useState(false);
@@ -132,36 +132,6 @@ export default function More() {
     }
   }
 
-  useEffect(() => { getSubscription().then((s) => setPushOn(!!s)); }, []);
-
-  async function togglePush() {
-    if (pushBusy) return;
-    setPushBusy(true);
-    try {
-      if (pushOn) {
-        await unsubscribePush();
-        setPushOn(false);
-        toast("Notificações desativadas");
-        return;
-      }
-      const res = await subscribePush(squad?.id || "");
-      setPushOn(res.ok);
-      if (res.ok) { toast("Notificações ativadas ✓ Você receberá os lances ao vivo."); return; }
-      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-      const msg =
-        res.reason === "denied"
-          ? "Permissão negada no navegador. Toque no cadeado ao lado do endereço → Notificações → Permitir, e tente de novo."
-          : res.reason === "unsupported"
-            ? isIOS
-              ? "No iPhone, primeiro adicione o app à tela de início (menu compartilhar) e abra por lá."
-              : "Este navegador não suporta notificações push."
-            : res.reason === "server"
-              ? "O navegador aprovou, mas o servidor recusou o registro. Me avise se continuar."
-              : "Não foi possível ativar as notificações neste aparelho.";
-      tell(msg + (res.detail ? `\n\nDetalhe técnico: ${res.detail}` : ""), "Notificações");
-    } finally { setPushBusy(false); }
-  }
-
   function exportJSON() {
     // backup é sempre completo — ignora o filtro de período
     download(`proleta-${squad?.name || "backup"}-${stamp()}.json`,
@@ -214,7 +184,7 @@ export default function More() {
           </p>
           <button
             className={`btn block ${pushOn ? "ghost" : "primary"}`}
-            disabled={!pushSupported || !VAPID_PUBLIC_KEY || pushBusy}
+            disabled={!pushReady || pushBusy}
             onClick={togglePush}
           >
             {pushOn ? "Desativar notificações" : "Ativar notificações"}
@@ -381,58 +351,5 @@ export default function More() {
       )}
       {login && <LoginModal onClose={() => setLogin(false)} />}
     </>
-  );
-}
-
-function LoginModal({ onClose }: { onClose: () => void }) {
-  const { signIn, toast } = useStore();
-  const [email, setEmail] = useState("");
-  const [pass, setPass] = useState("");
-  const [err, setErr] = useState("");
-  const [busy, setBusy] = useState(false);
-
-  async function submit() {
-    if (!email.trim() || !pass) { setErr("Preencha e-mail e senha."); return; }
-    setBusy(true); setErr("");
-    try {
-      await signIn(email.trim(), pass);
-      toast("Bem-vindo de volta ✓");
-      onClose();
-    } catch (e: any) {
-      const m = (e?.message || "").toLowerCase();
-      setErr(
-        m.includes("invalid") ? "E-mail ou senha incorretos."
-        : m.includes("email not confirmed") ? "Confirme seu e-mail pelo link enviado e tente de novo."
-        : e?.message || "Não foi possível entrar."
-      );
-    } finally { setBusy(false); }
-  }
-
-  return (
-    <Modal title="Entrar · comissão técnica" onClose={onClose}
-      footer={
-        <>
-          <button className="btn ghost" style={{ flex: 1 }} onClick={onClose}>Cancelar</button>
-          <button className="btn primary" style={{ flex: 2 }} disabled={busy} onClick={submit}>Entrar</button>
-        </>
-      }
-    >
-      <div className="field">
-        <label>E-mail</label>
-        <input type="email" autoComplete="username" placeholder="voce@email.com"
-          value={email} onChange={(e) => setEmail(e.target.value)} autoFocus />
-      </div>
-      <div className="field">
-        <label>Senha</label>
-        <input type="password" autoComplete="current-password" placeholder="••••••••"
-          value={pass} onChange={(e) => setPass(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter") submit(); }} />
-      </div>
-      {err && <div className="login-err">{err}</div>}
-      <p className="muted" style={{ fontSize: 13 }}>
-        Contas de admin são criadas no painel do Supabase (Authentication → Users) e liberadas na
-        tabela <code>admins</code> — ver README.
-      </p>
-    </Modal>
   );
 }

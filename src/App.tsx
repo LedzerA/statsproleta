@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { useStore } from "./state/store";
 import { useRoute, navigate } from "./lib/router";
-import { TEAM } from "./config";
+import { TEAM, VAPID_PUBLIC_KEY } from "./config";
 import { fmtDate, fmtDateShort, pct } from "./lib/format";
 import { PERIOD_PRESETS, periodRange } from "./lib/period";
 import { FormDots, Modal, Spinner } from "./components/ui";
+import LoginModal from "./components/LoginModal";
 import Home from "./views/Home";
 import Matches from "./views/Matches";
 import MatchDetail from "./views/MatchDetail";
@@ -25,9 +27,11 @@ const NAV = [
 export default function App() {
   const {
     loading, fatal, schemaLegacy, squads, squadId, setSquadId, squad, stats,
-    liveMatch, isAdmin, toastMsg, period, setPeriod, dialog, resolveDialog,
+    liveMatch, session, isAdmin, toastMsg, period, setPeriod, dialog, resolveDialog,
+    pushOn, pushBusy, togglePush,
   } = useStore();
   const route = useRoute();
+  const [login, setLogin] = useState(false);
 
   if (loading) return <Spinner />;
   if (fatal) {
@@ -82,6 +86,30 @@ export default function App() {
                 <div className="n num">{pct(t.aprov)}</div>
                 <div className="l">Aproveitamento</div>
               </div>
+            </div>
+            <div className="hd-actions">
+              {!!VAPID_PUBLIC_KEY && (
+                <button
+                  className={`hd-btn ${pushOn ? "on" : ""}`}
+                  disabled={pushBusy}
+                  onClick={togglePush}
+                  title={pushOn ? "Notificações ativadas — toque para desativar" : "Receba os gols no celular"}
+                >
+                  <span className="ic">🔔</span>
+                  <span className="lb">{pushOn ? "Avisos ✓" : "Ativar avisos"}</span>
+                </button>
+              )}
+              {session ? (
+                <button className="hd-btn" onClick={() => navigate("#/mais")} title="Sua conta (na aba Mais)">
+                  <span className="ic">👤</span>
+                  <span className="lb">{isAdmin ? "Admin" : "Conta"}</span>
+                </button>
+              ) : (
+                <button className="hd-btn" onClick={() => setLogin(true)} title="Entrar como admin (comissão técnica)">
+                  <span className="ic">👤</span>
+                  <span className="lb">Entrar</span>
+                </button>
+              )}
             </div>
           </div>
           {squads.length > 1 && (
@@ -229,6 +257,8 @@ export default function App() {
           <p style={{ whiteSpace: "pre-line", margin: "2px 0 6px" }}>{dialog.msg}</p>
         </Modal>
       )}
+
+      {login && <LoginModal onClose={() => setLogin(false)} />}
 
       <div className={`toast ${toastMsg ? "show" : ""}`}>{toastMsg}</div>
     </>

@@ -68,7 +68,18 @@ code { background: rgba(0, 0, 0, .25); padding: 1px 5px; border-radius: 5px; fon
   font-size: 10.5px; letter-spacing: 1.5px; text-transform: uppercase;
   color: var(--verde-300); margin-top: 4px; font-weight: 600;
 }
-.scoreboard { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.scoreboard { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; margin-left: auto; }
+/* ações rápidas do cabeçalho: avisos de gol e login da comissão */
+.hd-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.hd-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(0, 0, 0, .18); border: 1px solid var(--linha); color: var(--verde-300);
+  border-radius: 20px; padding: 6px 12px; font-weight: 600; font-size: 12px;
+  transition: all .12s; white-space: nowrap;
+}
+.hd-btn:hover { color: var(--creme); }
+.hd-btn.on { background: var(--creme); color: var(--verde-800); border-color: var(--creme); }
+.hd-btn:disabled { opacity: .55; }
 .aprov { text-align: right; }
 .aprov .n { font-size: 38px; line-height: .9; color: var(--creme-3); font-weight: 700; }
 .aprov .l {
@@ -630,7 +641,11 @@ button.chip:hover { border-color: var(--verde-500); }
   /* header compacto: uma linha só de placar (kpis + aproveitamento);
      a forma recente segue no subtítulo ("Sequência: …") */
   .hd { padding: 10px 16px 8px; }
-  .scoreboard { width: 100%; justify-content: space-between; gap: 6px; flex-wrap: nowrap; }
+  .scoreboard { width: 100%; justify-content: space-between; gap: 6px; flex-wrap: nowrap; order: 5; }
+  /* ações viram só ícone, na linha do escudo */
+  .hd-actions { margin-left: auto; }
+  .hd-btn { padding: 6px 9px; }
+  .hd-btn .lb { display: none; }
   .kpis { flex-wrap: nowrap; gap: 4px; }
   .kpi { padding: 4px 5px; min-width: 34px; }
   .kpi .n { font-size: 15px; }
