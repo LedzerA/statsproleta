@@ -92,6 +92,8 @@ export interface Match {
   clock: Clock | null;
   started_at: string | null;
   tactics: Tactics | null; // formações com/sem bola (atualização 4)
+  /** carimbo da última gravação no banco — base da detecção de edição simultânea */
+  updated_at?: string | null;
 }
 
 export type EventType =

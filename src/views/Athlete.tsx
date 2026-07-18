@@ -10,9 +10,10 @@ import { Modal, ResultBadge } from "../components/ui";
 import { LineChart } from "../components/LineChart";
 
 export default function Athlete({ id }: { id: string }) {
-  const { athletes, allMatches, squads, period, periodOn, isAdmin, updateAthletePositions } = useStore();
+  const { athletes, allMatches, squads, period, periodOn, isAdmin, updateAthletePositions, updateAthleteName } = useStore();
   const athlete = athletes.find((a) => a.id === id);
   const [editPos, setEditPos] = useState<string[] | null>(null);
+  const [editName, setEditName] = useState<string | null>(null);
   // filtro da lista de partidas pela posição em que ele atuou
   const [fPos, setFPos] = useState<string | null>(null);
   useEffect(() => { setFPos(null); }, [id]);
@@ -114,13 +115,17 @@ export default function Athlete({ id }: { id: string }) {
           <div className="sh-team" style={{ fontSize: 30 }}>{athlete.name}</div>
         </div>
         {isAdmin && (
-          <button
-            className="btn sm ghost-light"
-            style={{ marginTop: 10 }}
-            onClick={() => setEditPos(athlete.positions?.length ? [...athlete.positions] : [...data.posList])}
-          >
-            ✎ Editar posições
-          </button>
+          <div className="row-gap" style={{ marginTop: 10, justifyContent: "center" }}>
+            <button
+              className="btn sm ghost-light"
+              onClick={() => setEditPos(athlete.positions?.length ? [...athlete.positions] : [...data.posList])}
+            >
+              ✎ Editar posições
+            </button>
+            <button className="btn sm ghost-light" onClick={() => setEditName(athlete.name)}>
+              ✎ Renomear
+            </button>
+          </div>
         )}
       </div>
 
@@ -157,6 +162,39 @@ export default function Athlete({ id }: { id: string }) {
           <p className="muted" style={{ fontSize: 13, marginTop: 12 }}>
             A primeira posição (na ordem GOL → CA) vira a principal — usada para agrupar
             a escalação e sugerir a posição nas partidas. Sem seleção, o app usa o histórico.
+          </p>
+        </Modal>
+      )}
+
+      {editName !== null && (
+        <Modal
+          title="Renomear atleta"
+          onClose={() => setEditName(null)}
+          footer={
+            <>
+              <button className="btn ghost" style={{ flex: 1 }} onClick={() => setEditName(null)}>Cancelar</button>
+              <button
+                className="btn primary" style={{ flex: 2 }}
+                onClick={async () => { if (await updateAthleteName(athlete.id, editName)) setEditName(null); }}
+              >
+                Salvar nome
+              </button>
+            </>
+          }
+        >
+          <div className="field">
+            <label>Nome do atleta</label>
+            <input
+              type="text" value={editName} autoFocus autoComplete="off"
+              onChange={(e) => setEditName(e.target.value)}
+              onKeyDown={async (e) => {
+                if (e.key === "Enter" && await updateAthleteName(athlete.id, editName)) setEditName(null);
+              }}
+            />
+          </div>
+          <p className="muted" style={{ fontSize: 13, marginTop: 12 }}>
+            A correção vale para o histórico inteiro: partidas, gols, assistências e artes
+            passam a mostrar o nome novo (os registros guardam o atleta, não o texto do nome).
           </p>
         </Modal>
       )}

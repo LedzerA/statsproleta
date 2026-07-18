@@ -157,10 +157,16 @@ interface StoreValue {
   togglePush: () => Promise<void>;
   /** Grava a partida; false = a escrita falhou (estado já reconciliado). */
   upsertMatch: (m: Match) => Promise<boolean>;
+  /** Grava a partida SÓ se ninguém salvou por cima desde `base` (o updated_at
+      de quando o formulário abriu). "conflict" = outro admin salvou antes. */
+  upsertMatchGuarded: (m: Match, base: string | null) => Promise<"ok" | "conflict" | "error">;
   deleteMatch: (id: string) => Promise<void>;
-  addAthlete: (name: string) => Promise<Athlete | null>;
+  /** Cria atleta no elenco indicado (sem indicar, no elenco selecionado). */
+  addAthlete: (name: string, squadId?: string) => Promise<Athlete | null>;
   /** Salva as posições do perfil do atleta (precisa da atualização 3 no banco). */
   updateAthletePositions: (id: string, positions: string[]) => Promise<void>;
+  /** Corrige o nome do atleta — vale para todo o histórico (registros guardam o id). */
+  updateAthleteName: (id: string, name: string) => Promise<boolean>;
   addSquad: (name: string) => Promise<void>;
   addEvent: (
     m: Match,
@@ -485,6 +491,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     else toast("Lance excluído");
   }, [toast, loadEvents]);
 
+  /** Linha pronta para o banco: carimbo novo + colunas que o schema não tem. */
+  const matchRow = useCallback((m: Match) => {
+    const row: any = { ...m, updated_at: new Date().toISOString() };
+    if (schemaLegacy) for (const f of V21_FIELDS) delete row[f];
+    if (schemaLegacy || !schemaTactics) delete row.tactics;
+    if (schemaLegacy || !schemaLogistics) for (const f of LOGISTICS_FIELDS) delete row[f];
+    return row;
+  }, [schemaLegacy, schemaTactics, schemaLogistics]);
+
   /** Grava a partida (otimista). Em erro, reconcilia o estado com o banco e
       devolve false — quem depende da escrita (ex.: addEvent) pode abortar. */
   const upsertMatch = useCallback(async (m: Match): Promise<boolean> => {
@@ -493,11 +508,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (i >= 0) { const cp = [...old]; cp[i] = m; return cp; }
       return [...old, m];
     });
-    const row: any = { ...m, updated_at: new Date().toISOString() };
-    if (schemaLegacy) for (const f of V21_FIELDS) delete row[f];
-    if (schemaLegacy || !schemaTactics) delete row.tactics;
-    if (schemaLegacy || !schemaLogistics) for (const f of LOGISTICS_FIELDS) delete row[f];
-    const { error } = await sb.from("matches").upsert(row);
+    const { error } = await sb.from("matches").upsert(matchRow(m));
     if (error) {
       console.error(error);
       toast("Erro ao salvar. Verifique a conexão.");
@@ -505,7 +516,25 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       return false;
     }
     return true;
-  }, [toast, schemaLegacy, schemaTactics, schemaLogistics, refetch]);
+  }, [toast, matchRow, refetch]);
+
+  /** Edição simultânea: só grava se o updated_at do banco ainda for `base`
+      (a versão de quando o formulário abriu). O UPDATE condicional não afeta
+      nenhuma linha quando outro admin salvou antes (ou excluiu a partida) —
+      nesse caso devolve "conflict" e NÃO altera nada, nem o estado local. */
+  const upsertMatchGuarded = useCallback(async (m: Match, base: string | null): Promise<"ok" | "conflict" | "error"> => {
+    let q = sb.from("matches").update(matchRow(m)).eq("id", m.id);
+    q = base == null ? q.is("updated_at", null) : q.eq("updated_at", base);
+    const { data, error } = await q.select("id");
+    if (error) {
+      console.error(error);
+      toast("Erro ao salvar. Verifique a conexão.");
+      return "error";
+    }
+    if (!data?.length) return "conflict";
+    setAllMatches((old) => old.map((x) => (x.id === m.id ? m : x)));
+    return "ok";
+  }, [toast, matchRow]);
 
   /** Corrige um lance já registrado: tempo (minuto/período) e, em gol do
       Proleta, autor e assistência — os totais da partida (scorers/assists)
@@ -598,14 +627,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     } else toast("Partida excluída");
   }, [toast, refetch]);
 
-  const addAthlete = useCallback(async (name: string): Promise<Athlete | null> => {
+  const addAthlete = useCallback(async (name: string, squad?: string): Promise<Athlete | null> => {
     const clean = name.trim();
     if (!clean) return null;
-    if (roster.some((a) => a.name.toLowerCase() === clean.toLowerCase())) {
+    // o formulário de partida pode estar editando um jogo de OUTRO elenco —
+    // o atleta novo tem que nascer no elenco da partida, não no do cabeçalho
+    const sid = squad || squadId;
+    if (athletes.some((a) => a.squad_id === sid && a.name.toLowerCase() === clean.toLowerCase())) {
       toast("Atleta já existe no elenco");
       return null;
     }
-    const a: Athlete = { id: uid("a"), squad_id: squadId, name: clean };
+    const a: Athlete = { id: uid("a"), squad_id: sid, name: clean };
     setAthletes((old) => [...old, a]);
     const { error } = await sb.from("athletes").insert(a);
     if (error) {
@@ -617,7 +649,29 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
     toast(`${clean} adicionado ao elenco`);
     return a;
-  }, [roster, squadId, toast]);
+  }, [athletes, squadId, toast]);
+
+  const updateAthleteName = useCallback(async (id: string, name: string): Promise<boolean> => {
+    const clean = name.trim();
+    const cur = athletes.find((a) => a.id === id);
+    if (!cur) return false;
+    if (!clean) { toast("Informe o nome do atleta"); return false; }
+    if (clean === cur.name) return true;
+    if (athletes.some((a) => a.id !== id && a.squad_id === cur.squad_id && a.name.toLowerCase() === clean.toLowerCase())) {
+      toast("Já existe um atleta com esse nome no elenco");
+      return false;
+    }
+    setAthletes((old) => old.map((a) => (a.id === id ? { ...a, name: clean } : a)));
+    const { error } = await sb.from("athletes").update({ name: clean }).eq("id", id);
+    if (error) {
+      console.error(error);
+      toast("Erro ao salvar o nome.");
+      refetch().catch(console.error); // desfaz o otimismo com a verdade do banco
+      return false;
+    }
+    toast("Nome atualizado ✓");
+    return true;
+  }, [athletes, toast, refetch]);
 
   const updateAthletePositions = useCallback(async (id: string, positions: string[]) => {
     setAthletes((old) => old.map((a) => (a.id === id ? { ...a, positions } : a)));
@@ -958,7 +1012,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     period, setPeriod, periodOn, findMatch, stats,
     liveMatch, events, loadEvents, session, isAdmin, signIn, signOut,
     pushOn, pushBusy, pushReady: pushSupported && !!VAPID_PUBLIC_KEY, togglePush,
-    upsertMatch, deleteMatch, addAthlete, updateAthletePositions, addSquad, addEvent,
+    upsertMatch, upsertMatchGuarded, deleteMatch, addAthlete, updateAthletePositions, updateAthleteName, addSquad, addEvent,
     updateEvent, deleteEvent, undoLastEvent, toggleClock,
     resetToScheduled, importBackup, wipeMatches, toast, toastMsg,
     ask, tell, dialog, resolveDialog,

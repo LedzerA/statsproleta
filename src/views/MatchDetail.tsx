@@ -69,7 +69,7 @@ function LiveClock({ m }: { m: Match }) {
 
 export default function MatchDetail({ id, editar }: { id: string; editar?: boolean }) {
   const {
-    findMatch, roster, squads, athleteName, isAdmin, schemaLegacy,
+    findMatch, roster, squads, squadId, setSquadId, athleteName, isAdmin, schemaLegacy,
     events, loadEvents, addEvent, updateEvent, deleteEvent, undoLastEvent,
     toggleClock, resetToScheduled, deleteMatch, upsertMatch, toast, ask,
   } = useStore();
@@ -85,6 +85,12 @@ export default function MatchDetail({ id, editar }: { id: string; editar?: boole
 
   const m = findMatch(id);
   useEffect(() => { if (m) loadEvents(m.id); }, [id, !!m]);
+  // partida de OUTRO elenco (aberta por link, notificação ou histórico do
+  // navegador): alinha o contexto do cabeçalho ao elenco dela — assim roster,
+  // estatísticas, pickers e o formulário de edição usam o elenco certo
+  useEffect(() => {
+    if (m && m.squad_id !== squadId) setSquadId(m.squad_id);
+  }, [m?.squad_id]);
   // rota #/partida/:id/editar (lista de dados incompletos) abre o formulário
   // direto — nunca para partida ao vivo (o form congelaria o placar)
   useEffect(() => {

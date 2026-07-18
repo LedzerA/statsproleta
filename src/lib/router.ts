@@ -30,10 +30,34 @@ export function navigate(path: string) {
   window.location.hash = path;
 }
 
+/* Guarda de navegação: um formulário com alterações pendentes registra um
+   interceptador que segura QUALQUER troca de rota (voltar do navegador
+   incluso) até decidir se ela prossegue — chama proceed() para deixar sair. */
+type NavGuard = (proceed: () => void) => void;
+let navGuard: NavGuard | null = null;
+export function setNavGuard(g: NavGuard | null) {
+  navGuard = g;
+}
+
 export function useRoute(): Route {
   const [route, setRoute] = useState<Route>(() => parse(window.location.hash));
   useEffect(() => {
-    const on = () => setRoute(parse(window.location.hash));
+    let current = window.location.hash;
+    let bypass = false;
+    const on = () => {
+      const next = window.location.hash;
+      if (next === current) return;
+      if (navGuard && !bypass) {
+        const target = next;
+        const guard = navGuard;
+        window.location.hash = current; // desfaz já — o guard decide se prossegue
+        guard(() => { bypass = true; window.location.hash = target; });
+        return;
+      }
+      bypass = false;
+      current = next;
+      setRoute(parse(next));
+    };
     window.addEventListener("hashchange", on);
     return () => window.removeEventListener("hashchange", on);
   }, []);

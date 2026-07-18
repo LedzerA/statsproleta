@@ -212,9 +212,9 @@ export default function App() {
           )}
           {route.view === "inicio" && <Home />}
           {route.view === "partidas" && <Matches openNew={route.nova} />}
-          {route.view === "partida" && <MatchDetail id={route.id} editar={route.editar} />}
+          {route.view === "partida" && <MatchDetail key={route.id} id={route.id} editar={route.editar} />}
           {route.view === "atletas" && <Athletes />}
-          {route.view === "atleta" && <Athlete id={route.id} />}
+          {route.view === "atleta" && <Athlete key={route.id} id={route.id} />}
           {route.view === "adversarios" && <Opponents />}
           {route.view === "comparativo" && <Compare />}
           {route.view === "mais" && <More />}

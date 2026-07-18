@@ -1,5 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
 import { useStore } from "../state/store";
+import { sb } from "../lib/supabase";
+import { setNavGuard } from "../lib/router";
 import { Modal, Stepper } from "../components/ui";
 import { todayISO, uid } from "../lib/format";
 import { POSITIONS, POS_GROUPS, athletePositions, lastPosition, posRank } from "../lib/positions";
@@ -40,9 +42,154 @@ const COBRANCAS: { k: keyof SetPieceTakers; label: string }[] = [
   { k: "escanteio_d", label: "Esc. dir." },
 ];
 
+/** Rascunho completo do formulário — é ao mesmo tempo o fingerprint de
+    alteração pendente e o payload do espelhamento ao vivo entre admins. */
+interface DraftState {
+  date: string; opponent: string; venue: string; kickoff: string; kit: string;
+  meetTime: string; ballHolder: string; kitHolder: string;
+  gf: number; ga: number;
+  lineup: string[];
+  positions: Record<string, string>;
+  tactics: FormTactics;
+  semManual: boolean;
+  bpManual: boolean;
+  posManual: string[];
+  cobradores: SetPieceTakers;
+  scorers: Record<string, number>;
+  assists: Record<string, number>;
+  complete: boolean;
+}
+
 export default function MatchForm({ match, schedule, onClose }: Props) {
-  const { roster, squadMatches, squadId, schemaLegacy, schemaTactics, schemaLogistics, upsertMatch, addAthlete, toast } = useStore();
+  const { allMatches, session } = useStore();
+  /* A partida-alvo é congelada na abertura ("base"): se a rota mudar com o
+     modal aberto, o salvar continua mirando a partida original — nunca a da
+     nova rota (já gravou escalação de um elenco em partida de outro).
+
+     Colaboração ao vivo (canal `edit:<partida>` do Realtime, sem tocar no
+     banco): presença mostra quem mais está editando; cada mudança local é
+     transmitida por broadcast e espelhada no formulário do outro admin — o
+     arrasto do campinho inclusive, em tempo real. Quando alguém salva, um
+     aviso "saved" faz os outros adotarem a versão gravada (remount via key). */
+  const [base, setBase] = useState<Match | null>(match || null);
+  const [ver, setVer] = useState(0);
+  const dirtyRef = useRef<() => boolean>(() => false);
+  const draftRef = useRef<(() => DraftState) | null>(null);
+  const chRef = useRef<ReturnType<typeof sb.channel> | null>(null);
+  const [others, setOthers] = useState<string[]>([]);
+  const [remote, setRemote] = useState<{ seq: number; state: DraftState } | null>(null);
+  const seq = useRef(0);
+  const adoptOnSave = useRef(false);
+  const [savedPing, setSavedPing] = useState(0);
+  const email = session?.user?.email;
+
+  const liveRow = base ? allMatches.find((x) => x.id === base.id) : undefined;
+  const newer = !!(base && liveRow && (liveRow.updated_at || null) !== (base.updated_at || null));
+  const adopt = () => { setBase(liveRow!); setVer((v) => v + 1); setRemote(null); };
+  useEffect(() => {
+    if (!newer) return;
+    // o "saved" do parceiro (ou um formulário limpo) adota a versão nova na hora
+    if (adoptOnSave.current || !dirtyRef.current()) { adoptOnSave.current = false; adopt(); }
+  }, [liveRow?.updated_at, savedPing]);
+
+  useEffect(() => {
+    if (!base?.id) return;
+    // chave por FORMULÁRIO aberto (não por aparelho): duas abas da mesma
+    // pessoa também são edição simultânea e merecem o espelhamento
+    const key = uid("v");
+    const ch = sb.channel(`edit:${base.id}`, { config: { presence: { key } } });
+    ch.on("presence", { event: "sync" }, () => {
+      const st = ch.presenceState() as Record<string, { email?: string }[]>;
+      setOthers(Object.entries(st)
+        .filter(([k]) => k !== key)
+        .map(([, metas]) => metas[0]?.email || "outro admin"));
+    });
+    // alguém acabou de abrir o formulário: quem tem rascunho pendente manda o
+    // estado atual para o recém-chegado já entrar sincronizado
+    ch.on("presence", { event: "join" }, ({ key: k }) => {
+      if (k !== key && dirtyRef.current() && draftRef.current) {
+        ch.send({ type: "broadcast", event: "state", payload: { state: draftRef.current() } });
+      }
+    });
+    ch.on("broadcast", { event: "state" }, ({ payload }) => {
+      setRemote({ seq: ++seq.current, state: payload.state as DraftState });
+    });
+    ch.on("broadcast", { event: "saved" }, () => {
+      adoptOnSave.current = true;
+      setSavedPing((p) => p + 1);
+    });
+    ch.subscribe((status) => {
+      if (status === "SUBSCRIBED") ch.track({ email: email || "outro admin" });
+    });
+    chRef.current = ch;
+    return () => { chRef.current = null; sb.removeChannel(ch); setOthers([]); };
+  }, [base?.id, email]);
+
+  const sendState = (state: DraftState) => {
+    chRef.current?.send({ type: "broadcast", event: "state", payload: { state } });
+  };
+  const sendSaved = () => {
+    chRef.current?.send({ type: "broadcast", event: "saved", payload: {} });
+  };
+
+  return (
+    <MatchFormInner
+      key={ver}
+      match={base}
+      schedule={schedule}
+      onClose={onClose}
+      dirtyRef={dirtyRef}
+      draftRef={draftRef}
+      others={others}
+      remote={remote}
+      sendState={sendState}
+      sendSaved={sendSaved}
+      onAdopt={newer ? adopt : null}
+    />
+  );
+}
+
+interface InnerProps extends Props {
+  /** preenchido pelo formulário: diz se há alteração ainda não salva */
+  dirtyRef: MutableRefObject<() => boolean>;
+  /** preenchido pelo formulário: devolve o rascunho atual completo */
+  draftRef: MutableRefObject<(() => DraftState) | null>;
+  /** admins com este mesmo formulário aberto agora (e-mails) */
+  others: string[];
+  /** último rascunho recebido do outro admin (seq cresce a cada mensagem) */
+  remote: { seq: number; state: DraftState } | null;
+  /** transmite o rascunho local para os outros formulários abertos */
+  sendState: (state: DraftState) => void;
+  /** avisa os outros que a partida acabou de ser gravada no banco */
+  sendSaved: () => void;
+  /** recarrega o formulário com a versão mais nova do banco (null = não há) */
+  onAdopt: (() => void) | null;
+}
+
+function MatchFormInner({
+  match, schedule, onClose, dirtyRef, draftRef, others, remote, sendState, sendSaved, onAdopt,
+}: InnerProps) {
+  const {
+    athletes, allMatches, squadId, schemaLegacy, schemaTactics, schemaLogistics,
+    upsertMatch, upsertMatchGuarded, addAthlete, toast, ask,
+  } = useStore();
   const isEdit = !!match;
+  // elenco e histórico do ELENCO DA PARTIDA, não do selecionado no cabeçalho —
+  // uma partida aberta por link/notificação pode ser de outro elenco
+  const targetSquadId = match?.squad_id || squadId;
+  const roster = useMemo(
+    () => athletes.filter((a) => a.squad_id === targetSquadId),
+    [athletes, targetSquadId]
+  );
+  const squadMatches = useMemo(
+    () => allMatches.filter((mt) => mt.squad_id === targetSquadId),
+    [allMatches, targetSquadId]
+  );
+  // edição simultânea: a versão viva no banco (o realtime mantém allMatches em
+  // dia) vs a de quando o formulário abriu — divergiu, outro admin salvou no meio
+  const liveRow = isEdit ? allMatches.find((x) => x.id === match!.id) : undefined;
+  const deleted = isEdit && !liveRow;
+  const conflict = isEdit && !!liveRow && (liveRow.updated_at || null) !== (match!.updated_at || null);
   const scheduling = schedule || match?.status === "agendada";
 
   const [date, setDate] = useState(match?.date || todayISO());
@@ -145,6 +292,82 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
   );
   const [complete, setComplete] = useState(match ? match.lineup_complete !== false : true);
   const [busca, setBusca] = useState("");
+
+  /* rascunho: o estado editável inteiro. Serve de fingerprint de alteração
+     pendente (fechar/navegar com diferença pede confirmação) e de payload do
+     espelhamento ao vivo entre os formulários abertos. */
+  const draft = (): DraftState => ({
+    date, opponent, venue, kickoff, kit, meetTime, ballHolder, kitHolder, gf, ga,
+    lineup, positions, tactics, semManual, bpManual, posManual: [...posManual],
+    cobradores, scorers, assists, complete,
+  });
+  draftRef.current = draft;
+  const draftJson = JSON.stringify(draft());
+  const initialSnap = useRef<string | null>(null);
+  if (initialSnap.current === null) initialSnap.current = draftJson;
+  dirtyRef.current = () => JSON.stringify(draft()) !== initialSnap.current;
+
+  /* espelhamento ao vivo: cada mudança local vai por broadcast (throttle de
+     ~120ms — o arrasto do campinho flui contínuo sem estourar o Realtime);
+     o que chega do outro admin é aplicado direto no formulário */
+  const lastRecv = useRef<string | null>(null);
+  const lastSent = useRef<string | null>(null);
+  const lastSentAt = useRef(0);
+  useEffect(() => {
+    // formulário intocado (nada enviado nem recebido ainda) não transmite
+    if (draftJson === initialSnap.current && !lastSent.current && !lastRecv.current) return;
+    // o estado atual é eco do que acabou de chegar/sair — nada novo a enviar
+    if (draftJson === lastRecv.current || draftJson === lastSent.current) return;
+    const delay = Math.max(0, 120 - (Date.now() - lastSentAt.current));
+    const t = window.setTimeout(() => {
+      lastSentAt.current = Date.now();
+      lastSent.current = draftJson;
+      sendState(JSON.parse(draftJson));
+    }, delay);
+    return () => window.clearTimeout(t);
+  }, [draftJson]);
+  useEffect(() => {
+    if (!remote) return;
+    const s = JSON.stringify(remote.state);
+    lastRecv.current = s;
+    if (s === draftJson) return; // já estamos iguais
+    const d = remote.state;
+    setDate(d.date); setOpponent(d.opponent); setVenue(d.venue); setKickoff(d.kickoff);
+    setKit(d.kit); setMeetTime(d.meetTime); setBallHolder(d.ballHolder); setKitHolder(d.kitHolder);
+    setGf(d.gf); setGa(d.ga);
+    setLineup(d.lineup); setPositions(d.positions); setTactics(d.tactics);
+    setSemManual(d.semManual); setBpManual(d.bpManual); setPosManual(new Set(d.posManual));
+    setCobradores(d.cobradores); setScorers(d.scorers); setAssists(d.assists);
+    setComplete(d.complete);
+  }, [remote?.seq]);
+
+  async function confirmDiscard(): Promise<boolean> {
+    if (!dirtyRef.current()) return true;
+    return ask("Tem certeza que deseja sair? O progresso da edição será perdido.", {
+      title: "Sair sem salvar?", okLabel: "Sair sem salvar", danger: true,
+    });
+  }
+  async function requestClose() {
+    if (await confirmDiscard()) onClose();
+  }
+  const confirmDiscardRef = useRef(confirmDiscard);
+  confirmDiscardRef.current = confirmDiscard;
+  useEffect(() => {
+    // qualquer troca de rota (voltar do navegador incluso) passa pelo mesmo
+    // aviso; sem alteração pendente a navegação segue e o modal fecha sozinho
+    setNavGuard(async (proceed) => {
+      if (await confirmDiscardRef.current()) proceed();
+    });
+    // recarregar/fechar a aba com alteração pendente aciona o aviso nativo
+    const before = (e: BeforeUnloadEvent) => {
+      if (dirtyRef.current()) { e.preventDefault(); e.returnValue = ""; }
+    };
+    window.addEventListener("beforeunload", before);
+    return () => {
+      setNavGuard(null);
+      window.removeEventListener("beforeunload", before);
+    };
+  }, []);
 
   const gSum = useMemo(() => Object.values(scorers).reduce((a, b) => a + b, 0), [scorers]);
   const aSum = useMemo(() => Object.values(assists).reduce((a, b) => a + b, 0), [assists]);
@@ -353,7 +576,7 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
   }
 
   async function handleAddAthlete() {
-    const a = await addAthlete(busca);
+    const a = await addAthlete(busca, targetSquadId);
     if (a) { setLineup((old) => [...old, a.id]); setBusca(""); }
   }
 
@@ -387,7 +610,7 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
     });
     const rec: Match = {
       id: match?.id || uid("m"),
-      squad_id: match?.squad_id || squadId,
+      squad_id: targetSquadId,
       date,
       opponent: opponent.trim(),
       status: scheduling ? "agendada" : match?.status && match.status !== "agendada" ? match.status : "encerrada",
@@ -420,7 +643,24 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
           }
         : null,
     };
-    await upsertMatch(rec);
+    if (isEdit) {
+      // condicional pelo updated_at: se outro admin salvou (ou excluiu) esta
+      // partida depois que o formulário abriu, nada é gravado — pergunta antes
+      const res = await upsertMatchGuarded(rec, match!.updated_at || null);
+      if (res === "error") return; // toast já dado; formulário fica aberto
+      if (res === "conflict") {
+        const force = await ask(
+          "Outro admin salvou esta partida enquanto você editava (ou a excluiu).\n\n" +
+          "Salvar mesmo assim SOBRESCREVE a versão dele com o que está neste formulário. " +
+          "Para ver a versão dele antes, saia sem salvar e abra a edição de novo.",
+          { title: "Edição simultânea", okLabel: "Salvar mesmo assim", danger: true }
+        );
+        if (!force || !(await upsertMatch(rec))) return;
+      }
+    } else if (!(await upsertMatch(rec))) {
+      return;
+    }
+    sendSaved(); // outros formulários abertos adotam a versão gravada na hora
     toast(isEdit ? "Partida atualizada" : scheduling ? "Jogo agendado ✓" : "Partida salva ✓");
     onClose();
   }
@@ -428,16 +668,52 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
   return (
     <Modal
       title={isEdit ? "Editar partida" : scheduling ? "Agendar jogo" : "Nova partida"}
-      onClose={onClose}
+      onClose={requestClose}
       footer={
         <>
-          <button className="btn ghost" style={{ flex: 1 }} onClick={onClose}>Cancelar</button>
+          <button className="btn ghost" style={{ flex: 1 }} onClick={requestClose}>Cancelar</button>
           <button className="btn primary" style={{ flex: 2 }} onClick={save}>
             {isEdit ? "Salvar alterações" : "Salvar"}
           </button>
         </>
       }
     >
+      {others.length > 0 && (
+        <div className="warn show">
+          👥 <b>{[...new Set(others.map((e) => e.split("@")[0]))].join(", ")}</b> também está
+          editando agora — vocês estão vendo e mexendo no <b>mesmo rascunho, em tempo real</b>.
+          Qualquer um dos dois pode salvar.
+        </div>
+      )}
+      {deleted && (
+        <div className="warn show">
+          ⚠ <b>Esta partida foi excluída por outro admin</b> enquanto você editava.
+          Salvar vai recriá-la com os dados deste formulário.
+        </div>
+      )}
+      {conflict && (
+        <div className="warn show">
+          ⚠ <b>Outro admin salvou esta partida agora há pouco.</b> Você tem alterações
+          não salvas — ao salvar, você sobrescreve a versão dele.
+          {onAdopt && (
+            <>
+              {" "}
+              <button
+                type="button"
+                className="linklike"
+                onClick={async () => {
+                  if (!dirtyRef.current() || await ask(
+                    "Descartar as SUAS alterações e carregar a versão que ele salvou?",
+                    { title: "Carregar a versão dele", okLabel: "Carregar versão dele", danger: true }
+                  )) onAdopt();
+                }}
+              >
+                Carregar a versão dele (descarta a sua)
+              </button>
+            </>
+          )}
+        </div>
+      )}
       <div className="field">
         <label>Adversário</label>
         <input
