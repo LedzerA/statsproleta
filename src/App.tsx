@@ -96,7 +96,7 @@ export default function App() {
                   title={pushOn ? "Notificações ativadas — toque para desativar" : "Receba os gols no celular"}
                 >
                   <span className="ic">🔔</span>
-                  <span className="lb">{pushOn ? "Avisos ✓" : "Ativar avisos"}</span>
+                  <span className="lb">{pushOn ? "Avisos ligados ✓" : "Me avise dos gols"}</span>
                 </button>
               )}
               {session ? (

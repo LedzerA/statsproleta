@@ -68,9 +68,15 @@ code { background: rgba(0, 0, 0, .25); padding: 1px 5px; border-radius: 5px; fon
   font-size: 10.5px; letter-spacing: 1.5px; text-transform: uppercase;
   color: var(--verde-300); margin-top: 4px; font-weight: 600;
 }
-.scoreboard { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; margin-left: auto; }
+/* estrutura FIXA em duas linhas — escudo + ações em cima, placar embaixo.
+   Sem isso o ponto de quebra do flex dependia da largura dos números e o
+   cabeçalho mudava de cara a cada troca de elenco. */
+.scoreboard {
+  display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+  order: 2; flex-basis: 100%; justify-content: flex-end;
+}
 /* ações rápidas do cabeçalho: avisos de gol e login da comissão */
-.hd-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.hd-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; order: 1; margin-left: auto; }
 .hd-btn {
   display: inline-flex; align-items: center; gap: 6px;
   background: rgba(0, 0, 0, .18); border: 1px solid var(--linha); color: var(--verde-300);
@@ -80,8 +86,10 @@ code { background: rgba(0, 0, 0, .25); padding: 1px 5px; border-radius: 5px; fon
 .hd-btn:hover { color: var(--creme); }
 .hd-btn.on { background: var(--creme); color: var(--verde-800); border-color: var(--creme); }
 .hd-btn:disabled { opacity: .55; }
-.aprov { text-align: right; }
-.aprov .n { font-size: 38px; line-height: .9; color: var(--creme-3); font-weight: 700; }
+/* largura reservada: "0%" e "100%" ocupam o mesmo espaço — trocar de elenco
+   não desloca o placar do cabeçalho */
+.aprov { text-align: right; min-width: 96px; }
+.aprov .n { font-size: 38px; line-height: .9; color: var(--creme-3); font-weight: 700; font-variant-numeric: tabular-nums; }
 .aprov .l {
   font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
   color: var(--verde-300); font-weight: 600; margin-top: 4px;
@@ -241,13 +249,14 @@ code { background: rgba(0, 0, 0, .25); padding: 1px 5px; border-radius: 5px; fon
   display: grid; place-items: center; font-size: 9px; font-weight: 700; color: #08240f;
 }
 .dot.v { background: var(--v); } .dot.e { background: var(--e); } .dot.d { background: var(--d); }
-.dot.empty { background: var(--linha); }
+/* casa vazia da forma — "vaga" para não colidir com .empty (página vazia) */
+.dot.vaga { background: var(--linha); }
 .kpis { display: flex; gap: 8px; flex-wrap: wrap; }
 .kpi {
   background: rgba(0, 0, 0, .16); border: 1px solid var(--linha); border-radius: 10px;
   padding: 7px 11px; text-align: center; min-width: 46px;
 }
-.kpi .n { font-size: 19px; color: var(--creme-3); line-height: 1; }
+.kpi .n { font-size: 19px; color: var(--creme-3); line-height: 1; font-variant-numeric: tabular-nums; }
 .kpi .l {
   font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase;
   color: var(--verde-300); font-weight: 600; margin-top: 3px;
@@ -651,7 +660,7 @@ button.chip:hover { border-color: var(--verde-500); }
   .kpi .n { font-size: 15px; }
   .kpi .l { font-size: 8px; letter-spacing: 1px; margin-top: 2px; }
   .form-dots { display: none; }
-  .aprov { flex-shrink: 0; }
+  .aprov { flex-shrink: 0; min-width: 62px; }
   .aprov .n { font-size: 24px; }
   .aprov .l { font-size: 8px; letter-spacing: 1px; margin-top: 2px; }
   .squad-row { padding-bottom: 10px; }

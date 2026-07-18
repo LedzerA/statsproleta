@@ -32,13 +32,16 @@ export function EmptyState({ icon = "⚽", title, sub, action }: {
 }
 
 export function FormDots({ form, label }: { form: Result[]; label?: string }) {
-  const dots = form.length ? form : null;
+  // sempre 5 casas (vazias viram bolinha neutra) — o placar do cabeçalho
+  // mantém a mesma largura em qualquer elenco, com 0 ou 50 jogos
+  const slots: (Result | null)[] = [...form.slice(-5)];
+  while (slots.length < 5) slots.push(null);
   return (
     <div className="form-dots">
       {label && <span className="lbl">{label}</span>}
-      {dots
-        ? dots.map((r, i) => <span key={i} className={`dot ${r.toLowerCase()}`}>{r}</span>)
-        : <span className="dot empty" />}
+      {slots.map((r, i) => r
+        ? <span key={i} className={`dot ${r.toLowerCase()}`}>{r}</span>
+        : <span key={i} className="dot vaga" />)}
     </div>
   );
 }
