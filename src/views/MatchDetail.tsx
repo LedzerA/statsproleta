@@ -70,12 +70,13 @@ function LiveClock({ m }: { m: Match }) {
 export default function MatchDetail({ id, editar }: { id: string; editar?: boolean }) {
   const {
     findMatch, roster, squads, squadId, setSquadId, athleteName, isAdmin, schemaLegacy,
-    events, loadEvents, addEvent, updateEvent, deleteEvent, undoLastEvent,
+    events, loadEvents, addEvent, addPastEvent, updateEvent, deleteEvent, undoLastEvent,
     toggleClock, resetToScheduled, deleteMatch, upsertMatch, toast, ask,
   } = useStore();
   const [editing, setEditing] = useState(false);
   const [goalPicker, setGoalPicker] = useState(false);
   const [subPicker, setSubPicker] = useState(false);
+  const [addLance, setAddLance] = useState(false);
   const [editEv, setEditEv] = useState<MatchEvent | null>(null);
   const [busy, setBusy] = useState(false);
   const [art, setArt] = useState<{ label: string; url: string; file: string }[] | null>(null);
@@ -128,6 +129,8 @@ export default function MatchDetail({ id, editar }: { id: string; editar?: boole
   }
 
   const live = isLive(m.status);
+  // partida encerrada aceita lance esquecido (sub, gol, pênalti) sem notificar
+  const canAddLance = isAdmin && m.status === "encerrada";
   // último lance registrado — desfazível quando é gol, pênalti ou substituição
   const lastEv = evList.slice()
     .sort((a, b) => (a.created_at < b.created_at ? -1 : a.created_at > b.created_at ? 1 : 0))
@@ -393,9 +396,14 @@ export default function MatchDetail({ id, editar }: { id: string; editar?: boole
         </div>
       )}
 
-      {(live || timeline.length > 0) && (
+      {(live || timeline.length > 0 || canAddLance) && (
         <div className="panel">
-          <div className="panel-head"><h3>Lances da partida</h3></div>
+          <div className="panel-head">
+            <h3>Lances da partida</h3>
+            {canAddLance && (
+              <button className="btn ghost-light sm" onClick={() => setAddLance(true)}>＋ Adicionar lance</button>
+            )}
+          </div>
           {timeline.length === 0 ? (
             <div className="ga-empty" style={{ padding: "14px 18px" }}>Nenhum lance registrado ainda.</div>
           ) : (
@@ -532,7 +540,7 @@ export default function MatchDetail({ id, editar }: { id: string; editar?: boole
         </div>
       )}
 
-      {editing && <MatchForm match={m} onClose={() => setEditing(false)} />}
+      {editing && <MatchForm match={m} onClose={() => setEditing(false)} onDeleted={() => navigate("#/partidas")} />}
       {goalPicker && (
         <GoalPicker
           match={m}
@@ -581,6 +589,13 @@ export default function MatchDetail({ id, editar }: { id: string; editar?: boole
               : "No celular, “Compartilhar” abre direto o WhatsApp / Instagram. Se o aparelho não suportar, o botão baixa o PNG."}
           </p>
         </Modal>
+      )}
+      {addLance && (
+        <AddEventModal
+          match={m}
+          onClose={() => setAddLance(false)}
+          onSave={(type, opts) => { setAddLance(false); addPastEvent(m, type, opts); }}
+        />
       )}
       {editEv && (
         <EventEditModal
@@ -748,6 +763,134 @@ function EventEditModal({ ev, match, onClose, onSave, onDelete }: {
         {isGoal
           ? "Trocar autor ou assistência atualiza os gols e assistências da partida (e as estatísticas) — o placar não muda."
           : "Só o tempo do lance é ajustado — o placar não muda."}
+      </p>
+    </Modal>
+  );
+}
+
+/** Adiciona um lance esquecido a uma partida encerrada: substituição, gol ou
+    pênalti, com período e minuto. Gols mexem no placar; ninguém é notificado. */
+function AddEventModal({ match, onClose, onSave }: {
+  match: Match;
+  onClose: () => void;
+  onSave: (
+    type: EventType,
+    opts: { period: number; minute: number | null; scorerId?: string; assistId?: string; inId?: string; outId?: string }
+  ) => void;
+}) {
+  const { roster } = useStore();
+  const [type, setType] = useState<EventType>("sub");
+  const [period, setPeriod] = useState<number>(1);
+  const [minute, setMinute] = useState<string>("");
+  const [scorer, setScorer] = useState<string | undefined>();
+  const [assist, setAssist] = useState<string | undefined>();
+  const [inId, setInId] = useState<string | undefined>();
+  const [outId, setOutId] = useState<string | undefined>();
+  const [showAll, setShowAll] = useState(match.lineup.length === 0);
+  const byPos = (a: { id: string; name: string }, b: { id: string; name: string }) =>
+    posRank(match.positions?.[a.id]) - posRank(match.positions?.[b.id]) ||
+    a.name.localeCompare(b.name, "pt");
+  const related = roster.filter((a) => match.lineup.includes(a.id)).sort(byPos);
+  const options = (showAll ? roster.slice().sort(byPos) : related);
+  const TYPES: { t: EventType; label: string }[] = [
+    { t: "sub", label: "🔁 Substituição" },
+    { t: "gol_pro", label: "⚽ Gol do Proleta" },
+    { t: "gol_contra", label: `Gol do ${match.opponent}` },
+    { t: "penalti_pro", label: "🎯 Pênalti pró" },
+    { t: "penalti_contra", label: "⚠️ Pênalti contra" },
+  ];
+  const NOTES: Record<string, string> = {
+    sub: "Quem entra passa a contar como relacionado na partida.",
+    gol_pro: "O gol entra no placar, no resumo e nas estatísticas.",
+    gol_contra: "O gol entra no placar.",
+    penalti_pro: "O lance só entra na linha do tempo — o placar não muda.",
+    penalti_contra: "O lance só entra na linha do tempo — o placar não muda.",
+  };
+  const incomplete = type === "sub" && (!inId || !outId);
+  return (
+    <Modal
+      title="＋ Adicionar lance"
+      onClose={onClose}
+      footer={
+        <>
+          <button className="btn ghost" style={{ flex: 1 }} onClick={onClose}>Cancelar</button>
+          <button className="btn primary" style={{ flex: 2 }} disabled={incomplete}
+            onClick={() => onSave(type, {
+              period,
+              minute: minute === "" ? null : Math.max(0, parseInt(minute) || 0),
+              ...(type === "gol_pro" ? { scorerId: scorer, assistId: assist } : {}),
+              ...(type === "sub" ? { inId, outId } : {}),
+            })}>
+            Adicionar
+          </button>
+        </>
+      }
+    >
+      <div className="subhead"><div className="t">Qual lance?</div></div>
+      <div className="chips">
+        {TYPES.map(({ t, label }) => (
+          <button key={t} className={`chip ${type === t ? "on" : ""}`} onClick={() => setType(t)}>{label}</button>
+        ))}
+      </div>
+      <div className="subhead"><div className="t">Período</div></div>
+      <div className="chips">
+        <button className={`chip ${period === 1 ? "on" : ""}`} onClick={() => setPeriod(1)}>1º tempo</button>
+        <button className={`chip ${period === 2 ? "on" : ""}`} onClick={() => setPeriod(2)}>2º tempo</button>
+      </div>
+      <div className="subhead"><div className="t">Minuto <span className="muted">(opcional)</span></div></div>
+      <input
+        type="number" className="fb-num" min={0} placeholder="min"
+        value={minute}
+        onChange={(e) => setMinute(e.target.value)}
+        style={{ width: 120 }}
+      />
+      {type === "gol_pro" && (
+        <>
+          <div className="subhead"><div className="t">Quem marcou?</div></div>
+          <div className="chips">
+            {options.map((a) => (
+              <button key={a.id} className={`chip ${scorer === a.id ? "on" : ""}`}
+                onClick={() => setScorer(scorer === a.id ? undefined : a.id)}>{a.name}</button>
+            ))}
+          </div>
+          <div className="subhead"><div className="t">Assistência (opcional)</div></div>
+          <div className="chips">
+            {options.filter((a) => a.id !== scorer).map((a) => (
+              <button key={a.id} className={`chip ${assist === a.id ? "on" : ""}`}
+                onClick={() => setAssist(assist === a.id ? undefined : a.id)}>{a.name}</button>
+            ))}
+          </div>
+        </>
+      )}
+      {type === "sub" && (
+        <>
+          <div className="subhead"><div className="t">Quem saiu?</div></div>
+          <div className="chips">
+            {related.length === 0
+              ? <span className="muted" style={{ fontSize: 13 }}>Nenhum relacionado na partida.</span>
+              : related.filter((a) => a.id !== inId).map((a) => (
+                  <button key={a.id} className={`chip ${outId === a.id ? "on" : ""}`}
+                    onClick={() => setOutId(outId === a.id ? undefined : a.id)}>{a.name}</button>
+                ))}
+          </div>
+          <div className="subhead"><div className="t">Quem entrou?</div></div>
+          <div className="chips">
+            {options.filter((a) => a.id !== outId).map((a) => (
+              <button key={a.id} className={`chip ${inId === a.id ? "on" : ""}`}
+                onClick={() => setInId(inId === a.id ? undefined : a.id)}>{a.name}</button>
+            ))}
+          </div>
+        </>
+      )}
+      {!showAll && (type === "gol_pro" || type === "sub") && (
+        <p style={{ marginTop: 14 }}>
+          <button className="linklike" onClick={() => setShowAll(true)}>
+            Não está na lista? Mostrar o elenco completo
+          </button>
+        </p>
+      )}
+      <p className="muted" style={{ fontSize: 13, marginTop: 12 }}>
+        {NOTES[type]} Lances adicionados depois do fim não enviam notificação.
       </p>
     </Modal>
   );

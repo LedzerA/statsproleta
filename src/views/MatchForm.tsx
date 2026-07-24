@@ -3,7 +3,7 @@ import { useStore } from "../state/store";
 import { sb } from "../lib/supabase";
 import { setNavGuard } from "../lib/router";
 import { Modal, Stepper } from "../components/ui";
-import { todayISO, uid } from "../lib/format";
+import { fmtDate, isLive, todayISO, uid } from "../lib/format";
 import { POSITIONS, POS_GROUPS, athletePositions, lastPosition, posRank } from "../lib/positions";
 import {
   FORMATIONS, getFormation, autoSlots, bestFreeSlot, inferFormation, remapPhase, reconcileSem,
@@ -15,6 +15,8 @@ interface Props {
   match?: Match | null;       // editar existente
   schedule?: boolean;         // agendar jogo futuro (sem placar)
   onClose: () => void;
+  /** chamado após excluir a partida pelo formulário (ex.: voltar à lista) */
+  onDeleted?: () => void;
 }
 
 type PhaseKey = "com" | "sem" | "bp";
@@ -60,7 +62,7 @@ interface DraftState {
   complete: boolean;
 }
 
-export default function MatchForm({ match, schedule, onClose }: Props) {
+export default function MatchForm({ match, schedule, onClose, onDeleted }: Props) {
   const { allMatches, session } = useStore();
   /* A partida-alvo é congelada na abertura ("base"): se a rota mudar com o
      modal aberto, o salvar continua mirando a partida original — nunca a da
@@ -138,6 +140,7 @@ export default function MatchForm({ match, schedule, onClose }: Props) {
       match={base}
       schedule={schedule}
       onClose={onClose}
+      onDeleted={onDeleted}
       dirtyRef={dirtyRef}
       draftRef={draftRef}
       others={others}
@@ -167,11 +170,11 @@ interface InnerProps extends Props {
 }
 
 function MatchFormInner({
-  match, schedule, onClose, dirtyRef, draftRef, others, remote, sendState, sendSaved, onAdopt,
+  match, schedule, onClose, onDeleted, dirtyRef, draftRef, others, remote, sendState, sendSaved, onAdopt,
 }: InnerProps) {
   const {
     athletes, allMatches, squadId, schemaLegacy, schemaTactics, schemaLogistics,
-    upsertMatch, upsertMatchGuarded, addAthlete, toast, ask,
+    upsertMatch, upsertMatchGuarded, deleteMatch, addAthlete, toast, ask,
   } = useStore();
   const isEdit = !!match;
   // elenco e histórico do ELENCO DA PARTIDA, não do selecionado no cabeçalho —
@@ -580,6 +583,20 @@ function MatchFormInner({
     if (a) { setLineup((old) => [...old, a.id]); setBusca(""); }
   }
 
+  /** Exclui a partida aberta no formulário (lances vão junto — cascade). */
+  async function handleDelete() {
+    if (!match) return;
+    const quando = match.status === "agendada" ? "agendada para" : "de";
+    if (!(await ask(
+      `Excluir a partida contra ${match.opponent}, ${quando} ${fmtDate(match.date)}?\n\nEssa ação não pode ser desfeita.`,
+      { danger: true, okLabel: "Excluir" }
+    ))) return;
+    setNavGuard(null); // exclusão confirmada dispensa o aviso de alterações não salvas
+    await deleteMatch(match.id);
+    onClose();
+    onDeleted?.();
+  }
+
   async function save() {
     if (!opponent.trim()) { toast("Informe o adversário"); return; }
     const comF = getFormation(tactics.com.formation);
@@ -671,6 +688,9 @@ function MatchFormInner({
       onClose={requestClose}
       footer={
         <>
+          {isEdit && !isLive(match!.status) && (
+            <button className="btn danger" style={{ flex: 1 }} onClick={handleDelete}>Excluir</button>
+          )}
           <button className="btn ghost" style={{ flex: 1 }} onClick={requestClose}>Cancelar</button>
           <button className="btn primary" style={{ flex: 2 }} onClick={save}>
             {isEdit ? "Salvar alterações" : "Salvar"}
