@@ -44,10 +44,14 @@ function normPhase(p: any): TacticsPhase | null {
         Array.isArray(c) && c.length === 2 && typeof c[0] === "number" && typeof c[1] === "number"
           ? ([c[0], c[1]] as [number, number]) : null)
     : null;
+  const roles = Array.isArray(p.roles)
+    ? p.roles.map((x: any) => (typeof x === "string" && x ? x : null))
+    : null;
   return {
     formation: p.formation,
     slots: p.slots.map((x: any) => (typeof x === "string" && x ? x : null)),
     coords,
+    roles,
   };
 }
 
@@ -81,6 +85,7 @@ function remapTactics(t: any, idMap: Map<string, string>): Tactics | null {
     formation: p.formation,
     slots: p.slots.map((id) => (id && idMap.get(id)) || null),
     coords: p.coords ?? null, // ajustes de vaga não dependem de id
+    roles: p.roles ?? null, // funções por vaga também não
   });
   const cb: SetPieceTakers = {};
   for (const k of COBRANCAS) {

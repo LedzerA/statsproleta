@@ -48,6 +48,10 @@ export interface TacticsPhase {
       campo (x 0→100 esq→dir, y 0→100 fundo→ataque). null/ausente = posição
       padrão da formação. Não muda a posição (rótulo) nem a formação. */
   coords?: ([number, number] | null)[] | null;
+  /** Função por vaga SÓ nesta fase (ajuste pontual); null = rótulo da vaga.
+      A fase com bola na saída não usa isto — nela vale a posição da partida
+      (positions), que alimenta as estatísticas. */
+  roles?: (string | null)[] | null;
 }
 
 /** Cobradores de bola parada (atletaId por tipo de cobrança). */

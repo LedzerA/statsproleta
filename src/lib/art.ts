@@ -521,8 +521,10 @@ export async function renderTacticsArt(
     ctx.lineWidth = 3; ctx.strokeStyle = "#0f2019"; ctx.stroke();
     ctx.fillStyle = "#14532d";
     ctx.font = inter(700, 16);
-    // posição ajustada pontualmente vale mais que o rótulo da vaga
-    const lbl = (m.positions?.[id] || s.pos).split("/")[0].trim().toUpperCase() || s.pos;
+    // função da fase vale mais que o rótulo da vaga: na saída é a posição da
+    // partida; nas outras fases, a função definida naquela fase
+    const ajuste = phaseKey === "com" ? m.positions?.[id] : phase.roles?.[i];
+    const lbl = (ajuste || s.pos).split("/")[0].trim().toUpperCase() || s.pos;
     ctx.fillText(lbl, cx, cy + 1);
     ocupadas.push({ id, cx, cy });
   });

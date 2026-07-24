@@ -249,6 +249,7 @@ function MatchFormInner({
             return id && inLineup.has(id) ? id : null;
           }),
           coords: p.coords ? f.slots.map((_, i) => p.coords![i] || null) : null,
+          roles: p.roles ? f.slots.map((_, i) => p.roles![i] || null) : null,
         };
       };
       const com = fit(match.tactics.com);
@@ -273,11 +274,12 @@ function MatchFormInner({
   const [semManual, setSemManual] = useState<boolean>(() => {
     const t = match?.tactics;
     if (!t) return false;
-    // arrasto no campinho também é personalização — sem isso os pontos da
-    // fase sem bola eram descartados na próxima edição
+    // arrasto no campinho e função por vaga também são personalização — sem
+    // isso os ajustes da fase sem bola eram descartados na próxima edição
     return t.com.formation !== t.sem.formation ||
       t.com.slots.join() !== t.sem.slots.join() ||
-      JSON.stringify(t.com.coords ?? null) !== JSON.stringify(t.sem.coords ?? null);
+      JSON.stringify(t.com.coords ?? null) !== JSON.stringify(t.sem.coords ?? null) ||
+      (t.sem.roles ?? []).some(Boolean);
   });
   const [bpManual, setBpManual] = useState<boolean>(() => !!match?.tactics?.bp);
   const [ofeManual, setOfeManual] = useState<boolean>(() => !!match?.tactics?.ofe);
@@ -509,10 +511,10 @@ function MatchFormInner({
   function clearLineup() {
     setLineup([]);
     setTactics((t) => ({
-      com: { ...t.com, slots: t.com.slots.map(() => null), coords: null },
-      ofe: { ...t.ofe, slots: t.ofe.slots.map(() => null), coords: null },
-      sem: { ...t.sem, slots: t.sem.slots.map(() => null), coords: null },
-      bp: { ...t.bp, slots: t.bp.slots.map(() => null), coords: null },
+      com: { ...t.com, slots: t.com.slots.map(() => null), coords: null, roles: null },
+      ofe: { ...t.ofe, slots: t.ofe.slots.map(() => null), coords: null, roles: null },
+      sem: { ...t.sem, slots: t.sem.slots.map(() => null), coords: null, roles: null },
+      bp: { ...t.bp, slots: t.bp.slots.map(() => null), coords: null, roles: null },
     }));
     setSemManual(false);
     setBpManual(false);
@@ -571,6 +573,19 @@ function MatchFormInner({
       markManual(ph);
       setTactics(patchPhase(ph, { ...base, slots }));
     }
+  }
+
+  /** Função do jogador SÓ nesta fase (fase ofensiva / sem bola): rótulo por
+      vaga da própria fase — não muda a posição salva na partida. Escolher o
+      rótulo da vaga volta a herdar dele. */
+  function setPhaseRole(ph: PhaseKey, idx: number, slotPos: string, v: string) {
+    const base = tactics[ph];
+    const roles = base.roles
+      ? [...base.roles]
+      : getFormation(base.formation).slots.map(() => null as string | null);
+    roles[idx] = v && v !== slotPos ? v : null;
+    markManual(ph);
+    setTactics(patchPhase(ph, { ...base, roles: roles.some(Boolean) ? roles : null }));
   }
 
   /** Ajuste pontual da posição de um titular; escolher o rótulo da vaga
@@ -637,13 +652,15 @@ function MatchFormInner({
     const bpSlots = tactics.bp.slots.map((id) => (id && st.includes(id) ? id : null));
     const fitCoords = (p: TacticsPhase, f: ReturnType<typeof getFormation>) =>
       p.coords && p.coords.some(Boolean) ? f.slots.map((_, i) => p.coords![i] || null) : null;
+    const fitRoles = (p: TacticsPhase, f: ReturnType<typeof getFormation>) =>
+      p.roles && p.roles.some(Boolean) ? f.slots.map((_, i) => p.roles![i] || null) : null;
     const cb: SetPieceTakers = {};
     for (const { k } of COBRANCAS) {
       const v = cobradores[k];
       if (v && lineup.includes(v)) cb[k] = v;
     }
     const salvaBp = bpManual || !!tactics.bp.coords?.some(Boolean);
-    const salvaOfe = ofeManual || !!tactics.ofe.coords?.some(Boolean);
+    const salvaOfe = ofeManual || !!tactics.ofe.coords?.some(Boolean) || !!tactics.ofe.roles?.some(Boolean);
     // posição por relacionado; titular herda o rótulo da vaga (com bola)
     const cleanPositions: Record<string, string> = {};
     for (const id of lineup) {
@@ -684,9 +701,13 @@ function MatchFormInner({
       tactics: st.length
         ? {
             com: { formation: comF.name, slots: comSlots, coords: fitCoords(tactics.com, comF) },
-            ofe: salvaOfe ? { formation: ofeF.name, slots: ofeSlots, coords: fitCoords(tactics.ofe, ofeF) } : null,
-            sem: { formation: semF.name, slots: semSlots, coords: fitCoords(tactics.sem, semF) },
-            bp: salvaBp ? { formation: bpF.name, slots: bpSlots, coords: fitCoords(tactics.bp, bpF) } : null,
+            ofe: salvaOfe
+              ? { formation: ofeF.name, slots: ofeSlots, coords: fitCoords(tactics.ofe, ofeF), roles: fitRoles(tactics.ofe, ofeF) }
+              : null,
+            sem: { formation: semF.name, slots: semSlots, coords: fitCoords(tactics.sem, semF), roles: fitRoles(tactics.sem, semF) },
+            bp: salvaBp
+              ? { formation: bpF.name, slots: bpSlots, coords: fitCoords(tactics.bp, bpF), roles: fitRoles(tactics.bp, bpF) }
+              : null,
             cobradores: Object.keys(cb).length ? cb : null,
           }
         : null,
@@ -973,7 +994,10 @@ function MatchFormInner({
             formation={activeF}
             slots={active.slots}
             coords={active.coords}
-            labels={active.slots.map((id) => (id && posManual.has(id) ? positions[id] || null : null))}
+            labels={active.slots.map((id, i) =>
+              phase === "com"
+                ? (id && posManual.has(id) ? positions[id] || null : null)
+                : active.roles?.[i] || null)}
             nameOf={nameOf}
             onMove={moveSlot}
           />
@@ -1004,18 +1028,26 @@ function MatchFormInner({
           <div className="st-list">
             {activeF.slots.map((s, i) => {
               const occ = active.slots[i];
-              // posição editável nas fases com/sem bola (bola parada só espelha)
+              // posição/função editável fora da bola parada (que só espelha);
+              // na saída o ajuste é a posição da partida (estatísticas), nas
+              // outras fases é uma função SÓ daquela fase
               const editPos = phase !== "bp" && !!occ;
-              const cur = occ && posManual.has(occ) ? positions[occ] || s.pos : s.pos;
+              const cur = phase === "com"
+                ? (occ && posManual.has(occ) ? positions[occ] || s.pos : s.pos)
+                : (active.roles?.[i] || s.pos);
               return (
                 <div className="st-row slot" key={`${active.formation}-${i}`}>
                   {editPos ? (
                     <select
                       className="slot-pos-sel num"
                       value={cur}
-                      onChange={(e) => setStarterPos(occ!, s.pos, e.target.value)}
-                      aria-label="Posição do titular na partida"
-                      title="Ajusta a posição salva deste titular (a vaga da formação não muda)"
+                      onChange={(e) => phase === "com"
+                        ? setStarterPos(occ!, s.pos, e.target.value)
+                        : setPhaseRole(phase, i, s.pos, e.target.value)}
+                      aria-label={phase === "com" ? "Posição do titular na partida" : "Função do jogador nesta fase"}
+                      title={phase === "com"
+                        ? "Ajusta a posição salva deste titular (a vaga da formação não muda)"
+                        : "Função deste jogador só nesta fase — não muda a posição salva na partida"}
                     >
                       {cur && !(POSITIONS as readonly string[]).includes(cur) && (
                         <option value={cur}>{cur}</option>

@@ -492,7 +492,12 @@ export default function MatchDetail({ id, editar }: { id: string; editar?: boole
                   formation={getFormation(tacCur.formation)}
                   slots={tacCur.slots}
                   coords={tacCur.coords}
-                  labels={tacCur.slots.map((id) => (id && m.positions?.[id]) || null)}
+                  labels={tacCur.slots.map((id, i) =>
+                    // cada fase tem as próprias funções: na saída vale a posição
+                    // da partida; nas outras, a função definida naquela fase
+                    tacPhase === "com"
+                      ? (id && m.positions?.[id]) || null
+                      : tacCur.roles?.[i] || null)}
                   nameOf={athleteName}
                 />
                 {cobradores && (

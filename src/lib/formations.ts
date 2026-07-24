@@ -213,11 +213,14 @@ export function inferFormation(poss: (string | undefined | null)[]): Formation {
     fundo e os rótulos das vagas mudam. */
 export function remapPhase(p: TacticsPhase, formationName: string): TacticsPhase {
   const to = getFormation(formationName);
-  if (to.name === p.formation) return { formation: to.name, slots: [...p.slots], coords: p.coords ?? null };
+  if (to.name === p.formation) {
+    return { formation: to.name, slots: [...p.slots], coords: p.coords ?? null, roles: p.roles ?? null };
+  }
   return {
     formation: to.name,
     slots: to.slots.map((_, i) => p.slots[i] ?? null),
     coords: p.coords ? to.slots.map((_, i) => p.coords![i] ?? null) : null,
+    roles: p.roles ? to.slots.map((_, i) => p.roles![i] ?? null) : null,
   };
 }
 
@@ -238,5 +241,5 @@ export function reconcileSem(sem: TacticsPhase, com: TacticsPhase): TacticsPhase
     const i = bestFreeSlot(semF, slots, pos);
     if (i >= 0) slots[i] = id;
   }
-  return { formation: semF.name, slots, coords: sem.coords ?? null };
+  return { formation: semF.name, slots, coords: sem.coords ?? null, roles: sem.roles ?? null };
 }
