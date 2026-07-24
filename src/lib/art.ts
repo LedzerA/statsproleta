@@ -407,17 +407,19 @@ function chipRows(
   return y;
 }
 
-const PHASE_ART: Record<"com" | "sem" | "bp", { label: string; bg: string; fg: string }> = {
-  com: { label: "COM BOLA", bg: "#2fbf6b", fg: "#08240f" },
+const PHASE_ART: Record<"com" | "ofe" | "sem" | "bp", { label: string; bg: string; fg: string }> = {
+  com: { label: "COM BOLA NA SAÍDA", bg: "#2fbf6b", fg: "#08240f" },
+  ofe: { label: "COM BOLA NA FASE OFENSIVA", bg: "#5fd48f", fg: "#08240f" },
   sem: { label: "SEM BOLA", bg: "#e6b94b", fg: "#3d2f05" },
   bp: { label: "BOLA PARADA", bg: CREME, fg: "#0b4529" },
 };
 
-/** Arte do campinho tático de uma fase (com/sem bola/bola parada): formação,
-    jogadores nas vagas (com os ajustes arrastados no app) e o confronto. */
+/** Arte do campinho tático de uma fase (saída / fase ofensiva / sem bola /
+    bola parada): formação, jogadores nas vagas (com os ajustes arrastados
+    no app) e o confronto. */
 export async function renderTacticsArt(
   m: Match,
-  phaseKey: "com" | "sem" | "bp",
+  phaseKey: "com" | "ofe" | "sem" | "bp",
   nameOf: (id: string) => string,
   squadName: string | null
 ): Promise<HTMLCanvasElement> {

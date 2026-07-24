@@ -67,6 +67,7 @@ function normTactics(t: any): Tactics | null {
   return {
     com,
     sem: sem || { formation: com.formation, slots: [...com.slots], coords: null },
+    ofe: normPhase(t?.ofe),
     bp: normPhase(t?.bp),
     cobradores: normCobradores(t?.cobradores),
   };
@@ -90,6 +91,7 @@ function remapTactics(t: any, idMap: Map<string, string>): Tactics | null {
   return {
     com: remap(base.com),
     sem: remap(base.sem),
+    ofe: base.ofe ? remap(base.ofe) : null,
     bp: base.bp ? remap(base.bp) : null,
     cobradores: Object.keys(cb).length ? cb : null,
   };

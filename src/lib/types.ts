@@ -58,11 +58,13 @@ export interface SetPieceTakers {
   escanteio_d?: string | null;
 }
 
-/** Escalação tática com bola / sem bola — mesmos 11, distribuição diferente.
-    bp (bola parada) e cobradores são opcionais, só existem quando definidos. */
+/** Escalação tática por fase — mesmos 11, distribuição diferente.
+    com = com bola na saída; ofe (com bola na fase ofensiva), bp (bola parada)
+    e cobradores são opcionais, só existem quando personalizados. */
 export interface Tactics {
   com: TacticsPhase;
   sem: TacticsPhase;
+  ofe?: TacticsPhase | null;
   bp?: TacticsPhase | null;
   cobradores?: SetPieceTakers | null;
 }

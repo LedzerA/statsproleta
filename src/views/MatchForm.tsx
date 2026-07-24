@@ -19,12 +19,14 @@ interface Props {
   onDeleted?: () => void;
 }
 
-type PhaseKey = "com" | "sem" | "bp";
+type PhaseKey = "com" | "ofe" | "sem" | "bp";
 
-/* no formulário a fase bola parada sempre existe (espelhando a com bola);
-   ela só é SALVA quando o admin personaliza vagas, pontos ou formação */
+/* no formulário as fases opcionais (fase ofensiva e bola parada) sempre
+   existem, espelhando a com bola na saída; elas só são SALVAS quando o
+   admin personaliza vagas, pontos ou formação */
 interface FormTactics {
   com: TacticsPhase;
+  ofe: TacticsPhase;
   sem: TacticsPhase;
   bp: TacticsPhase;
 }
@@ -55,6 +57,7 @@ interface DraftState {
   tactics: FormTactics;
   semManual: boolean;
   bpManual: boolean;
+  ofeManual: boolean;
   posManual: string[];
   cobradores: SetPieceTakers;
   scorers: Record<string, number>;
@@ -250,6 +253,7 @@ function MatchFormInner({
       const com = fit(match.tactics.com);
       return {
         com,
+        ofe: match.tactics.ofe ? fit(match.tactics.ofe) : remapPhase(com, com.formation),
         sem: fit(match.tactics.sem),
         bp: match.tactics.bp ? fit(match.tactics.bp) : remapPhase(com, com.formation),
       };
@@ -258,7 +262,7 @@ function MatchFormInner({
     const f = inferFormation(st.map((x) => x.pos));
     const slots = autoSlots(f, st);
     const espelho = (): TacticsPhase => ({ formation: f.name, slots: [...slots], coords: null });
-    return { com: { formation: f.name, slots, coords: null }, sem: espelho(), bp: espelho() };
+    return { com: { formation: f.name, slots, coords: null }, ofe: espelho(), sem: espelho(), bp: espelho() };
   });
   const [phase, setPhase] = useState<PhaseKey>("com");
   // sem bola e bola parada espelham a com bola até o usuário mexer nelas
@@ -272,6 +276,7 @@ function MatchFormInner({
       JSON.stringify(t.com.coords ?? null) !== JSON.stringify(t.sem.coords ?? null);
   });
   const [bpManual, setBpManual] = useState<boolean>(() => !!match?.tactics?.bp);
+  const [ofeManual, setOfeManual] = useState<boolean>(() => !!match?.tactics?.ofe);
   // titulares cuja posição foi ajustada à mão (ex.: ZC numa vaga ZG) — para
   // eles a posição salva NÃO é sobrescrita pelo rótulo da vaga
   const [posManual, setPosManual] = useState<Set<string>>(() => {
@@ -301,7 +306,7 @@ function MatchFormInner({
      espelhamento ao vivo entre os formulários abertos. */
   const draft = (): DraftState => ({
     date, opponent, venue, kickoff, kit, meetTime, ballHolder, kitHolder, gf, ga,
-    lineup, positions, tactics, semManual, bpManual, posManual: [...posManual],
+    lineup, positions, tactics, semManual, bpManual, ofeManual, posManual: [...posManual],
     cobradores, scorers, assists, complete,
   });
   draftRef.current = draft;
@@ -339,7 +344,7 @@ function MatchFormInner({
     setKit(d.kit); setMeetTime(d.meetTime); setBallHolder(d.ballHolder); setKitHolder(d.kitHolder);
     setGf(d.gf); setGa(d.ga);
     setLineup(d.lineup); setPositions(d.positions); setTactics(d.tactics);
-    setSemManual(d.semManual); setBpManual(d.bpManual); setPosManual(new Set(d.posManual));
+    setSemManual(d.semManual); setBpManual(d.bpManual); setOfeManual(d.ofeManual); setPosManual(new Set(d.posManual));
     setCobradores(d.cobradores); setScorers(d.scorers); setAssists(d.assists);
     setComplete(d.complete);
   }, [remote?.seq]);
@@ -452,11 +457,12 @@ function MatchFormInner({
       a.name.localeCompare(b.name, "pt"));
   }, [roster, lineup, scorers, assists, positions, suggested]);
 
-  /* mantém sem bola e bola parada coerentes após mudanças na com bola;
-     bola parada não tem formação própria — segue a da com bola */
+  /* mantém as outras fases coerentes após mudanças na com bola na saída;
+     bola parada não tem formação própria — segue a da saída */
   function syncFrom(com: TacticsPhase): FormTactics {
     return {
       com,
+      ofe: ofeManual ? reconcileSem(tactics.ofe, com) : remapPhase(com, com.formation),
       sem: semManual ? reconcileSem(tactics.sem, com) : remapPhase(com, tactics.sem.formation),
       bp: bpManual ? reconcileSem(tactics.bp, com) : remapPhase(com, com.formation),
     };
@@ -464,12 +470,14 @@ function MatchFormInner({
 
   function patchPhase(ph: PhaseKey, next: TacticsPhase): FormTactics {
     return ph === "com" ? { ...tactics, com: next }
+      : ph === "ofe" ? { ...tactics, ofe: next }
       : ph === "sem" ? { ...tactics, sem: next }
       : { ...tactics, bp: next };
   }
 
   function markManual(ph: PhaseKey) {
-    if (ph === "sem") setSemManual(true);
+    if (ph === "ofe") setOfeManual(true);
+    else if (ph === "sem") setSemManual(true);
     else if (ph === "bp") setBpManual(true);
   }
 
@@ -498,11 +506,13 @@ function MatchFormInner({
     setLineup([]);
     setTactics((t) => ({
       com: { ...t.com, slots: t.com.slots.map(() => null), coords: null },
+      ofe: { ...t.ofe, slots: t.ofe.slots.map(() => null), coords: null },
       sem: { ...t.sem, slots: t.sem.slots.map(() => null), coords: null },
       bp: { ...t.bp, slots: t.bp.slots.map(() => null), coords: null },
     }));
     setSemManual(false);
     setBpManual(false);
+    setOfeManual(false);
     setCobradores({});
   }
 
@@ -600,10 +610,12 @@ function MatchFormInner({
   async function save() {
     if (!opponent.trim()) { toast("Informe o adversário"); return; }
     const comF = getFormation(tactics.com.formation);
+    const ofeF = getFormation(tactics.ofe.formation);
     const semF = getFormation(tactics.sem.formation);
     const bpF = getFormation(tactics.bp.formation);
     const comSlots = tactics.com.slots.map((id) => (id && lineup.includes(id) ? id : null));
     const st = comSlots.filter((x): x is string => !!x);
+    const ofeSlots = tactics.ofe.slots.map((id) => (id && st.includes(id) ? id : null));
     const semSlots = tactics.sem.slots.map((id) => (id && st.includes(id) ? id : null));
     const bpSlots = tactics.bp.slots.map((id) => (id && st.includes(id) ? id : null));
     const fitCoords = (p: TacticsPhase, f: ReturnType<typeof getFormation>) =>
@@ -614,6 +626,7 @@ function MatchFormInner({
       if (v && lineup.includes(v)) cb[k] = v;
     }
     const salvaBp = bpManual || !!tactics.bp.coords?.some(Boolean);
+    const salvaOfe = ofeManual || !!tactics.ofe.coords?.some(Boolean);
     // posição por relacionado; titular herda o rótulo da vaga (com bola)
     const cleanPositions: Record<string, string> = {};
     for (const id of lineup) {
@@ -654,6 +667,7 @@ function MatchFormInner({
       tactics: st.length
         ? {
             com: { formation: comF.name, slots: comSlots, coords: fitCoords(tactics.com, comF) },
+            ofe: salvaOfe ? { formation: ofeF.name, slots: ofeSlots, coords: fitCoords(tactics.ofe, ofeF) } : null,
             sem: { formation: semF.name, slots: semSlots, coords: fitCoords(tactics.sem, semF) },
             bp: salvaBp ? { formation: bpF.name, slots: bpSlots, coords: fitCoords(tactics.bp, bpF) } : null,
             cobradores: Object.keys(cb).length ? cb : null,
@@ -889,7 +903,10 @@ function MatchFormInner({
           )}
           <div className="phase-tabs">
             <button type="button" className={`chip ${phase === "com" ? "on" : ""}`} onClick={() => setPhase("com")}>
-              ⚽ Com bola
+              ⚽ Com bola na saída
+            </button>
+            <button type="button" className={`chip ${phase === "ofe" ? "on" : ""}`} onClick={() => setPhase("ofe")}>
+              🔥 Com bola na fase ofensiva
             </button>
             <button type="button" className={`chip ${phase === "sem" ? "on" : ""}`} onClick={() => setPhase("sem")}>
               🛡️ Sem bola
@@ -925,13 +942,19 @@ function MatchFormInner({
               </>
             )}
           </div>
+          {phase === "ofe" && !ofeManual && (
+            <div className="tot-line">
+              A fase ofensiva está espelhando a com bola na saída — mexa nas vagas, arraste os
+              jogadores ou troque a formação para personalizar e salvar.
+            </div>
+          )}
           {phase === "sem" && !semManual && (
-            <div className="tot-line">Sem bola está espelhando a com bola — mexa nas vagas para personalizar.</div>
+            <div className="tot-line">Sem bola está espelhando a com bola na saída — mexa nas vagas para personalizar.</div>
           )}
           {phase === "bp" && !bpManual && (
             <div className="tot-line">
-              Bola parada está espelhando a com bola — arraste os jogadores (ex.: todo mundo na área
-              para o escanteio) ou troque vagas para personalizar e salvar.
+              Bola parada está espelhando a com bola na saída — arraste os jogadores (ex.: todo mundo
+              na área para o escanteio) ou troque vagas para personalizar e salvar.
             </div>
           )}
           <div className="st-list">
@@ -1030,8 +1053,8 @@ function MatchFormInner({
             </>
           )}
           <div className="tot-line">
-            Titular = vaga preenchida na formação com bola · toque no rótulo verde da vaga
-            para ajustar a posição de um titular · sem bola usa os mesmos 11
+            Titular = vaga preenchida na formação com bola na saída · toque no rótulo verde da vaga
+            para ajustar a posição de um titular · as outras fases usam os mesmos 11
           </div>
         </>
       )}

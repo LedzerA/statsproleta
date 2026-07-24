@@ -82,7 +82,7 @@ export default function MatchDetail({ id, editar }: { id: string; editar?: boole
   const [art, setArt] = useState<{ label: string; url: string; file: string }[] | null>(null);
   const [artBusy, setArtBusy] = useState(false);
   const [waBusy, setWaBusy] = useState(false);
-  const [tacPhase, setTacPhase] = useState<"com" | "sem" | "bp">("com");
+  const [tacPhase, setTacPhase] = useState<"com" | "ofe" | "sem" | "bp">("com");
 
   const m = findMatch(id);
   useEffect(() => { if (m) loadEvents(m.id); }, [id, !!m]);
@@ -175,10 +175,17 @@ export default function MatchDetail({ id, editar }: { id: string; editar?: boole
         });
         if (m.tactics && m.tactics.com.slots.some(Boolean)) {
           imgs.push({
-            label: `Com bola · ${m.tactics.com.formation}`,
+            label: `Com bola na saída · ${m.tactics.com.formation}`,
             url: png(await renderTacticsArt(m, "com", athleteName, squadName)),
-            file: `proleta-com-bola-${m.date}.png`,
+            file: `proleta-com-bola-saida-${m.date}.png`,
           });
+          if (m.tactics.ofe) {
+            imgs.push({
+              label: `Com bola na fase ofensiva · ${m.tactics.ofe.formation}`,
+              url: png(await renderTacticsArt(m, "ofe", athleteName, squadName)),
+              file: `proleta-fase-ofensiva-${m.date}.png`,
+            });
+          }
           imgs.push({
             label: `Sem bola · ${m.tactics.sem.formation}`,
             url: png(await renderTacticsArt(m, "sem", athleteName, squadName)),
@@ -267,7 +274,9 @@ export default function MatchDetail({ id, editar }: { id: string; editar?: boole
 
   // escalação tática: fase ativa (bola parada só existe quando personalizada)
   const tac = m.tactics && m.tactics.com.slots.some(Boolean) ? m.tactics : null;
-  const tacCur = tac ? ((tacPhase === "bp" ? tac.bp : tac[tacPhase]) || tac.com) : null;
+  const tacCur = tac
+    ? ((tacPhase === "bp" ? tac.bp : tacPhase === "ofe" ? tac.ofe : tac[tacPhase]) || tac.com)
+    : null;
   const cobradores = tac?.cobradores || null;
   // segredo tático: antes da bola rolar, escalação e formações só para admins
   const escalaOculta = m.status === "agendada" && !isAdmin;
@@ -463,8 +472,13 @@ export default function MatchDetail({ id, editar }: { id: string; editar?: boole
               <>
                 <div className="phase-tabs">
                   <button className={`chip ${tacPhase === "com" ? "on" : ""}`} onClick={() => setTacPhase("com")}>
-                    ⚽ Com bola · {tac.com.formation}
+                    ⚽ Com bola na saída · {tac.com.formation}
                   </button>
+                  {tac.ofe && (
+                    <button className={`chip ${tacPhase === "ofe" ? "on" : ""}`} onClick={() => setTacPhase("ofe")}>
+                      🔥 Com bola na fase ofensiva · {tac.ofe.formation}
+                    </button>
+                  )}
                   <button className={`chip ${tacPhase === "sem" ? "on" : ""}`} onClick={() => setTacPhase("sem")}>
                     🛡️ Sem bola · {tac.sem.formation}
                   </button>
