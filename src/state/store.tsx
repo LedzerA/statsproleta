@@ -173,6 +173,14 @@ interface StoreValue {
     type: EventType,
     opts?: { scorerId?: string; assistId?: string; inId?: string; outId?: string }
   ) => Promise<void>;
+  /** Adiciona um lance a uma partida ENCERRADA (esquecido durante o jogo):
+      gols atualizam placar/marcadores, sub inclui quem entrou nos relacionados.
+      Sem notificação — o lance nasce sem payload.title, como os legados. */
+  addPastEvent: (
+    m: Match,
+    type: EventType,
+    opts: { period: number; minute: number | null; scorerId?: string; assistId?: string; inId?: string; outId?: string }
+  ) => Promise<void>;
   updateEvent: (
     m: Match,
     ev: MatchEvent,
@@ -792,6 +800,76 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [athleteName, athletes, allMatches, upsertMatch, toast, loadEvents]
   );
 
+  /** Adiciona um lance esquecido a uma partida já encerrada. O lance nasce
+      SEM payload.title — a Edge Function e o notificador em primeiro plano
+      ignoram lances sem título (mesmo caminho dos legados), então ninguém
+      recebe notificação de um jogo que já acabou; a linha do tempo deriva o
+      texto na exibição. Gols atualizam placar, marcadores e estatísticas. */
+  const addPastEvent = useCallback(
+    async (
+      m: Match,
+      type: EventType,
+      opts: { period: number; minute: number | null; scorerId?: string; assistId?: string; inId?: string; outId?: string }
+    ) => {
+      const upd: Match = { ...m };
+      let matchChanged = false;
+      if (type === "gol_pro") {
+        upd.goals_for = m.goals_for + 1;
+        matchChanged = true;
+        if (opts.scorerId) {
+          const sc = [...(m.scorers || [])];
+          const i = sc.findIndex((x) => x.a === opts.scorerId);
+          if (i >= 0) sc[i] = { ...sc[i], g: sc[i].g + 1 }; else sc.push({ a: opts.scorerId, g: 1 });
+          upd.scorers = sc;
+          if (!upd.lineup.includes(opts.scorerId)) upd.lineup = [...upd.lineup, opts.scorerId];
+        }
+        if (opts.assistId) {
+          const as = [...(m.assists || [])];
+          const i = as.findIndex((x) => x.a === opts.assistId);
+          if (i >= 0) as[i] = { ...as[i], n: as[i].n + 1 }; else as.push({ a: opts.assistId, n: 1 });
+          upd.assists = as;
+          if (!upd.lineup.includes(opts.assistId)) upd.lineup = [...upd.lineup, opts.assistId];
+        }
+      } else if (type === "gol_contra") {
+        upd.goals_against = m.goals_against + 1;
+        matchChanged = true;
+      } else if (type === "sub" && opts.inId && !upd.lineup.includes(opts.inId)) {
+        upd.lineup = [...upd.lineup, opts.inId];
+        matchChanged = true;
+      }
+
+      const payload: EventPayload = {
+        period: opts.period,
+        seconds: opts.minute != null ? opts.minute * 60 : undefined,
+      };
+      if (type === "sub") { payload.in = opts.inId; payload.out = opts.outId; }
+
+      const ev: MatchEvent = {
+        id: uid("e"),
+        match_id: m.id,
+        squad_id: m.squad_id,
+        type,
+        minute: opts.minute,
+        athlete_id: opts.scorerId || opts.inId || null,
+        assist_id: opts.assistId || opts.outId || null,
+        payload,
+        created_at: new Date().toISOString(),
+      };
+      ownEvents.current.add(ev.id);
+      setEvents((old) => ({ ...old, [m.id]: [...(old[m.id] || []), ev] }));
+      if (matchChanged && !(await upsertMatch(upd))) {
+        // partida não gravou (upsertMatch já reconciliou) — não insere o lance
+        ownEvents.current.delete(ev.id);
+        setEvents((old) => ({ ...old, [m.id]: (old[m.id] || []).filter((x) => x.id !== ev.id) }));
+        return;
+      }
+      const { error } = await sb.from("match_events").insert(ev);
+      if (error) { console.error(error); toast("Erro ao registrar o lance."); loadEvents(m.id); }
+      else toast("Lance adicionado ✓");
+    },
+    [upsertMatch, toast, loadEvents]
+  );
+
   /** Desfaz o ÚLTIMO lance registrado (gols, pênaltis e substituições):
       apaga o lance e reverte o placar/marcadores quando for gol. Transições
       de tempo têm os próprios controles e não passam por aqui. */
@@ -1013,7 +1091,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     liveMatch, events, loadEvents, session, isAdmin, signIn, signOut,
     pushOn, pushBusy, pushReady: pushSupported && !!VAPID_PUBLIC_KEY, togglePush,
     upsertMatch, upsertMatchGuarded, deleteMatch, addAthlete, updateAthletePositions, updateAthleteName, addSquad, addEvent,
-    updateEvent, deleteEvent, undoLastEvent, toggleClock,
+    addPastEvent, updateEvent, deleteEvent, undoLastEvent, toggleClock,
     resetToScheduled, importBackup, wipeMatches, toast, toastMsg,
     ask, tell, dialog, resolveDialog,
   };

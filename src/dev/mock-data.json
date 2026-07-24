@@ -27,9 +27,9 @@
  ],
  "athletes": [
   {
-   "id": "a42",
+   "id": "a48",
    "squad_id": "esporte",
-   "name": "PH",
+   "name": "Alef",
    "created_at": "2026-07-10T22:46:13.282876+00:00",
    "positions": []
   },
@@ -167,9 +167,9 @@
    "positions": []
   },
   {
-   "id": "a4",
+   "id": "a42",
    "squad_id": "esporte",
-   "name": "Vini França",
+   "name": "PH",
    "created_at": "2026-07-10T22:46:13.282876+00:00",
    "positions": []
   },
@@ -195,9 +195,9 @@
    "positions": []
   },
   {
-   "id": "a48",
+   "id": "a4",
    "squad_id": "esporte",
-   "name": "Alef",
+   "name": "Vini França",
    "created_at": "2026-07-10T22:46:13.282876+00:00",
    "positions": []
   },
@@ -700,6 +700,90 @@
    "squad_id": "diverso",
    "name": "Alef",
    "created_at": "2026-07-14T13:38:52.269325+00:00",
+   "positions": []
+  },
+  {
+   "id": "amrphumfnhoqwyy14",
+   "squad_id": "diverso",
+   "name": "Fernando Santos",
+   "created_at": "2026-07-17T22:12:50.165696+00:00",
+   "positions": []
+  },
+  {
+   "id": "amrphupdlt5uixd22",
+   "squad_id": "diverso",
+   "name": "Miguel Santos",
+   "created_at": "2026-07-17T22:12:53.790027+00:00",
+   "positions": []
+  },
+  {
+   "id": "amrphutjdsbbawbff",
+   "squad_id": "diverso",
+   "name": "Barone",
+   "created_at": "2026-07-17T22:12:59.18973+00:00",
+   "positions": []
+  },
+  {
+   "id": "amrphuwagsxnyrekb",
+   "squad_id": "diverso",
+   "name": "Julio Cesar",
+   "created_at": "2026-07-17T22:13:03.031199+00:00",
+   "positions": []
+  },
+  {
+   "id": "amrphuyblpupzpbon",
+   "squad_id": "diverso",
+   "name": "Klisman",
+   "created_at": "2026-07-17T22:13:05.347247+00:00",
+   "positions": []
+  },
+  {
+   "id": "amrphv0mgrpirkies",
+   "squad_id": "diverso",
+   "name": "Ana Paula",
+   "created_at": "2026-07-17T22:13:08.313608+00:00",
+   "positions": []
+  },
+  {
+   "id": "amrphv86f95ll2rrk",
+   "squad_id": "diverso",
+   "name": "Weverson",
+   "created_at": "2026-07-17T22:13:18.096295+00:00",
+   "positions": []
+  },
+  {
+   "id": "amrpk0y1f0jpalmwr",
+   "squad_id": "diverso",
+   "name": "Alemão",
+   "created_at": "2026-07-17T23:13:44.287492+00:00",
+   "positions": []
+  },
+  {
+   "id": "amrpk26ucjssx9gy8",
+   "squad_id": "diverso",
+   "name": "caique",
+   "created_at": "2026-07-17T23:14:42.27966+00:00",
+   "positions": []
+  },
+  {
+   "id": "amrpk5apiiuvnm6mf",
+   "squad_id": "diverso",
+   "name": "Michael",
+   "created_at": "2026-07-17T23:17:07.133177+00:00",
+   "positions": []
+  },
+  {
+   "id": "amrpkcw3pqweo6ozx",
+   "squad_id": "diverso",
+   "name": "Rafael Alemão",
+   "created_at": "2026-07-17T23:23:01.491976+00:00",
+   "positions": []
+  },
+  {
+   "id": "amrpkxplt75h",
+   "squad_id": "diverso",
+   "name": "Julio",
+   "created_at": "2026-07-17T23:39:13.645838+00:00",
    "positions": []
   }
  ],
@@ -1732,7 +1816,7 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-14T14:43:00.121917+00:00",
+   "updated_at": "2026-07-14T21:11:00.842+00:00",
    "starters": [
     "a13",
     "a12",
@@ -1749,16 +1833,16 @@
    "positions": {
     "a1": "VOL",
     "a2": "PE/PD",
-    "a3": "ATA",
+    "a3": "PD",
     "a4": "ZE",
     "a5": "ZD",
     "a6": "LE",
     "a7": "MC",
     "a9": "MEI/SA/MC",
-    "a11": "ATA",
+    "a11": "PE",
     "a12": "LD",
     "a13": "GOL",
-    "a14": "ATA",
+    "a14": "CA",
     "a17": "PD/PE/SA/LD",
     "a19": "MC",
     "a20": "ZG"
@@ -2364,7 +2448,7 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-14T15:31:41.28+00:00",
+   "updated_at": "2026-07-14T16:59:50.246+00:00",
    "starters": [
     "a14",
     "a12",
@@ -2393,7 +2477,8 @@
     "a20": "ZG/LD",
     "a23": "MC/MEI/VOL",
     "a27": "PE",
-    "a33": "MEI"
+    "a33": "MEI",
+    "a40": "VOL"
    },
    "venue": "Av. Mariano Melliani, 270 — Ponte Grande",
    "kickoff": "08:00",
@@ -4092,21 +4177,39 @@
    "notes": "",
    "started_at": null,
    "created_at": "2026-07-10T22:46:13.282876+00:00",
-   "updated_at": "2026-07-10T22:46:13.282876+00:00",
+   "updated_at": "2026-07-17T14:21:36.747+00:00",
    "starters": [
-    "amrdsdpcn4zq",
-    "amrdsdsen3su",
-    "amrdse11a2t5",
-    "amrdse3fj5ff",
-    "amrdse5592tl",
-    "amrdse7fn687",
-    "amrdsgr6o4dy",
-    "amrdsgtqi45k",
-    "amrdsgvsu2dx",
+    "v_78a39788",
     "amrdsh60j124",
-    "v_78a39788"
+    "amrdsgvsu2dx",
+    "amrdsgtqi45k",
+    "amrdsgr6o4dy",
+    "amrdse7fn687",
+    "amrdse5592tl",
+    "amrdse3fj5ff",
+    "amrdse11a2t5",
+    "amrdsdsen3su",
+    "amrdsdpcn4zq"
    ],
-   "positions": {},
+   "positions": {
+    "v_144e9d3b": "LD",
+    "v_22494c72": "VOL",
+    "v_5a681924": "ZD",
+    "v_725bbf8b": "MEI",
+    "v_78a39788": "GOL",
+    "v_a5d80dd8": "CA",
+    "v_dc1d67d1": "CA",
+    "amrdsdpcn4zq": "CA",
+    "amrdsdsen3su": "PD",
+    "amrdse11a2t5": "PE",
+    "amrdse3fj5ff": "MEI",
+    "amrdse5592tl": "MC",
+    "amrdse7fn687": "VOL",
+    "amrdsgr6o4dy": "LE",
+    "amrdsgtqi45k": "ZE",
+    "amrdsgvsu2dx": "ZD",
+    "amrdsh60j124": "LD"
+   },
    "venue": null,
    "kickoff": null,
    "kit": null,
@@ -4116,7 +4219,44 @@
     "period": 2,
     "running": false
    },
-   "tactics": null,
+   "tactics": {
+    "bp": null,
+    "com": {
+     "slots": [
+      "v_78a39788",
+      "amrdsh60j124",
+      "amrdsgvsu2dx",
+      "amrdsgtqi45k",
+      "amrdsgr6o4dy",
+      "amrdse7fn687",
+      "amrdse5592tl",
+      "amrdse3fj5ff",
+      "amrdse11a2t5",
+      "amrdsdsen3su",
+      "amrdsdpcn4zq"
+     ],
+     "coords": null,
+     "formation": "4-3-3"
+    },
+    "sem": {
+     "slots": [
+      "v_78a39788",
+      "amrdsh60j124",
+      "amrdsgvsu2dx",
+      "amrdsgtqi45k",
+      "amrdsgr6o4dy",
+      "amrdse7fn687",
+      "amrdse5592tl",
+      "amrdse3fj5ff",
+      "amrdse11a2t5",
+      "amrdsdsen3su",
+      "amrdsdpcn4zq"
+     ],
+     "coords": null,
+     "formation": "4-3-3"
+    },
+    "cobradores": null
+   },
    "meet_time": null,
    "ball_holder": null,
    "kit_holder": null
@@ -4223,9 +4363,9 @@
    "squad_id": "diverso",
    "date": "2026-07-14",
    "opponent": "Sociedad Latinos F.C.",
-   "status": "agendada",
-   "goals_for": 0,
-   "goals_against": 0,
+   "status": "encerrada",
+   "goals_for": 3,
+   "goals_against": 3,
    "lineup": [
     "amrkp4y1z5pl",
     "amrkp52984kk",
@@ -4247,13 +4387,27 @@
     "amrkp5z8m49w",
     "amrkp510b47c"
    ],
-   "scorers": [],
-   "assists": [],
+   "scorers": [
+    {
+     "a": "amrkp5adp7i2",
+     "g": 1
+    },
+    {
+     "a": "amrkp5uvp2bk",
+     "g": 2
+    }
+   ],
+   "assists": [
+    {
+     "a": "amrkp62em5a3",
+     "n": 2
+    }
+   ],
    "lineup_complete": true,
    "notes": "",
-   "started_at": null,
+   "started_at": "2026-07-15T00:16:16.537+00:00",
    "created_at": "2026-07-13T22:20:01.210397+00:00",
-   "updated_at": "2026-07-14T15:28:08.71+00:00",
+   "updated_at": "2026-07-15T23:14:22.465+00:00",
    "starters": [
     "amrkp4y1z5pl",
     "amrkp5z8m49w",
@@ -4292,7 +4446,12 @@
    "kickoff": "21:00",
    "kit": "Verde Diverso",
    "archived": false,
-   "clock": null,
+   "clock": {
+    "at": "2026-07-15T02:01:22.081Z",
+    "base": 2852,
+    "period": 2,
+    "running": false
+   },
    "tactics": {
     "bp": {
      "slots": [
@@ -4480,6 +4639,201 @@
    "kit_holder": "Belaz"
   },
   {
+   "id": "mmrjsf87d34z",
+   "squad_id": "diverso",
+   "date": "2026-07-18",
+   "opponent": "Safari",
+   "status": "agendada",
+   "goals_for": 0,
+   "goals_against": 0,
+   "lineup": [
+    "amrkp4y1z5pl",
+    "amrk3l61f578",
+    "amrkp5tyk3i",
+    "amrkp58qg1qi",
+    "amrphumfnhoqwyy14",
+    "amrphutjdsbbawbff",
+    "amrphuwagsxnyrekb",
+    "amrphuyblpupzpbon",
+    "amrphv0mgrpirkies",
+    "amrkp62em5a3",
+    "amrphv86f95ll2rrk",
+    "amrpk26ucjssx9gy8",
+    "amrpk0y1f0jpalmwr",
+    "amrpk5apiiuvnm6mf",
+    "amrpkcw3pqweo6ozx",
+    "amrkp63vv6q9"
+   ],
+   "scorers": [],
+   "assists": [],
+   "lineup_complete": true,
+   "notes": "Time mesclado com o Veterano",
+   "started_at": null,
+   "created_at": "2026-07-13T22:22:09.998588+00:00",
+   "updated_at": "2026-07-18T00:36:46.104+00:00",
+   "starters": [
+    "amrkp4y1z5pl",
+    "amrkp5tyk3i",
+    "amrkp58qg1qi",
+    "amrphumfnhoqwyy14",
+    "amrphutjdsbbawbff",
+    "amrphuyblpupzpbon",
+    "amrphv0mgrpirkies",
+    "amrpk5apiiuvnm6mf",
+    "amrpk0y1f0jpalmwr",
+    "amrkp63vv6q9",
+    "amrpk26ucjssx9gy8"
+   ],
+   "positions": {
+    "amrkp5tyk3i": "LD",
+    "amrk3l61f578": "CA",
+    "amrkp4y1z5pl": "GOL",
+    "amrkp58qg1qi": "ZD",
+    "amrkp62em5a3": "MEI",
+    "amrkp63vv6q9": "SA",
+    "amrphumfnhoqwyy14": "ZE",
+    "amrphutjdsbbawbff": "LE",
+    "amrphuwagsxnyrekb": "LD",
+    "amrphuyblpupzpbon": "VOL",
+    "amrphv0mgrpirkies": "MC",
+    "amrphv86f95ll2rrk": "PE",
+    "amrpk0y1f0jpalmwr": "MEI",
+    "amrpk26ucjssx9gy8": "CA",
+    "amrpk5apiiuvnm6mf": "MC",
+    "amrpkcw3pqweo6ozx": "PE"
+   },
+   "venue": "Parque Municipal do Tatuapé (Sampaio Moreira)",
+   "kickoff": "07:00",
+   "kit": "Verde esporte",
+   "archived": false,
+   "clock": null,
+   "tactics": {
+    "bp": {
+     "slots": [
+      "amrkp4y1z5pl",
+      "amrkp5tyk3i",
+      "amrkp58qg1qi",
+      "amrphumfnhoqwyy14",
+      "amrphutjdsbbawbff",
+      "amrphuyblpupzpbon",
+      "amrphv0mgrpirkies",
+      "amrpk0y1f0jpalmwr",
+      "amrkp63vv6q9",
+      "amrpk5apiiuvnm6mf",
+      "amrpk26ucjssx9gy8"
+     ],
+     "coords": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      [
+       83.8,
+       67.3
+      ],
+      null
+     ],
+     "formation": "4-3-3"
+    },
+    "com": {
+     "slots": [
+      "amrkp4y1z5pl",
+      "amrkp5tyk3i",
+      "amrkp58qg1qi",
+      "amrphumfnhoqwyy14",
+      "amrphutjdsbbawbff",
+      "amrphuyblpupzpbon",
+      "amrphv0mgrpirkies",
+      "amrpk5apiiuvnm6mf",
+      "amrpk0y1f0jpalmwr",
+      "amrkp63vv6q9",
+      "amrpk26ucjssx9gy8"
+     ],
+     "coords": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      [
+       66.5,
+       49.5
+      ],
+      [
+       30.4,
+       50.9
+      ],
+      null,
+      [
+       38.1,
+       81.8
+      ],
+      [
+       63.3,
+       85.4
+      ]
+     ],
+     "formation": "4-1-2-1-2"
+    },
+    "sem": {
+     "slots": [
+      "amrkp4y1z5pl",
+      "amrkp5tyk3i",
+      "amrkp58qg1qi",
+      "amrphumfnhoqwyy14",
+      "amrphutjdsbbawbff",
+      "amrphuyblpupzpbon",
+      "amrphv0mgrpirkies",
+      "amrpk5apiiuvnm6mf",
+      "amrkp63vv6q9",
+      "amrpk0y1f0jpalmwr",
+      "amrpk26ucjssx9gy8"
+     ],
+     "coords": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      [
+       14.4,
+       54.8
+      ],
+      [
+       92,
+       52.6
+      ],
+      [
+       40.6,
+       73.8
+      ],
+      [
+       64,
+       77.7
+      ]
+     ],
+     "formation": "4-4-2"
+    },
+    "cobradores": {
+     "falta": "amrkp62em5a3",
+     "penalti": "amrkp58qg1qi",
+     "escanteio_d": "amrkp62em5a3",
+     "escanteio_e": "amrkp62em5a3"
+    }
+   },
+   "meet_time": "06:30",
+   "ball_holder": "Romário",
+   "kit_holder": "GusMooca"
+  },
+  {
    "id": "mmrjschd23nt",
    "squad_id": "esporte",
    "date": "2026-07-18",
@@ -4493,7 +4847,6 @@
     "a3",
     "a4",
     "a5",
-    "a6",
     "a7",
     "a8",
     "a10",
@@ -4501,13 +4854,11 @@
     "a13",
     "a15",
     "a16",
-    "a18",
-    "a20",
     "a21",
     "a22",
-    "a24",
     "a25",
-    "a28"
+    "a17",
+    "a24"
    ],
    "scorers": [],
    "assists": [],
@@ -4515,41 +4866,38 @@
    "notes": "Semifinal do TCA",
    "started_at": null,
    "created_at": "2026-07-13T22:20:01.885592+00:00",
-   "updated_at": "2026-07-14T13:37:01.809+00:00",
+   "updated_at": "2026-07-17T23:44:46.331+00:00",
    "starters": [
     "a13",
-    "a22",
     "a5",
-    "a4",
-    "a16",
-    "a24",
-    "a7",
-    "a21",
-    "a11",
     "a2",
+    "a4",
+    "a22",
+    "a16",
+    "a1",
+    "a10",
+    "a7",
+    "a11",
     "a8"
    ],
    "positions": {
     "a1": "VOL",
     "a2": "PD",
-    "a3": "VOL",
-    "a4": "ZG",
-    "a5": "ZG",
-    "a6": "PE/LE",
-    "a7": "MC",
+    "a3": "LD",
+    "a4": "ZC",
+    "a5": "ZD",
+    "a7": "MEI",
     "a8": "CA",
     "a10": "MC",
     "a11": "PE",
     "a13": "GOL",
     "a15": "ZG",
-    "a16": "LE",
-    "a18": "ZG",
-    "a20": "LD",
+    "a16": "ZE",
+    "a17": "PD/PE",
     "a21": "MEI",
-    "a22": "LD",
+    "a22": "MC",
     "a24": "VOL",
-    "a25": "PD",
-    "a28": "ZG"
+    "a25": "CA"
    },
    "venue": "CDC Só Alegria - Grêmio Anchieta Cohab-I",
    "kickoff": "12:00",
@@ -4564,9 +4912,9 @@
       "a5",
       "a4",
       "a16",
-      "a24",
+      "a1",
       "a7",
-      "a21",
+      "a10",
       "a11",
       "a2",
       "a8"
@@ -4574,44 +4922,44 @@
      "coords": [
       null,
       [
-       95.4,
-       28.7
+       79.4,
+       53.7
       ],
       [
-       71,
-       15
+       51.4,
+       96.6
       ],
       [
-       30.9,
-       14.9
+       44.5,
+       89.8
       ],
       [
-       9.4,
-       27.9
+       65.4,
+       97
       ],
       [
-       53.1,
-       31.3
+       51.2,
+       52.9
       ],
       [
-       34,
-       48
+       7.5,
+       95.5
       ],
       [
-       59.3,
+       23,
        55.5
       ],
       [
-       10,
-       67.2
+       59.8,
+       88.4
       ],
       [
-       89.4,
-       71.9
+       37,
+       96.6
       ],
       [
-       54,
-       80.5
+       50.9,
+       73.8
       ]
      ],
      "formation": "4-3-3"
@@ -4619,61 +4967,58 @@
     "com": {
      "slots": [
       "a13",
-      "a22",
       "a5",
-      "a4",
-      "a16",
-      "a24",
-      "a7",
-      "a21",
-      "a11",
       "a2",
+      "a4",
+      "a22",
+      "a16",
+      "a1",
+      "a10",
+      "a7",
+      "a11",
       "a8"
      ],
      "coords": [
       null,
       [
-       95.4,
-       28.7
+       84,
+       26.9
       ],
       [
-       71,
-       15
+       85.5,
+       77.3
       ],
       [
-       30.9,
-       14.9
+       50.9,
+       25.8
       ],
       [
-       9.4,
-       27.9
+       74.9,
+       52.3
       ],
       [
-       53.1,
-       31.3
+       20.6,
+       27.1
       ],
       [
-       40.1,
-       45.9
+       51.5,
+       41.6
       ],
       [
-       62.9,
-       58.1
+       30.6,
+       52.3
       ],
       [
-       10,
-       67.2
+       50.9,
+       65.6
       ],
       [
-       89.4,
-       71.9
+       13.8,
+       78.6
       ],
-      [
-       54,
-       80.5
-      ]
+      null
      ],
-     "formation": "4-3-3"
+     "formation": "3-4-3"
     },
     "sem": {
      "slots": [
@@ -4682,91 +5027,70 @@
       "a5",
       "a4",
       "a16",
-      "a24",
-      "a7",
-      "a21",
+      "a1",
+      "a10",
       "a11",
       "a2",
+      "a7",
       "a8"
      ],
      "coords": [
-      null,
       [
-       95.4,
-       28.7
+       49.7,
+       10.5
       ],
       [
-       71,
-       15
+       85.5,
+       29.3
       ],
       [
-       30.9,
-       14.9
+       63.8,
+       27.8
       ],
       [
-       9.4,
-       27.9
+       39,
+       27.8
       ],
       [
-       53.1,
-       31.3
+       17.5,
+       27.6
       ],
       [
-       34,
-       48
+       64.1,
+       41.4
       ],
       [
-       59.3,
-       55.5
+       38.4,
+       41.6
       ],
       [
-       10,
-       67.2
+       12.9,
+       44.6
       ],
       [
-       89.4,
-       71.9
+       84.6,
+       46.8
       ],
       [
-       54,
-       80.5
+       62.6,
+       61.7
+      ],
+      [
+       39,
+       61.5
       ]
      ],
-     "formation": "4-3-3"
+     "formation": "4-4-2"
     },
-    "cobradores": null
+    "cobradores": {
+     "falta": "a7",
+     "escanteio_d": "a7",
+     "escanteio_e": "a7"
+    }
    },
    "meet_time": null,
-   "ball_holder": null,
-   "kit_holder": null
-  },
-  {
-   "id": "mmrjsf87d34z",
-   "squad_id": "diverso",
-   "date": "2026-07-18",
-   "opponent": "Safari",
-   "status": "agendada",
-   "goals_for": 0,
-   "goals_against": 0,
-   "lineup": [],
-   "scorers": [],
-   "assists": [],
-   "lineup_complete": true,
-   "notes": "Time mesclado com o Veterano",
-   "started_at": null,
-   "created_at": "2026-07-13T22:22:09.998588+00:00",
-   "updated_at": "2026-07-14T13:23:19.404+00:00",
-   "starters": [],
-   "positions": {},
-   "venue": "Parque Municipal do Tatuapé (Sampaio Moreira)",
-   "kickoff": "07:00",
-   "kit": "Diverso",
-   "archived": false,
-   "clock": null,
-   "tactics": null,
-   "meet_time": "06:30",
-   "ball_holder": "Não sei",
-   "kit_holder": "Não sei"
+   "ball_holder": "Led",
+   "kit_holder": "SABA"
   },
   {
    "id": "mmrjsci4x4r5",
@@ -5367,6 +5691,219 @@
     "goals_against": 1
    },
    "created_at": "2026-07-11T16:50:58.968+00:00"
+  },
+  {
+   "id": "emrlbxti1ceqmek98",
+   "match_id": "mmrjscgs73od",
+   "squad_id": "diverso",
+   "type": "inicio",
+   "minute": null,
+   "athlete_id": null,
+   "assist_id": null,
+   "payload": {
+    "body": "Proleta × Sociedad Latinos F.C. — acompanhe ao vivo",
+    "title": "🔴 Bola rolando!",
+    "period": 1,
+    "seconds": 0
+   },
+   "created_at": "2026-07-15T00:16:16.537+00:00"
+  },
+  {
+   "id": "emrlc8c9cbaj0p1ag",
+   "match_id": "mmrjscgs73od",
+   "squad_id": "diverso",
+   "type": "penalti_pro",
+   "minute": 8,
+   "athlete_id": null,
+   "assist_id": null,
+   "payload": {
+    "body": "Proleta 0 × 0 Sociedad Latinos F.C.",
+    "title": "🎯 Pênalti para o Proleta!",
+    "period": 1,
+    "seconds": 491
+   },
+   "created_at": "2026-07-15T00:24:27.408+00:00"
+  },
+  {
+   "id": "emrlc9s6pu9a8lmcu",
+   "match_id": "mmrjscgs73od",
+   "squad_id": "diverso",
+   "type": "gol_pro",
+   "minute": 9,
+   "athlete_id": "amrkp5adp7i2",
+   "assist_id": null,
+   "payload": {
+    "body": "Brendon — Proleta 1 × 0 Sociedad Latinos F.C.",
+    "title": "⚽ GOL DO PROLETA!",
+    "period": 1,
+    "scorer": "Brendon",
+    "seconds": 558,
+    "goals_for": 1,
+    "goals_against": 0
+   },
+   "created_at": "2026-07-15T00:25:34.704+00:00"
+  },
+  {
+   "id": "emrlcpjg0pt3q4szg",
+   "match_id": "mmrjscgs73od",
+   "squad_id": "diverso",
+   "type": "penalti_contra",
+   "minute": 22,
+   "athlete_id": null,
+   "assist_id": null,
+   "payload": {
+    "body": "Proleta 1 × 0 Sociedad Latinos F.C.",
+    "title": "⚠️ Pênalti para o Sociedad Latinos F.C.",
+    "period": 1,
+    "seconds": 1293
+   },
+   "created_at": "2026-07-15T00:37:49.871+00:00"
+  },
+  {
+   "id": "emrlcpy7zkabw1fu1",
+   "match_id": "mmrjscgs73od",
+   "squad_id": "diverso",
+   "type": "gol_contra",
+   "minute": 22,
+   "athlete_id": null,
+   "assist_id": null,
+   "payload": {
+    "body": "Proleta 1 × 1 Sociedad Latinos F.C.",
+    "title": "Gol do Sociedad Latinos F.C. 😕",
+    "period": 1,
+    "seconds": 1312,
+    "goals_for": 1,
+    "goals_against": 1
+   },
+   "created_at": "2026-07-15T00:38:09.023+00:00"
+  },
+  {
+   "id": "emrlct29owty818mb",
+   "match_id": "mmrjscgs73od",
+   "squad_id": "diverso",
+   "type": "gol_contra",
+   "minute": 24,
+   "athlete_id": null,
+   "assist_id": null,
+   "payload": {
+    "body": "Proleta 1 × 2 Sociedad Latinos F.C.",
+    "title": "Gol do Sociedad Latinos F.C. 😕",
+    "period": 1,
+    "seconds": 1458,
+    "goals_for": 1,
+    "goals_against": 2
+   },
+   "created_at": "2026-07-15T00:40:34.236+00:00"
+  },
+  {
+   "id": "emrldik5jrjsfezbw",
+   "match_id": "mmrjscgs73od",
+   "squad_id": "diverso",
+   "type": "fim_1t",
+   "minute": 44,
+   "athlete_id": null,
+   "assist_id": null,
+   "payload": {
+    "body": "Proleta 1 × 2 Sociedad Latinos F.C.",
+    "title": "⏸️ Fim do 1º tempo",
+    "period": 1,
+    "seconds": 2647,
+    "goals_for": 1,
+    "goals_against": 2
+   },
+   "created_at": "2026-07-15T01:00:23.812+00:00"
+  },
+  {
+   "id": "emrldzufmkmtkra40",
+   "match_id": "mmrjscgs73od",
+   "squad_id": "diverso",
+   "type": "inicio_2t",
+   "minute": 44,
+   "athlete_id": null,
+   "assist_id": null,
+   "payload": {
+    "body": "Proleta 1 × 2 Sociedad Latinos F.C.",
+    "title": "▶️ Começa o 2º tempo",
+    "period": 1,
+    "seconds": 2647
+   },
+   "created_at": "2026-07-15T01:13:50.29+00:00"
+  },
+  {
+   "id": "emrlej83e800t2j5w",
+   "match_id": "mmrjscgs73od",
+   "squad_id": "diverso",
+   "type": "gol_pro",
+   "minute": 15,
+   "athlete_id": "amrkp5uvp2bk",
+   "assist_id": "amrkp62em5a3",
+   "payload": {
+    "body": "Detona (assist. Wez) — Proleta 2 × 2 Sociedad Latinos F.C.",
+    "title": "⚽ GOL DO PROLETA!",
+    "assist": "Wez",
+    "period": 2,
+    "scorer": "Detona",
+    "seconds": 900,
+    "goals_for": 2,
+    "goals_against": 2
+   },
+   "created_at": "2026-07-15T01:28:54.457+00:00"
+  },
+  {
+   "id": "emrlemz27opffep83",
+   "match_id": "mmrjscgs73od",
+   "squad_id": "diverso",
+   "type": "gol_contra",
+   "minute": 18,
+   "athlete_id": null,
+   "assist_id": null,
+   "payload": {
+    "body": "Proleta 2 × 3 Sociedad Latinos F.C.",
+    "title": "Gol do Sociedad Latinos F.C. 😕",
+    "period": 2,
+    "seconds": 1079,
+    "goals_for": 2,
+    "goals_against": 3
+   },
+   "created_at": "2026-07-15T01:31:49.375+00:00"
+  },
+  {
+   "id": "emrlevnx61bg1f5wx",
+   "match_id": "mmrjscgs73od",
+   "squad_id": "diverso",
+   "type": "gol_pro",
+   "minute": 25,
+   "athlete_id": "amrkp5uvp2bk",
+   "assist_id": "amrkp62em5a3",
+   "payload": {
+    "body": "Detona (assist. Wez) — Proleta 3 × 3 Sociedad Latinos F.C.",
+    "title": "⚽ GOL DO PROLETA!",
+    "assist": "Wez",
+    "period": 2,
+    "scorer": "Detona",
+    "seconds": 1485,
+    "goals_for": 3,
+    "goals_against": 3
+   },
+   "created_at": "2026-07-15T01:38:34.837+00:00"
+  },
+  {
+   "id": "emrlfoyw1vxfv7m7a",
+   "match_id": "mmrjscgs73od",
+   "squad_id": "diverso",
+   "type": "fim_jogo",
+   "minute": 48,
+   "athlete_id": null,
+   "assist_id": null,
+   "payload": {
+    "body": "Proleta 3 × 3 Sociedad Latinos F.C.",
+    "title": "🤝 Empate",
+    "period": 2,
+    "seconds": 2852,
+    "goals_for": 3,
+    "goals_against": 3
+   },
+   "created_at": "2026-07-15T02:01:22.081+00:00"
   }
  ]
 }
