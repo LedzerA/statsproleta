@@ -6,7 +6,8 @@ import { Modal, Stepper } from "../components/ui";
 import { fmtDate, isLive, todayISO, uid } from "../lib/format";
 import { POSITIONS, POS_GROUPS, athletePositions, lastPosition, posRank } from "../lib/positions";
 import {
-  FORMATIONS, getFormation, autoSlots, bestFreeSlot, inferFormation, remapPhase, reconcileSem,
+  FORMATIONS, getFormation, autoSlots, bestFreeSlot, inferFormation, parseCustomFormation,
+  remapPhase, reconcileSem,
 } from "../lib/formations";
 import { Pitch } from "../components/Pitch";
 import type { Match, SetPieceTakers, TacticsPhase } from "../lib/types";
@@ -265,6 +266,9 @@ function MatchFormInner({
     return { com: { formation: f.name, slots, coords: null }, ofe: espelho(), sem: espelho(), bp: espelho() };
   });
   const [phase, setPhase] = useState<PhaseKey>("com");
+  // campo de texto da formação personalizada (aberto pela opção do seletor)
+  const [customFor, setCustomFor] = useState<PhaseKey | null>(null);
+  const [customTxt, setCustomTxt] = useState("");
   // sem bola e bola parada espelham a com bola até o usuário mexer nelas
   const [semManual, setSemManual] = useState<boolean>(() => {
     const t = match?.tactics;
@@ -538,6 +542,19 @@ function MatchFormInner({
       markManual(ph);
       setTactics(patchPhase(ph, remapPhase(tactics[ph], name)));
     }
+  }
+
+  /** Aplica o texto digitado como formação personalizada da fase. */
+  function applyCustomFormation() {
+    const ph = customFor;
+    setCustomFor(null);
+    if (!ph) return;
+    const name = parseCustomFormation(customTxt);
+    if (!name) {
+      if (customTxt.trim()) toast("Formação inválida — linhas de 1 a 6 somando 10, ex.: 4-2-3-1");
+      return;
+    }
+    setFormation(ph, name);
   }
 
   function setSlot(ph: PhaseKey, idx: number, raw: string) {
@@ -914,16 +931,43 @@ function MatchFormInner({
             <button type="button" className={`chip ${phase === "bp" ? "on" : ""}`} onClick={() => setPhase("bp")}>
               🎯 Bola parada
             </button>
-            {phase !== "bp" && (
+            {phase !== "bp" && (customFor === phase ? (
+              <input
+                type="text"
+                className="pos-sel formation-sel"
+                style={{ width: 120 }}
+                placeholder="ex.: 4-2-3-1"
+                autoFocus
+                value={customTxt}
+                onChange={(e) => setCustomTxt(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") { e.preventDefault(); applyCustomFormation(); }
+                  else if (e.key === "Escape") setCustomFor(null);
+                }}
+                onBlur={applyCustomFormation}
+                aria-label="Formação personalizada"
+              />
+            ) : (
               <select
                 className="pos-sel formation-sel"
                 value={active.formation}
-                onChange={(e) => setFormation(phase, e.target.value)}
+                onChange={(e) => {
+                  if (e.target.value === "__custom") {
+                    setCustomTxt(active.formation);
+                    setCustomFor(phase);
+                    return;
+                  }
+                  setFormation(phase, e.target.value);
+                }}
                 aria-label="Formação"
               >
+                {!FORMATIONS.some((f) => f.name === active.formation) && (
+                  <option value={active.formation}>{active.formation} ✏️</option>
+                )}
                 {FORMATIONS.map((f) => <option key={f.name} value={f.name}>{f.name}</option>)}
+                <option value="__custom">Personalizada…</option>
               </select>
-            )}
+            ))}
           </div>
           <Pitch
             formation={activeF}

@@ -76,8 +76,73 @@ export const FORMATIONS: Formation[] = [
   ]),
 ];
 
+/* ---- formação customizada ("4-2-2-2", "3-3-3-1"…): gerada na hora ----
+   O nome É o dado salvo; o desenho (vagas, rótulos e pontos) é derivado dele
+   aqui, então campinho, detalhe e artes funcionam sem persistir nada extra. */
+
+/** Espalhamento horizontal de uma linha com k jogadores (esquerda → direita). */
+const SPREAD: Record<number, number[]> = {
+  1: [50], 2: [35, 65], 3: [25, 50, 75],
+  4: [14, 38, 62, 86], 5: [10, 30, 50, 70, 90], 6: [8, 25, 42, 58, 75, 92],
+};
+
+/** Rótulos de uma linha (esquerda → direita), pela altura dela no campo. */
+function rowLabels(r: number, n: number, k: number): string[] {
+  if (r === 0) {
+    return [
+      ["ZC"], ["ZE", "ZD"], ["ZE", "ZC", "ZD"], ["LE", "ZE", "ZD", "LD"],
+      ["LE", "ZE", "ZC", "ZD", "LD"], ["LE", "ZE", "ZC", "ZC", "ZD", "LD"],
+    ][k - 1];
+  }
+  if (r === n - 1) {
+    return [
+      ["CA"], ["CA", "CA"], ["PE", "CA", "PD"], ["PE", "CA", "CA", "PD"],
+      ["PE", "CA", "CA", "CA", "PD"], ["PE", "CA", "CA", "CA", "CA", "PD"],
+    ][k - 1];
+  }
+  const meias = n - 2; // linhas de meio-campo
+  const inner = meias === 1 ? "MC" : r === 1 ? "VOL" : r === n - 2 ? "MEI" : "MC";
+  return Array.from({ length: k }, (_, j) =>
+    k >= 4 && j === 0 ? "PE" : k >= 4 && j === k - 1 ? "PD" : inner);
+}
+
+/** Valida e normaliza uma formação digitada ("4 2 3 1" → "4-2-3-1").
+    Regras: 2 a 5 linhas de 1 a 6 jogadores somando 10 (o goleiro é implícito).
+    null quando não dá uma formação válida. */
+export function parseCustomFormation(raw: string): string | null {
+  const nums = raw.trim().split(/[^0-9]+/).filter(Boolean).map(Number);
+  if (nums.length < 2 || nums.length > 5) return null;
+  if (nums.some((n) => n < 1 || n > 6)) return null;
+  if (nums.reduce((a, b) => a + b, 0) !== 10) return null;
+  return nums.join("-");
+}
+
+const customCache = new Map<string, Formation>();
+
+function buildFormation(name: string): Formation | null {
+  const canon = parseCustomFormation(name);
+  if (!canon || canon !== name) return null;
+  const hit = customCache.get(name);
+  if (hit) return hit;
+  const rows = name.split("-").map(Number);
+  const n = rows.length;
+  const slots: FormationSlot[] = [{ pos: "GOL", x: 50, y: 6 }];
+  rows.forEach((k, r) => {
+    const y = Math.round(19 + (r * (86 - 19)) / (n - 1));
+    const xs = SPREAD[k];
+    const labels = rowLabels(r, n, k);
+    // ordem convencional das listas: cada linha da direita para a esquerda
+    for (let j = k - 1; j >= 0; j--) slots.push({ pos: labels[j], x: xs[j], y });
+  });
+  const f: Formation = { name, slots };
+  customCache.set(name, f);
+  return f;
+}
+
 export function getFormation(name?: string | null): Formation {
-  return FORMATIONS.find((f) => f.name === name) || FORMATIONS[0];
+  const f = FORMATIONS.find((x) => x.name === name);
+  if (f) return f;
+  return (name && buildFormation(name)) || FORMATIONS[0];
 }
 
 /* apelidos comuns do histórico → rótulo canônico das vagas */
@@ -142,19 +207,17 @@ export function inferFormation(poss: (string | undefined | null)[]): Formation {
   return best;
 }
 
-/** Reorganiza os ocupantes de uma fase em outra formação (ou na mesma),
-    casando cada um pela posição da vaga que ocupa hoje. Os ajustes finos de
-    vaga (coords) só sobrevivem quando a formação não muda — em outra
-    formação as vagas são outras. */
+/** Leva uma fase para outra formação SEM reposicionar ninguém: cada jogador
+    permanece na vaga de mesma ordem (vaga 1 → vaga 1, vaga 2 → vaga 2…) e os
+    ajustes arrastados no campinho (coords) são preservados — só o desenho de
+    fundo e os rótulos das vagas mudam. */
 export function remapPhase(p: TacticsPhase, formationName: string): TacticsPhase {
-  const from = getFormation(p.formation);
   const to = getFormation(formationName);
-  const players: TaggedPlayer[] = [];
-  p.slots.forEach((id, i) => { if (id) players.push({ id, pos: from.slots[i]?.pos }); });
+  if (to.name === p.formation) return { formation: to.name, slots: [...p.slots], coords: p.coords ?? null };
   return {
     formation: to.name,
-    slots: autoSlots(to, players),
-    coords: to.name === from.name ? p.coords ?? null : null,
+    slots: to.slots.map((_, i) => p.slots[i] ?? null),
+    coords: p.coords ? to.slots.map((_, i) => p.coords![i] ?? null) : null,
   };
 }
 
